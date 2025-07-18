@@ -38,21 +38,29 @@ export default function Signup() {
         <div id="da-signup-form">
             <h1>Sign up</h1>
             <FormControl defaultValue={firstName}
+                type="text" style={{ maxWidth: "300px" }}
                 onChange={(e: any) => setFirstName(e.target.value)}
-                className="mb-2" placeholder="first name" id="da-firstname" />
+                className="mb-2 mt-4" placeholder="First Name" id="da-firstname" />
             <FormControl defaultValue={lastName}
+                type="text" style={{ maxWidth: "300px" }}
                 onChange={(e: any) => setLastName(e.target.value)}
-                className="mb-2" placeholder="last name" id="da-lastname" />
+                className="mb-2" placeholder="Last Name" id="da-lastname" />
             <FormControl defaultValue={email}
+                type="email" style={{ maxWidth: "300px" }}
                 onChange={(e: any) => setEmail(e.target.value)}
-                className="mb-2" placeholder="email" id="da-email" />
+                className="mb-2" placeholder="Email" id="da-email" />
             <FormControl defaultValue={username}
+                type="text" style={{ maxWidth: "300px" }}
                 onChange={(e: any) => setUsername(e.target.value)}
-                className="mb-2" placeholder="username" id="da-username" />
+                className="mb-2" placeholder="Username" id="da-username" />
             <FormControl defaultValue={password}
+                type="password" style={{maxWidth: "300px"}}
                 onChange={(e: any) => setPassword(e.target.value)}
-                className="mb-2" placeholder="password" id="da-password" />
-            <Button onClick={signup} id="da-signin-button" className="btn btn-danger w-100"> Sign Up </Button>
+                className="mb-2" placeholder="Password" id="da-password" />
+            <Button onClick={signup} id="da-signin-button"
+                className="btn btn-primary w-100" style={{ maxWidth: "300px" }}>
+                Sign Up
+            </Button>
         </div>
     );
 }
