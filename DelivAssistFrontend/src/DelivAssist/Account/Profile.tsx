@@ -6,6 +6,7 @@ import * as client from "./client";
 
 export default function Profile() {
     const [user, setUser] = useState<any>({});
+    const [password, setPassword] = useState("");
     const { currentUser } = useSelector((state: any) => state.accountReducer);
     const [loading, setLoading] = useState(true);
 
@@ -18,9 +19,14 @@ export default function Profile() {
     }
 
     const updateProfile = async () => {
-        const updatedProfile = await client.updateUser(user);
+        const payload = { ...user };
+        if (password.length > 0) {
+            payload.password = password;
+        }
+
+        const updatedProfile = await client.updateUser(payload);
         dispatch(setCurrentUser(updatedProfile));
-    }
+    };
 
     useEffect(() => {
         setLoading(true);
@@ -92,9 +98,9 @@ export default function Profile() {
                         <FormControl
                             placeholder="Password"
                             id="da-password"
-                            defaultValue=""
+                            value=""
                             type="password"
-                            onChange={(e) => setUser({ ...user, password: e.target.value })}
+                            onChange={(e) => setPassword(e.target.value)}
                         />
                     </Col>
                 </FormGroup>
