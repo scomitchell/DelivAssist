@@ -67,7 +67,7 @@ namespace DelivAssist.Controllers
                 return Unauthorized("Wrong username or password");
             }
 
-            var token = _service.GenerateToken(user);
+            var token = _service.GenerateToken(existingUser);
 
             var userDto = new UserDto
             {
@@ -151,7 +151,14 @@ namespace DelivAssist.Controllers
                 return NotFound();
             }
 
-            return Ok(user);
+            return Ok(new
+            {
+                user.Id,
+                user.FirstName,
+                user.LastName,
+                user.Email,
+                user.Username
+            });
         }
     }
 }
