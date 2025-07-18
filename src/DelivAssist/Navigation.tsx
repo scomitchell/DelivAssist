@@ -83,7 +83,7 @@ export default function Navigation() {
                         <span>Profile</span>
                     </Link>
 
-                    <Link to="#"
+                    <Link to="/DelivAssist"
                         className="nav-link-hover d-flex flex-column align-items-center px-4 py-2 text-decoration-none border-0 text-white ms-2 mt-2 me-2 rounded"
                         onClick={handleLogout}
                         style={{ cursor: "pointer" }}>
