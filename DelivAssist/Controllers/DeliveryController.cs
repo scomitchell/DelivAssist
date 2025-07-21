@@ -45,6 +45,7 @@ namespace DelivAssist.Controllers
 			return NoContent();
 		}
 
+
 		private bool DeliveryExists(int id)
 		{
 			return _context.Deliveries.Any(d => d.Id == id);

@@ -8,6 +8,10 @@ namespace DelivAssist.Models
 
         public DateTime EndTime { get; set; }
 
+        public DeliveryApp App { get; set; }
+
         public List<UserShift> UserShifts { get; set; } = new();
+
+        public List<ShiftDelivery> ShiftDeliveries { get; set; } = new();
     }
 }

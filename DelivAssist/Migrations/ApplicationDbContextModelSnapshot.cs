@@ -44,10 +44,6 @@ namespace DelivAssist.Migrations
                         .IsRequired()
                         .HasColumnType("TEXT");
 
-                    b.Property<string>("RestaurantStreetAddress")
-                        .IsRequired()
-                        .HasColumnType("TEXT");
-
                     b.Property<double>("TipPay")
                         .HasColumnType("REAL");
 
@@ -83,6 +79,9 @@ namespace DelivAssist.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("INTEGER");
 
+                    b.Property<int>("App")
+                        .HasColumnType("INTEGER");
+
                     b.Property<DateTime>("EndTime")
                         .HasColumnType("TEXT");
 
@@ -91,7 +90,22 @@ namespace DelivAssist.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Shift");
+                    b.ToTable("Shifts");
+                });
+
+            modelBuilder.Entity("DelivAssist.Models.ShiftDelivery", b =>
+                {
+                    b.Property<int>("ShiftId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("DeliveryId")
+                        .HasColumnType("INTEGER");
+
+                    b.HasKey("ShiftId", "DeliveryId");
+
+                    b.HasIndex("DeliveryId");
+
+                    b.ToTable("ShiftDeliveries");
                 });
 
             modelBuilder.Entity("DelivAssist.Models.User", b =>
@@ -179,6 +193,25 @@ namespace DelivAssist.Migrations
                     b.ToTable("UserShifts");
                 });
 
+            modelBuilder.Entity("DelivAssist.Models.ShiftDelivery", b =>
+                {
+                    b.HasOne("DelivAssist.Models.Delivery", "Delivery")
+                        .WithMany("ShiftDeliveries")
+                        .HasForeignKey("DeliveryId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("DelivAssist.Models.Shift", "Shift")
+                        .WithMany("ShiftDeliveries")
+                        .HasForeignKey("ShiftId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Delivery");
+
+                    b.Navigation("Shift");
+                });
+
             modelBuilder.Entity("DelivAssist.Models.UserDelivery", b =>
                 {
                     b.HasOne("DelivAssist.Models.Delivery", "Delivery")
@@ -238,6 +271,8 @@ namespace DelivAssist.Migrations
 
             modelBuilder.Entity("DelivAssist.Models.Delivery", b =>
                 {
+                    b.Navigation("ShiftDeliveries");
+
                     b.Navigation("UserDeliveries");
                 });
 
@@ -248,6 +283,8 @@ namespace DelivAssist.Migrations
 
             modelBuilder.Entity("DelivAssist.Models.Shift", b =>
                 {
+                    b.Navigation("ShiftDeliveries");
+
                     b.Navigation("UserShifts");
                 });
 
