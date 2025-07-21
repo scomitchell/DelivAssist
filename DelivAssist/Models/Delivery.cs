@@ -23,12 +23,12 @@ namespace DelivAssist.Models
 
         public string Restaurant { get; set; } = string.Empty;
 
-        public string RestaurantStreetAddress { get; set; } = string.Empty;
-
         public string CustomerNeighborhood { get; set; } = string.Empty;
 
         public string Notes { get; set; } = string.Empty;
 
         public List<UserDelivery> UserDeliveries { get; set; } = new();
+
+        public List<ShiftDelivery> ShiftDeliveries { get; set; } = new();
     }
 }

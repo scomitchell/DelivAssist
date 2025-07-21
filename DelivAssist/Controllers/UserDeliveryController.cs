@@ -24,13 +24,23 @@ namespace DelivAssist.Controllers
         {
             var userId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier));
 
+            var userExists = await _context.Users.AnyAsync(u => u.Id == userId);
+
+            if (!userExists)
+            {
+                return BadRequest("User with Id " + userId + " does not exist");
+            }
+
+            delivery.TotalPay = delivery.BasePay + delivery.TipPay;
+
             _context.Deliveries.Add(delivery);
             await _context.SaveChangesAsync();
 
             var userDelivery = new UserDelivery
             {
                 UserId = userId,
-                DeliveryId = delivery.Id
+                DeliveryId = delivery.Id,
+                DateAdded = DateTime.UtcNow
             };
 
             _context.UserDeliveries.Add(userDelivery);
@@ -56,7 +66,6 @@ namespace DelivAssist.Controllers
                     ud.Delivery.TipPay,
                     ud.Delivery.TotalPay,
                     ud.Delivery.Restaurant,
-                    ud.Delivery.RestaurantStreetAddress,
                     ud.Delivery.CustomerNeighborhood,
                     ud.Delivery.Notes
                 })
@@ -121,7 +130,6 @@ namespace DelivAssist.Controllers
                     ud.Delivery.TipPay,
                     ud.Delivery.TotalPay,
                     ud.Delivery.Restaurant,
-                    ud.Delivery.RestaurantStreetAddress,
                     ud.Delivery.CustomerNeighborhood,
                     ud.Delivery.Notes
                 })
@@ -130,7 +138,36 @@ namespace DelivAssist.Controllers
             return Ok(userDeliveries);
         }
 
-        [HttpGet("{deliveryId}")]
+        [HttpGet("delivery-neighborhoods")]
+        public async Task<IActionResult> GetUserDeliveryNeighborhoods()
+        {
+            var userId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier));
+
+            var userNeighborhoods = await _context.UserDeliveries
+                .Where(ud => ud.UserId == userId)
+                .Select(ud => ud.Delivery.CustomerNeighborhood)
+                .Where(n => n != null)
+                .Distinct()
+                .ToListAsync();
+
+            return Ok(userNeighborhoods);
+        }
+
+        [HttpGet("delivery-apps")]
+        public async Task<IActionResult> GetUserDeliveryApps()
+        {
+            var userId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier));
+
+            var userApps = await _context.UserDeliveries
+                .Where(ud => ud.UserId == userId)
+                .Select(ud => ud.Delivery.App)
+                .Distinct()
+                .ToListAsync();
+
+            return Ok(userApps);
+        }
+
+        [HttpGet("{deliveryId:int}")]
         public async Task<IActionResult> GetDeliveryById(int deliveryId)
         {
             var userId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier));

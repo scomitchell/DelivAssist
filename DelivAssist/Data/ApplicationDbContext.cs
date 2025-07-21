@@ -16,6 +16,7 @@ namespace DelivAssist.Data
         public DbSet<UserDelivery> UserDeliveries { get; set; }
         public DbSet<UserExpense> UserExpenses { get; set; }
         public DbSet<UserShift> UserShifts { get; set; }
+        public DbSet<ShiftDelivery> ShiftDeliveries { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -57,6 +58,19 @@ namespace DelivAssist.Data
                 .HasOne(us => us.Shift)
                 .WithMany(us => us.UserShifts)
                 .HasForeignKey(us => us.ShiftId);
+
+            modelBuilder.Entity<ShiftDelivery>()
+                .HasKey(sd => new { sd.ShiftId, sd.DeliveryId });
+
+            modelBuilder.Entity<ShiftDelivery>()
+                .HasOne(sd => sd.Shift)
+                .WithMany(sd => sd.ShiftDeliveries)
+                .HasForeignKey(sd => sd.ShiftId);
+
+            modelBuilder.Entity<ShiftDelivery>()
+                .HasOne(sd => sd.Delivery)
+                .WithMany(sd => sd.ShiftDeliveries)
+                .HasForeignKey(sd => sd.DeliveryId);
         }
     }
 }

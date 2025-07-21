@@ -74,3 +74,8 @@ nav {
     background-color: #3b3a3c;
     color: #FFFFFF;
 }
+
+.user-delivery-card {
+    border-width: 2px !important;
+    border-color: #000000 !important;
+}
