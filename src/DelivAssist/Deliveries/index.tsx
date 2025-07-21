@@ -13,8 +13,8 @@ export default function Deliveries() {
 
     const addDelivery = async () => {
         try {
-            if (!delivery.app || !delivery.deliveryTime || !delivery.basePay || !delivery.tipPay || !delivery.restaurant ||
-                !delivery.customerNeighborhood) {
+            if (!delivery.app || !delivery.deliveryTime || !delivery.basePay || !delivery.tipPay || !delivery.mileage
+                || !delivery.restaurant || !delivery.customerNeighborhood) {
                 alert("Please complete all fields before submitting");
                 return;
             }
@@ -94,6 +94,18 @@ export default function Deliveries() {
                                         min="1.00"
                                         placeholder="Tip Pay"
                                         onChange={(e) => setDelivery({...delivery, tipPay: e.target.value})}
+                                    />
+                                </Col>
+                            </FormGroup>
+                            <FormGroup as={Row} className="d-flex align-items-center mb-2">
+                                <FormLabel column sm={4} className="me-3">Mileage</FormLabel>
+                                <Col sm={7}>
+                                    <FormControl
+                                        type="number"
+                                        step="0.01"
+                                        min="1.00"
+                                        placeholder="Mileage"
+                                        onChange={(e) => setDelivery({ ...delivery, mileage: e.target.value })}
                                     />
                                 </Col>
                             </FormGroup>

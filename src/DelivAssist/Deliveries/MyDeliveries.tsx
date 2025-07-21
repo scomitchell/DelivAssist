@@ -10,6 +10,7 @@ export default function MyDeliveries() {
     const [totalPay, setTotalPay] = useState<number | null>(null);
     const [basePay, setBasePay] = useState<number | null>(null);
     const [tipPay, setTipPay] = useState<number | null>(null);
+    const [mileage, setMileage] = useState<number | null>(null);
     const [neighborhood, setNeighborhood] = useState<string | null>(null);
     const [neighborhoods, setNeighborhoods] = useState<any>([]);
     const [app, setApp] = useState<string | null>(null);
@@ -18,11 +19,12 @@ export default function MyDeliveries() {
     const [error, setError] = useState("");
 
     const fetchDeliveries = async () => {
-        if (totalPay || basePay || tipPay || neighborhood || app) {
+        if (totalPay || basePay || tipPay || neighborhood || app || mileage) {
             const filters: DeliveryFilters = {
                 totalPay: totalPay,
                 basePay: basePay,
                 tipPay: tipPay,
+                mileage: mileage,
                 customerNeighborhood: neighborhood,
                 app: app
             }
@@ -59,6 +61,7 @@ export default function MyDeliveries() {
         setTotalPay(null);
         setBasePay(null);
         setTipPay(null);
+        setMileage(null);
         setNeighborhood(null);
         setApp(null);
         setReset(true);
@@ -75,6 +78,7 @@ export default function MyDeliveries() {
             totalPay === null &&
             basePay === null &&
             tipPay === null &&
+            mileage === null &&
             neighborhood === null &&
             app === null;
 
@@ -141,6 +145,18 @@ export default function MyDeliveries() {
                                 />
                             </Col>
                         </FormGroup>
+                        <FormGroup as={Row} className="mb-3">
+                            <FormLabel column sm={4}>Minimum Mileage</FormLabel>
+                            <Col sm={7}>
+                                <FormControl
+                                    type="number"
+                                    value={mileage === null ? "" : mileage}
+                                    min="1.00"
+                                    step="0.01"
+                                    onChange={e => setMileage(e.target.value === "" ? null : Number(e.target.value))}
+                                />
+                            </Col>
+                        </FormGroup>
                         <FormGroup as={Row} className="d-flex align-items-center mb-2">
                             <FormLabel column sm={4}>Neighborhood</FormLabel>
                             <Col sm={7}>
@@ -181,6 +197,7 @@ export default function MyDeliveries() {
                             <strong>Date Completed:</strong> {formatTime(delivery.deliveryTime)} {" "} <br />
                             <strong>Base Pay:</strong> ${delivery.basePay.toFixed(2)} {" "} <br />
                             <strong>Tip Pay:</strong> ${delivery.tipPay.toFixed(2)} {" "} <br />
+                            <strong>Mileage:</strong> {delivery.mileage.toFixed(2)} {" miles"} <br />
                             <strong>App:</strong> {delivery.app} {" "} <br />
                             <strong>Restaurant:</strong> {delivery.restaurant} {" "} <br />
                             <strong>Customer Neighborhood:</strong> {delivery.customerNeighborhood} {" "} <br />
