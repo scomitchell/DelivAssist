@@ -21,6 +21,8 @@ namespace DelivAssist.Models
 
         public double TotalPay { get; set; }
 
+        public double Mileage { get; set; }
+
         public string Restaurant { get; set; } = string.Empty;
 
         public string CustomerNeighborhood { get; set; } = string.Empty;

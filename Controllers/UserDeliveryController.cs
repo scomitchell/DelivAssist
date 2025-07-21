@@ -67,6 +67,7 @@ namespace DelivAssist.Controllers
                     ud.Delivery.TotalPay,
                     ud.Delivery.Restaurant,
                     ud.Delivery.CustomerNeighborhood,
+                    ud.Delivery.Mileage,
                     ud.Delivery.Notes
                 })
                 .ToListAsync();
@@ -79,6 +80,7 @@ namespace DelivAssist.Controllers
             [FromQuery] double? basePay,
             [FromQuery] double? tipPay,
             [FromQuery] double? totalPay,
+            [FromQuery] double? mileage,
             [FromQuery] string? restaurant,
             [FromQuery] string? customerNeighborhood)
         {
@@ -109,6 +111,11 @@ namespace DelivAssist.Controllers
                 userDeliveriesQuery = userDeliveriesQuery.Where(ud => ud.Delivery.TotalPay >= totalPay.Value);
             }
 
+            if (mileage.HasValue)
+            {
+                userDeliveriesQuery = userDeliveriesQuery.Where(ud => ud.Delivery.Mileage >= mileage.Value);
+            }
+
             if (!string.IsNullOrEmpty(restaurant))
             {
                 userDeliveriesQuery = userDeliveriesQuery.Where(ud => ud.Delivery.Restaurant.ToLower().Contains(restaurant.ToLower()));
@@ -131,6 +138,7 @@ namespace DelivAssist.Controllers
                     ud.Delivery.TotalPay,
                     ud.Delivery.Restaurant,
                     ud.Delivery.CustomerNeighborhood,
+                    ud.Delivery.Mileage,
                     ud.Delivery.Notes
                 })
                 .ToListAsync();
