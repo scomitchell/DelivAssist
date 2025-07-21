@@ -5,11 +5,18 @@ using dotenv.net;
 using System.Text;
 using DelivAssist.Data;
 using DelivAssist.Services;
+using System.Text.Json.Serialization;
 
 var builder = WebApplication.CreateBuilder(args);
 DotEnv.Load();
 
 // Add services to the container.
+
+builder.Services.AddControllers()
+    .AddJsonOptions(options =>
+    {
+        options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
+    });
 
 // Add CORS
 builder.Services.AddCors(options =>

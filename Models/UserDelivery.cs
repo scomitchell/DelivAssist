@@ -7,9 +7,9 @@ namespace DelivAssist.Models
 
         public DateTime DateAdded { get; set; }
 
-        public User User { get; set; } = new();
+        public User User { get; set; }
 
-        public Delivery Delivery { get; set; } = new();
+        public Delivery Delivery { get; set; }
 
     }
 }
