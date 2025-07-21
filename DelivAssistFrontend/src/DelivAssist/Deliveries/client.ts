@@ -57,6 +57,7 @@ export type DeliveryFilters = {
     basePay?: number | null;
     tipPay?: number | null;
     totalPay?: number | null;
+    mileage?: number | null;
     restaurant?: string | null;
     customerNeighborhood?: string | null;
 }
