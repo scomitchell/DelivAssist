@@ -2,11 +2,11 @@ import { Button, Modal, FormGroup, FormControl, FormLabel, Row, Col, Card } from
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import * as client from "./client";
+import type { ShiftFilters } from "./client";
 
-export default function MyShifts() {
-    // List of user shifts
-    const [myShifts, setMyShifts] = useState<any>([]);
-
+export default function MyShifts({ myShifts, setMyShifts }: {
+    myShifts: any[],
+    setMyShifts: React.Dispatch<React.SetStateAction<any[]>>}) {
     // Modal control state
     const [showForm, setShowForm] = useState(false);
 
@@ -16,8 +16,23 @@ export default function MyShifts() {
     const [app, setApp] = useState<string | null>(null);
 
     const [userApps, setUserApps] = useState<any>([]);
+    const [reset, setReset] = useState(false);
 
     const fetchShifts = async () => {
+        if (startTime || endTime || app) {
+            const filters: ShiftFilters = {
+                startTime: startTime,
+                endTime: endTime,
+                app: app
+            }
+
+            const shifts = await client.getFilteredShifts(filters);
+            shifts.sort((a: any, b: any) => new Date(b.endTime).getTime() - new Date(a.endTime).getTime());
+            setMyShifts(shifts);
+            setShowForm(false);
+            return;
+        }
+
         const shifts = await client.findUserShifts();
         shifts.sort((a: any, b: any) => new Date(b.endTime).getTime() - new Date(a.endTime).getTime());
         setMyShifts(shifts);
@@ -36,15 +51,37 @@ export default function MyShifts() {
         return readable;
     }
 
+    const resetFilters = () => {
+        setStartTime(null);
+        setEndTime(null);
+        setApp(null);
+        setReset(true);
+    }
+
     useEffect(() => {
         fetchShifts();
         fetchApps();
     }, [])
 
+    useEffect(() => {
+        const allCleared =
+            startTime === null &&
+            endTime === null &&
+            app === null;
+
+        if (reset && allCleared) {
+            fetchShifts();
+            setReset(false);
+        }
+    }, [startTime, endTime, app, reset])
+
     return (
         <div id="da-my-shifts" className="mt-3 col-sm-8">
-            <Button onClick={() => setShowForm(true)} className="btn btn-warning mb-3">
+            <Button onClick={() => setShowForm(true)} className="btn btn-warning mb-3 me-2">
                 Filter Shifts
+            </Button>
+            <Button onClick={resetFilters} className="btn btn-danger mb-3">
+                Reset filters
             </Button>
             
             <Modal show={showForm} onHide={() => setShowForm(false)} centered size="lg">
@@ -64,7 +101,7 @@ export default function MyShifts() {
                                 </Col>
                         </FormGroup>
                         <FormGroup as={Row} className="mb-3">
-                            <FormLabel column sm={4}>Ends after</FormLabel>
+                            <FormLabel column sm={4}>Ends before</FormLabel>
                             <Col sm={7}>
                                 <FormControl
                                     type="datetime-local"
@@ -76,7 +113,7 @@ export default function MyShifts() {
                         <FormGroup as={Row} className="d-flex align-items-center mb-2">
                             <FormLabel column sm={4}>App</FormLabel>
                             <Col sm={7}>
-                                <select onChange={(e) => setUserApps(e.target.value)}
+                                <select onChange={(e) => setApp(e.target.value)}
                                     className="form-control mb-2" id="da-app">
                                     <option value=""></option>
                                     {userApps.map((app: any) =>
@@ -85,6 +122,9 @@ export default function MyShifts() {
                                 </select>
                             </Col>
                         </FormGroup>
+                        <Button onClick={fetchShifts} className="btn btn-primary">
+                            Apply Filters
+                        </Button>
                     </div>
                 </Modal.Body>
             </Modal>

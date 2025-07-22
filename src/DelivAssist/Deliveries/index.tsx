@@ -10,6 +10,7 @@ export default function Deliveries() {
 
     /*Delivery state variable for newly created delivery*/
     const [delivery, setDelivery] = useState<any>({});
+    const [myDeliveries, setMyDeliveries] = useState<any[]>([]);
 
     /*Error handling*/
     const [error, setError] = useState("");
@@ -34,7 +35,8 @@ export default function Deliveries() {
             };
 
             // Call client, close modal, and go to delivery page.
-            await client.addUserDelivery(parsedDelivery);
+            const newDelivery = await client.addUserDelivery(parsedDelivery);
+            setMyDeliveries(prev => [newDelivery, ...prev]);
             setShowForm(false);
             navigate("/DelivAssist/MyDeliveries");
         } catch (err: any) {
@@ -156,7 +158,7 @@ export default function Deliveries() {
                     </Modal.Body>
                 </Modal>
             </div>
-            <MyDeliveries />
+            <MyDeliveries myDeliveries={myDeliveries} setMyDeliveries={setMyDeliveries} />
         </div>
     );
 }
