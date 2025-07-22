@@ -16,10 +16,19 @@ export default function Signup() {
     const navigate = useNavigate();
     const dispatch = useDispatch();
 
+    function scheduleAutoLogout() {
+        setTimeout(() => {
+            // Clear token and log out user
+            localStorage.removeItem("token");
+            navigate("/DelivAssist/Account/Login");
+        }, 60 * 60 * 1000);
+    }
+
     const signup = async () => {
         try {
             const response = await client.registerUser({ firstName, lastName, email, username, password });
             localStorage.setItem("token", response.token);
+            scheduleAutoLogout();
 
             dispatch(setCurrentUser(response.user));
             navigate("/");
