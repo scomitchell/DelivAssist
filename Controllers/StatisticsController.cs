@@ -115,5 +115,112 @@ namespace DelivAssist.Controllers
                 averageTipPay = result.AvgTipPay
             });
         }
+
+        [HttpGet("deliveries/highest-paying-restaurant")]
+        public async Task<IActionResult> GetHighestPayingRestaurant()
+        {
+            var userId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier));
+
+            var result = await _context.UserDeliveries
+                .Where(ud => ud.UserId == userId)
+                .GroupBy(ud => ud.Delivery.Restaurant)
+                .Select(g => new
+                {
+                    Restaurant = g.Key,
+                    AvgTotalPay = g.Average(ud => ud.Delivery.TotalPay)
+                })
+                .OrderByDescending(x => x.AvgTotalPay)
+                .FirstOrDefaultAsync();
+
+            if (result == null)
+            {
+                return NotFound("No deliveries found for user");
+            }
+
+            return Ok(new
+            {
+                restaurant = result.Restaurant,
+                avgTotalPay = result.AvgTotalPay
+            });
+        }
+
+        [HttpGet("deliveries/highest-paying-base-app")]
+        public async Task<IActionResult> GetHighestPayingBaseApp()
+        {
+            var userId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier));
+
+            var result = await _context.UserDeliveries
+                .Where(ud => ud.UserId == userId)
+                .GroupBy(ud => ud.Delivery.App)
+                .Select(g => new
+                {
+                    App = g.Key,
+                    AverageBase = g.Average(ud => ud.Delivery.BasePay)
+                })
+                .OrderByDescending(x => x.AverageBase)
+                .FirstOrDefaultAsync();
+
+            if (result == null)
+            {
+                return NotFound("No deliveries found");
+            }
+
+            return Ok(new
+            {
+                app = result.App,
+                avgBase = result.AverageBase
+            });
+        }
+
+        [HttpGet("deliveries/highest-paying-tip-app")]
+        public async Task<IActionResult> GetHighestPayingTipApp()
+        {
+            var userId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier));
+
+            var result = await _context.UserDeliveries
+                .Where(ud => ud.UserId == userId)
+                .GroupBy(ud => ud.Delivery.App)
+                .Select(g => new
+                {
+                    App = g.Key,
+                    AverageTip = g.Average(ud => ud.Delivery.TipPay)
+                })
+                .OrderByDescending(x => x.AverageTip)
+                .FirstOrDefaultAsync();
+
+            if (result == null)
+            {
+                return NotFound("No deliveries found");
+            }
+
+            return Ok(new
+            {
+                app = result.App,
+                avgTip = result.AverageTip
+            });
+        }
+
+        [HttpGet("deliveries/dollar-per-mile")]
+        public async Task<IActionResult> GetDollarPerMile()
+        {
+            var userId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier));
+
+            var miles = await _context.UserDeliveries
+                .Where(ud => ud.UserId == userId)
+                .SumAsync(ud => ud.Delivery.Mileage);
+
+            var totalPay = await _context.UserDeliveries
+                .Where(ud => ud.UserId == userId)
+                .SumAsync(ud => ud.Delivery.TotalPay);
+
+            if (miles == 0 || totalPay == 0)
+            {
+                return Ok(0);
+            }
+
+            var result = totalPay / miles;
+
+            return Ok(result);
+        }
     }
 }
