@@ -36,7 +36,13 @@ namespace DelivAssist.Controllers
             _context.UserExpenses.Add(userExpense);
             await _context.SaveChangesAsync();
 
-            return Ok("Expense Added");
+            return Ok(new
+            {
+                expense.Amount,
+                expense.Date,
+                expense.Type,
+                expense.Notes
+            });
         }
 
         [HttpGet("my-expenses")]
@@ -50,7 +56,10 @@ namespace DelivAssist.Controllers
                 .Select(ue => new
                 {
                     ue.Expense.Id,
-                    ue.Expense.Amount
+                    ue.Expense.Amount,
+                    ue.Expense.Date,
+                    ue.Expense.Type,
+                    ue.Expense.Notes
                 })
                 .ToListAsync();
 
