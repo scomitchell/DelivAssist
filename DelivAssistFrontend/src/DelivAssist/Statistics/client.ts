@@ -50,3 +50,51 @@ export const findHighestPayingNeighborhood = async () => {
 
     return response.data;
 }
+
+export const findHighestPayingRestaurant = async () => {
+    const token = localStorage.getItem("token");
+
+    const response = await axios.get(`${STATISTICS_API}/deliveries/highest-paying-restaurant`, {
+        headers: {
+            Authorization: `Bearer ${token}`,
+        }
+    });
+
+    return response.data;
+}
+
+export const findDollarPerMile = async () => {
+    const token = localStorage.getItem("token");
+
+    const response = await axios.get(`${STATISTICS_API}/deliveries/dollar-per-mile`, {
+        headers: {
+            Authorization: `Bearer ${token}`,
+        }
+    });
+
+    return response.data;
+}
+
+export const findHighestPayingBaseApp = async () => {
+    const token = localStorage.getItem("token");
+
+    const response = await axios.get(`${STATISTICS_API}/deliveries/highest-paying-base-app`, {
+        headers: {
+            Authorization: `Bearer ${token}`,
+        }
+    });
+
+    return response.data;
+}
+
+export const findHighestPayingTipApp = async () => {
+    const token = localStorage.getItem("token");
+
+    const response = await axios.get(`${STATISTICS_API}/deliveries/highest-paying-tip-app`, {
+        headers: {
+            Authorization: `Bearer ${token}`,
+        }
+    });
+
+    return response.data;
+}
