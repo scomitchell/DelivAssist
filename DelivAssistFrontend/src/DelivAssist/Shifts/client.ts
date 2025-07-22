@@ -50,3 +50,22 @@ export const getUserApps = async () => {
 
     return response.data;
 }
+
+export type ShiftFilters = {
+    startTime?: string | null;
+    endTime?: string | null;
+    app?: string | null;
+}
+
+export const getFilteredShifts = async (filters: ShiftFilters) => {
+    const token = localStorage.getItem("token");
+
+    const response = await axios.get(`${SHIFTS_API}/filtered-shifts`, {
+        params: filters,
+        headers: {
+            Authorization: `Bearer ${token}`,
+        }
+    });
+
+    return response.data;
+}

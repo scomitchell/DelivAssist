@@ -10,6 +10,7 @@ export default function Shifts() {
 
     // Shift state variable for creating new shifts
     const [shift, setShift] = useState<any>({});
+    const [myShifts, setMyShifts] = useState<any[]>([]);
 
     // Error handling
     const [error, setError] = useState("");
@@ -24,7 +25,8 @@ export default function Shifts() {
                 return;
             }
 
-            await client.addShift(shift);
+            const newShift = await client.addShift(shift);
+            setMyShifts(prev => [newShift, ...prev]);
             setShowForm(false);
             navigate("/DelivAssist/Shifts");
         } catch (err: any) {
@@ -90,7 +92,7 @@ export default function Shifts() {
                     </Modal.Body>
                 </Modal>
             </div>
-            <MyShifts />
+            <MyShifts myShifts={myShifts} setMyShifts={setMyShifts} />
         </div>
     );
 }
