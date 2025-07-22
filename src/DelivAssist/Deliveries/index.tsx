@@ -5,26 +5,35 @@ import MyDeliveries from "./MyDeliveries";
 import * as client from "./client";
 
 export default function Deliveries() {
+    //Controls modal
     const [showForm, setShowForm] = useState(false);
+
+    /*Delivery state variable for newly created delivery*/
     const [delivery, setDelivery] = useState<any>({});
+
+    /*Error handling*/
     const [error, setError] = useState("");
 
     const navigate = useNavigate();
 
+    // Call to client to add delivery to db
     const addDelivery = async () => {
         try {
+            // If any field is left blank, prompt user to fill in required information
             if (!delivery.app || !delivery.deliveryTime || !delivery.basePay || !delivery.tipPay || !delivery.mileage
                 || !delivery.restaurant || !delivery.customerNeighborhood) {
                 alert("Please complete all fields before submitting");
                 return;
             }
 
+            // parse delivery so pay gets passed as numerical value
             const parsedDelivery = {
                 ...delivery,
                 basePay: parseFloat(delivery.basePay),
                 tipPay: parseFloat(delivery.tipPay)
             };
 
+            // Call client, close modal, and go to delivery page.
             await client.addUserDelivery(parsedDelivery);
             setShowForm(false);
             navigate("/DelivAssist/MyDeliveries");
@@ -47,6 +56,7 @@ export default function Deliveries() {
                     Add Delivery
                 </Button>
 
+                {/*Modal form for creating new deliveries*/}
                 <Modal show={showForm} onHide={() => setShowForm(false)} centered size="lg">
                     <Modal.Header closeButton>
                         <Modal.Title>Add New Delivery</Modal.Title>
