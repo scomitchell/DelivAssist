@@ -73,3 +73,15 @@ export const getFilteredDeliveries = async (filters: DeliveryFilters) => {
     });
     return response.data;
 }
+
+export const deleteUserDelivery = async (deliveryId: number) => {
+    const token = localStorage.getItem("token");
+
+    const response = await axios.delete(`${DELIVERIES_API}/${deliveryId}`, {
+        headers: {
+            Authorization: `Bearer ${token}`,
+        }
+    });
+
+    return response.data;
+}
