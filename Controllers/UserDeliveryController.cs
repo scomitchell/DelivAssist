@@ -46,7 +46,18 @@ namespace DelivAssist.Controllers
             _context.UserDeliveries.Add(userDelivery);
             await _context.SaveChangesAsync();
 
-            return Ok("Delivery Added");
+            return Ok(new
+            {
+                delivery.App,
+                delivery.TotalPay,
+                delivery.BasePay,
+                delivery.TipPay,
+                delivery.Mileage,
+                delivery.CustomerNeighborhood,
+                delivery.Restaurant,
+                delivery.DeliveryTime,
+                delivery.Notes,
+            });
         }
 
         [HttpGet("my-deliveries")]
