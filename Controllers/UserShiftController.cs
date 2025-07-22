@@ -30,7 +30,8 @@ namespace DelivAssist.Controllers
             var userShift = new UserShift
             {
                 UserId = userId,
-                ShiftId = shift.Id
+                ShiftId = shift.Id,
+                DateAdded = DateTime.UtcNow
             };
 
             _context.UserShifts.Add(userShift);
@@ -51,14 +52,29 @@ namespace DelivAssist.Controllers
                 {
                     us.Shift.Id,
                     us.Shift.StartTime,
-                    us.Shift.EndTime
+                    us.Shift.EndTime,
+                    us.Shift.App
                 })
                 .ToListAsync();
 
             return Ok(userShifts);
         }
 
-        [HttpGet("{shiftId}")]
+        [HttpGet("apps")]
+        public async Task<IActionResult> GetUserShiftApps()
+        {
+            var userId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier));
+
+            var result = await _context.UserShifts
+                .Where(us => us.UserId == userId)
+                .Select(us => us.Shift.App)
+                .Distinct()
+                .ToListAsync();
+
+            return Ok(result);
+        }
+
+        [HttpGet("{shiftId:int}")]
         public async Task<IActionResult> GetShiftById(int shiftId)
         {
             var userId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier));

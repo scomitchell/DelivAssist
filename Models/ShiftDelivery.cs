@@ -6,8 +6,8 @@ namespace DelivAssist.Models
 
         public int DeliveryId { get; set; }
 
-        public Shift Shift { get; set; } = new();
+        public Shift Shift { get; set; }
 
-        public Delivery Delivery { get; set; } = new();
+        public Delivery Delivery { get; set; }
     }
 }
