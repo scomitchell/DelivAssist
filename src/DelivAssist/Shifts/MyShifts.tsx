@@ -1,4 +1,4 @@
-import { Button, Modal, FormGroup, FormControl, FormLabel, Row, Col, Card } from "react-bootstrap";
+import { Button, Modal, FormGroup, FormControl, FormLabel, Row, Col, Card, Dropdown } from "react-bootstrap";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import * as client from "./client";
@@ -9,6 +9,7 @@ export default function MyShifts({ myShifts, setMyShifts }: {
     setMyShifts: React.Dispatch<React.SetStateAction<any[]>>}) {
     // Modal control state
     const [showForm, setShowForm] = useState(false);
+    const [showModal, setShowModal] = useState(false)
 
     // User entered Filters
     const [startTime, setStartTime] = useState<string | null>(null);
@@ -38,6 +39,11 @@ export default function MyShifts({ myShifts, setMyShifts }: {
         setMyShifts(shifts);
         setShowForm(false);
         return;
+    }
+
+    const deleteShift = async (shiftId: number) => {
+        await client.deleteUserShift(shiftId);
+        fetchShifts();
     }
 
     const fetchApps = async () => {
@@ -134,12 +140,47 @@ export default function MyShifts({ myShifts, setMyShifts }: {
                     <Col sm={6}>
                         <Card className="mb-3 text-start user-delivery-card">
                             <Card.Body style={{ padding: '0.5rem' }}>
+                                <div style={{ position: 'absolute', top: '0.5rem', right: '0.5rem'}}>
+                                    <Dropdown>
+                                        <Dropdown.Toggle variant="secondary" size="sm">
+                                            &#x22EE;
+                                        </Dropdown.Toggle>
+
+                                        <Dropdown.Menu>
+                                            <Dropdown.Item onClick={() => setShowModal(true)} className="text-danger">
+                                                Delete Shift
+                                            </Dropdown.Item>
+                                        </Dropdown.Menu>
+                                    </Dropdown>
+                                </div>
                                 <Card.Title className="fw-bold">
                                     {formatTime(shift.startTime)} {" - "} {formatTime(shift.endTime)}
                                 </Card.Title>
                                 <Card.Text>
                                     <strong>App:</strong> {shift.app} {" "} <br />
                                 </Card.Text>
+                                <>
+                                    <Modal show={showModal} onHide={() => setShowModal(false)} centered>
+                                        <Modal.Header closeButton>
+                                            <Modal.Title>Confirm Deletion</Modal.Title>
+                                        </Modal.Header>
+                                        <Modal.Body>Are you sure you want to delete this shift?</Modal.Body>
+                                        <Modal.Footer>
+                                            <Button variant="secondary" onClick={() => setShowModal(false)}>
+                                                Cancel
+                                            </Button>
+                                            <Button
+                                                variant="danger"
+                                                onClick={() => {
+                                                    deleteShift(shift.id);
+                                                    setShowModal(false);
+                                                }}
+                                            >
+                                                Delete
+                                            </Button>
+                                        </Modal.Footer>
+                                    </Modal>
+                                </>
                             </Card.Body>
                         </Card>
                     </Col>
