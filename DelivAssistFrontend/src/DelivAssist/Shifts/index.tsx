@@ -78,6 +78,7 @@ export default function Shifts() {
                                 <Col sm={7}>
                                     <select onChange={(e) => setShift({ ...shift, app: e.target.value })}
                                         className="form-control mb-2" id="da-app">
+                                        <option value=""></option>
                                         <option value="Doordash">Doordash</option>
                                         <option value="UberEats">Uber Eats</option>
                                         <option value="Grubhub">Grubhub</option>

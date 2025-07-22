@@ -69,3 +69,15 @@ export const getFilteredShifts = async (filters: ShiftFilters) => {
 
     return response.data;
 }
+
+export const deleteUserShift = async (shiftId: number) => {
+    const token = localStorage.getItem("token");
+
+    const response = await axios.delete(`${SHIFTS_API}/${shiftId}`, {
+        headers: {
+            Authorization: `Bearer ${token}`,
+        }
+    });
+
+    return response.data;
+}

@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Card, FormGroup, FormLabel, FormControl, Modal, Button, Row, Col } from "react-bootstrap";
+import { Card, FormGroup, FormLabel, FormControl, Modal, Button, Row, Col, Dropdown } from "react-bootstrap";
 import * as client from "./client";
 import type { DeliveryFilters } from "./client";
 import '../../index.css';
@@ -9,6 +9,7 @@ export default function MyDeliveries({ myDeliveries, setMyDeliveries }: {
     setMyDeliveries: React.Dispatch<React.SetStateAction<any[]>>}) {
     // Control Modal
     const [showForm, setShowForm] = useState(false);
+    const [showModal, setShowModal] = useState(false);
 
     // User entered filters
     const [totalPay, setTotalPay] = useState<number | null>(null);
@@ -52,6 +53,12 @@ export default function MyDeliveries({ myDeliveries, setMyDeliveries }: {
         const deliveries = await client.findUserDeliveries();
         deliveries.sort((a: any, b: any) => new Date(b.deliveryTime).getTime() - new Date(a.deliveryTime).getTime());
         setMyDeliveries(deliveries);
+    }
+
+    // Deletes delivery from the database
+    const deleteDelivery = async (deliveryId: number) => {
+        await client.deleteUserDelivery(deliveryId);
+        fetchDeliveries();
     }
 
 
@@ -217,6 +224,20 @@ export default function MyDeliveries({ myDeliveries, setMyDeliveries }: {
                     <Col sm={6}>
                         <Card className="mb-3 text-start user-delivery-card">
                             <Card.Body style={{ padding: '0.5rem' }}>
+                                <div style={{ position: 'absolute', top: '0.5rem', right: '0.5rem' }}>
+                                    <Dropdown>
+                                        <Dropdown.Toggle variant="secondary" size="sm">
+                                            &#x22EE;
+                                        </Dropdown.Toggle>
+
+                                        <Dropdown.Menu>
+                                            <Dropdown.Item onClick={() => setShowModal(true)} className="text-danger">
+                                                Delete Shift
+                                            </Dropdown.Item>
+                                        </Dropdown.Menu>
+                                    </Dropdown>
+                                </div>
+
                                 <Card.Title className="fw-bold">Total Pay: ${delivery.totalPay.toFixed(2)}</Card.Title>
                                 <Card.Text>
                                     <strong>Date Completed:</strong> {formatTime(delivery.deliveryTime)} {" "} <br />
@@ -228,6 +249,29 @@ export default function MyDeliveries({ myDeliveries, setMyDeliveries }: {
                                     <strong>Customer Neighborhood:</strong> {delivery.customerNeighborhood} {" "} <br />
                                     <strong>Notes:</strong> {delivery.notes} {" "}
                                 </Card.Text>
+
+                                <>
+                                    <Modal show={showModal} onHide={() => setShowModal(false)} centered>
+                                        <Modal.Header closeButton>
+                                            <Modal.Title>Confirm Deletion</Modal.Title>
+                                        </Modal.Header>
+                                        <Modal.Body>Are you sure you want to delete this shift?</Modal.Body>
+                                        <Modal.Footer>
+                                            <Button variant="secondary" onClick={() => setShowModal(false)}>
+                                                Cancel
+                                            </Button>
+                                            <Button
+                                                variant="danger"
+                                                onClick={() => {
+                                                    deleteDelivery(delivery.id);
+                                                    setShowModal(false);
+                                                }}
+                                            >
+                                                Delete
+                                            </Button>
+                                        </Modal.Footer>
+                                    </Modal>
+                                </>
                             </Card.Body>
                         </Card>
                     </Col>
