@@ -7,8 +7,8 @@ namespace DelivAssist.Models
 
         public DateTime DateAdded { get; set; }
 
-        public User User { get; set; } = new();
+        public User User { get; set; }
 
-        public Expense Expense { get; set; } = new();
+        public Expense Expense { get; set; }
     }
 }
