@@ -5,20 +5,33 @@ import type { DeliveryFilters } from "./client";
 import '../../index.css';
 
 export default function MyDeliveries() {
+    // User's deliveries
     const [myDeliveries, setMyDeliveries] = useState<any>([]);
+
+    // Control Modal
     const [showForm, setShowForm] = useState(false);
+
+    // User entered filters
     const [totalPay, setTotalPay] = useState<number | null>(null);
     const [basePay, setBasePay] = useState<number | null>(null);
     const [tipPay, setTipPay] = useState<number | null>(null);
     const [mileage, setMileage] = useState<number | null>(null);
     const [neighborhood, setNeighborhood] = useState<string | null>(null);
-    const [neighborhoods, setNeighborhoods] = useState<any>([]);
     const [app, setApp] = useState<string | null>(null);
+
+
+    // Items for dropdown filters
+    const [neighborhoods, setNeighborhoods] = useState<any>([]);
     const [apps, setApps] = useState<any>([]);
+
+    // Reset and error handling
     const [reset, setReset] = useState(false);
     const [error, setError] = useState("");
 
+
+    // Initial fetch deliveries
     const fetchDeliveries = async () => {
+        // If filters applied, call getFilteredDeliveries, sort by date
         if (totalPay || basePay || tipPay || neighborhood || app || mileage) {
             const filters: DeliveryFilters = {
                 totalPay: totalPay,
@@ -36,27 +49,34 @@ export default function MyDeliveries() {
             return;
         }
 
+        // If no filters retrieve all deliveries, sort by date
         const deliveries = await client.findUserDeliveries();
         deliveries.sort((a: any, b: any) => new Date(b.deliveryTime).getTime() - new Date(a.deliveryTime).getTime());
         setMyDeliveries(deliveries);
     }
 
+
+    // Retrieves list of user neighborhoods for dropdown
     const fetchNeighborhoods = async () => {
         const userNeighborhoods = await client.findUserNeighborhoods();
         setNeighborhoods(userNeighborhoods);
     }
 
+
+    // Retreieves list of user apps for dropdown
     const fetchApps = async () => {
         const userApps = await client.findUserApps();
         setApps(userApps);
     }
 
+    // Converts datetime to readable format
     const formatTime = (date: string) => {
         const newDate = new Date(date);
         const readable = newDate.toLocaleString();
         return readable;
     }
 
+    // Set all filters to null
     const resetFilters = () => {
         setTotalPay(null);
         setBasePay(null);
@@ -67,12 +87,15 @@ export default function MyDeliveries() {
         setReset(true);
     }
 
+    // Initial fetch
     useEffect(() => {
         fetchDeliveries();
         fetchNeighborhoods();
         fetchApps();
     }, [])
 
+
+    // If reset intitiated and all cleared, re-fetch deliveries
     useEffect(() => {
         const allCleared =
             totalPay === null &&
@@ -95,7 +118,7 @@ export default function MyDeliveries() {
     }
 
     return (
-        <div id="da-my-deliveries" className="mt-3 col-sm-4">
+        <div id="da-my-deliveries" className="mt-3 col-sm-8">
             <Button onClick={() => setShowForm(true)} className="btn btn-warning mb-3 me-2">
                 Filter Deliveries
             </Button>
@@ -103,6 +126,7 @@ export default function MyDeliveries() {
                 Reset Filters
             </Button>
 
+            {/*Modal to apply delivery filters*/}
             <Modal show={showForm} onHide={() => setShowForm(false)} centered size="lg">
                 <Modal.Header closeButton>
                     <Modal.Title>Filter Deliveries</Modal.Title>
@@ -188,24 +212,28 @@ export default function MyDeliveries() {
                 </Modal.Body>
             </Modal>
 
-
-            {myDeliveries.map((delivery: any) => 
-                <Card className="mb-2 text-start user-delivery-card">
-                    <Card.Body style={{ padding: '0.5rem' }}>
-                        <Card.Title className="fw-bold">Total Pay: ${delivery.totalPay.toFixed(2)}</Card.Title>
-                        <Card.Text>
-                            <strong>Date Completed:</strong> {formatTime(delivery.deliveryTime)} {" "} <br />
-                            <strong>Base Pay:</strong> ${delivery.basePay.toFixed(2)} {" "} <br />
-                            <strong>Tip Pay:</strong> ${delivery.tipPay.toFixed(2)} {" "} <br />
-                            <strong>Mileage:</strong> {delivery.mileage.toFixed(2)} {" miles"} <br />
-                            <strong>App:</strong> {delivery.app} {" "} <br />
-                            <strong>Restaurant:</strong> {delivery.restaurant} {" "} <br />
-                            <strong>Customer Neighborhood:</strong> {delivery.customerNeighborhood} {" "} <br />
-                            <strong>Notes:</strong> {delivery.notes} {" "}
-                        </Card.Text>
-                    </Card.Body>
-                </Card>
-            )}
+            {/*Render individual delivery details on cards*/}
+            <Row>
+                {myDeliveries.map((delivery: any) => 
+                    <Col sm={6}>
+                        <Card className="mb-3 text-start user-delivery-card">
+                            <Card.Body style={{ padding: '0.5rem' }}>
+                                <Card.Title className="fw-bold">Total Pay: ${delivery.totalPay.toFixed(2)}</Card.Title>
+                                <Card.Text>
+                                    <strong>Date Completed:</strong> {formatTime(delivery.deliveryTime)} {" "} <br />
+                                    <strong>Base Pay:</strong> ${delivery.basePay.toFixed(2)} {" "} <br />
+                                    <strong>Tip Pay:</strong> ${delivery.tipPay.toFixed(2)} {" "} <br />
+                                    <strong>Mileage:</strong> {delivery.mileage.toFixed(2)} {" miles"} <br />
+                                    <strong>App:</strong> {delivery.app} {" "} <br />
+                                    <strong>Restaurant:</strong> {delivery.restaurant} {" "} <br />
+                                    <strong>Customer Neighborhood:</strong> {delivery.customerNeighborhood} {" "} <br />
+                                    <strong>Notes:</strong> {delivery.notes} {" "}
+                                </Card.Text>
+                            </Card.Body>
+                        </Card>
+                    </Col>
+                )}
+            </Row>
         </div>
     );
 }
