@@ -37,7 +37,12 @@ namespace DelivAssist.Controllers
             _context.UserShifts.Add(userShift);
             await _context.SaveChangesAsync();
 
-            return Ok("Shift Added");
+            return Ok(new
+            {
+                startTime = shift.StartTime,
+                endTime = shift.EndTime,
+                app = shift.App
+            });
         }
 
         [HttpGet("my-shifts")]
@@ -72,6 +77,46 @@ namespace DelivAssist.Controllers
                 .ToListAsync();
 
             return Ok(result);
+        }
+
+        [HttpGet("filtered-shifts")]
+        public async Task<IActionResult> GetFilteredShifts([FromQuery] DateTime? startTime,
+            [FromQuery] DateTime? endTime, 
+            [FromQuery] DeliveryApp? app)
+        {
+            var userId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier));
+
+            var userShiftsQuery = _context.UserShifts
+                .Where(us => us.UserId == userId)
+                .Include(us => us.Shift)
+                .AsQueryable();
+
+            if (startTime.HasValue)
+            {
+                userShiftsQuery = userShiftsQuery.Where(us => us.Shift.StartTime >= startTime);
+            }
+
+            if (endTime.HasValue)
+            {
+                userShiftsQuery = userShiftsQuery.Where(us => us.Shift.EndTime <= endTime);
+            }
+
+            if (app.HasValue)
+            {
+                userShiftsQuery = userShiftsQuery.Where(us => us.Shift.App == app);
+            }
+
+            var userShifts = await userShiftsQuery
+                .Select(us => new
+                {
+                    us.Shift.Id,
+                    us.Shift.StartTime,
+                    us.Shift.EndTime,
+                    us.Shift.App
+                })
+                .ToListAsync();
+
+            return Ok(userShifts);
         }
 
         [HttpGet("{shiftId:int}")]

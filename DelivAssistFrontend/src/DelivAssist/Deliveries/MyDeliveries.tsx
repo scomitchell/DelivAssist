@@ -4,10 +4,9 @@ import * as client from "./client";
 import type { DeliveryFilters } from "./client";
 import '../../index.css';
 
-export default function MyDeliveries() {
-    // User's deliveries
-    const [myDeliveries, setMyDeliveries] = useState<any>([]);
-
+export default function MyDeliveries({ myDeliveries, setMyDeliveries }: {
+    myDeliveries: any[],
+    setMyDeliveries: React.Dispatch<React.SetStateAction<any[]>>}) {
     // Control Modal
     const [showForm, setShowForm] = useState(false);
 
