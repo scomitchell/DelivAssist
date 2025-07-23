@@ -30,7 +30,8 @@ namespace DelivAssist.Controllers
             var userExpense = new UserExpense
             {
                 UserId = userId,
-                ExpenseId = expense.Id
+                ExpenseId = expense.Id,
+                DateAdded = DateTime.UtcNow
             };
 
             _context.UserExpenses.Add(userExpense);
@@ -66,7 +67,56 @@ namespace DelivAssist.Controllers
             return Ok(userExpenses);
         }
 
-        [HttpGet("{expenseId}")]
+        [HttpGet("filtered-expenses")]
+        public async Task<IActionResult> GetFilteredExpenses([FromQuery] double? amount,
+            [FromQuery] DateTime? date,
+            [FromQuery] string? type) 
+        {
+            var userId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier));
+
+            var userExpensesQuery = _context.UserExpenses
+                .Where(ue => ue.UserId == userId)
+                .Include(ue => ue.Expense)
+                .AsQueryable();
+
+            if (amount.HasValue) {
+                userExpensesQuery = userExpensesQuery.Where(ue => ue.Expense.Amount >= amount);
+            }
+
+            if (date.HasValue) {
+                userExpensesQuery = userExpensesQuery.Where(ue => ue.Expense.Date >= date);
+            }
+
+            if (!string.IsNullOrEmpty(type)) {
+                userExpensesQuery = userExpensesQuery.Where(ue => ue.Expense.Type == type);
+            }
+
+            var userExpenses = await userExpensesQuery
+                .Select(ue => new {
+                    ue.Expense.Id,
+                    ue.Expense.Amount,
+                    ue.Expense.Date,
+                    ue.Expense.Type
+                })
+                .ToListAsync();
+
+            return Ok(userExpenses);
+        }
+
+        [HttpGet("types")]
+        public async Task<IActionResult> GetExpenseTypes() {
+            var userId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier));
+
+            var result = await _context.UserExpenses
+                .Where(ue => ue.UserId == userId)
+                .Select(ue => ue.Expense.Type)
+                .Distinct()
+                .ToListAsync();
+            
+            return Ok(result);
+        }
+
+        [HttpGet("{expenseId:int}")]
         public async Task<IActionResult> GetExpenseById(int expenseId)
         {
             var userId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier));
