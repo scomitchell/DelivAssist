@@ -244,21 +244,28 @@ namespace DelivAssist.Controllers
         public async Task<IActionResult> GetAverageSpendingByType() {
             var userId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier));
 
-            var result = await _context.UserExpenses
+            var userExpenses = await _context.UserExpenses
                 .Where(ue => ue.UserId == userId)
-                .GroupBy(ue => new {ue.Expense.Date.Year, ue.Expense.Date.Month, ue.Expense.Type})
-                .Select(g => new {
-                    Type = g.Key.Type,
-                    Month = g.Key.Month,
-                    Year = g.Key.Year,
-                    MonthlyTotal = g.Sum(x => x.Expense.Amount)
-                })
-                .GroupBy(x => x.Type)
-                .Select(g => new {
-                    Type = g.Key,
-                    AvgExpense = g.Average(x => x.MonthlyTotal)
+                .Select(ue => new {
+                    ue.Expense.Type,
+                    ue.Expense.Amount,
+                    Month = ue.Expense.Date.Month,
+                    Year = ue.Expense.Date.Year
                 })
                 .ToListAsync();
+
+            var totalMonths = userExpenses
+                .Select(e => new {e.Year, e.Month})
+                .Distinct()
+                .Count();
+
+            var result = userExpenses
+                .GroupBy(e => e.Type)
+                .Select(g => new {
+                    Type = g.Key,
+                    AvgExpense = totalMonths > 0 ? g.Sum(x => x.Amount) / totalMonths : 0
+                })
+                .ToList();
 
             return Ok(result);
         }
