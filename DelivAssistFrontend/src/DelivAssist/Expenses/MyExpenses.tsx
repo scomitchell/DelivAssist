@@ -18,7 +18,6 @@ export default function MyExpenses({myExpenses, setMyExpenses} : {
 
     // Reset and Error handling
     const [reset, setReset] = useState(false);
-    const [error, setError] = useState("");
 
     // Filter dropdowns
     const [types, setTypes] = useState<any>([]);
@@ -156,7 +155,7 @@ export default function MyExpenses({myExpenses, setMyExpenses} : {
             <Row>
                 {myExpenses.map((expense: any) => 
                     <Col sm={6}>
-                        <Card className="mb-3 text-start user-delivery-card">
+                        <Card className="mb-3 text-start user-expense-card">
                             <Card.Body style={{ padding: '0.5rem' }}>
                                 {/*Fix dropdown menu to top right corner of card*/}
                                 <div style={{ position: 'absolute', top: '0.5rem', right: '0.5rem' }}>
