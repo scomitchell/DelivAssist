@@ -234,7 +234,7 @@ export default function MyDeliveries({ myDeliveries, setMyDeliveries }: {
 
                                         <Dropdown.Menu>
                                             <Dropdown.Item onClick={() => setShowModal(true)} className="text-danger">
-                                                Delete Shift
+                                                Delete Delivery
                                             </Dropdown.Item>
                                         </Dropdown.Menu>
                                     </Dropdown>
