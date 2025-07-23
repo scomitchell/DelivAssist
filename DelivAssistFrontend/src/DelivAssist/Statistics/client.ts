@@ -99,18 +99,6 @@ export const findHighestPayingTipApp = async () => {
     return response.data;
 }
 
-export const findHighestExpenseType = async () => {
-    const token = localStorage.getItem("token");
-
-    const response = await axios.get(`${STATISTICS_API}/expenses/highest-type`, {
-        headers: {
-            Authorization: `Bearer ${token}`,
-        }
-    });
-
-    return response.data;
-}
-
 export const findAverageMonthlySpending = async () => {
     const token = localStorage.getItem("token");
 

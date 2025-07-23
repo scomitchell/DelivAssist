@@ -23,7 +23,6 @@ export default function Statistics() {
     const [tipApp, setTipApp] = useState({ app: "", avgTip: 0 });
 
     // Expense statistics
-    const [highestType, setHighestType] = useState({type: "", avgAmount: 0});
     const [monthlySpending, setMonthlySpending] = useState(0);
     const [monthlySpendingByType, setMonthlySpendingByType] = useState<MonthlySpendingType[]>([]);
 
@@ -40,7 +39,6 @@ export default function Statistics() {
         const bestBaseApp = await client.findHighestPayingBaseApp();
         const bestTipApp = await client.findHighestPayingTipApp();
 
-        const mostExpensiveType = await client.findHighestExpenseType();
         const averageMonthlyExpenses = await client.findAverageMonthlySpending();
         const avgMonthlySpendingByType = await client.findMonthlySpendingByType();
 
@@ -56,7 +54,6 @@ export default function Statistics() {
         setBaseApp(bestBaseApp);
         setTipApp(bestTipApp);
 
-        setHighestType(mostExpensiveType);
         setMonthlySpending(averageMonthlyExpenses);
         setMonthlySpendingByType(avgMonthlySpendingByType);
     }
@@ -130,10 +127,6 @@ export default function Statistics() {
                                 <Card.Title className="fw-bold">Expense Statistics</Card.Title>
                                 <Card.Text>
                                     <strong>Average monthly spending:</strong> ${monthlySpending.toFixed(2)} <br />
-                                    <strong>Most expensive type:</strong> {highestType.type} <br />
-                                    <span style={{marginLeft: "1rem"}}>
-                                        <strong>- Average spent:</strong> ${highestType.avgAmount.toFixed(2)} <br />
-                                    </span>
                                     <strong>Monthly spending by type:</strong>
                                     <div style={{ marginLeft: "1rem" }}>
                                         {monthlySpendingByType.map((average, idx) => (
