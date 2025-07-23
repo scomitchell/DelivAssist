@@ -15,11 +15,16 @@ export default function MyShifts({ myShifts, setMyShifts }: {
     const [startTime, setStartTime] = useState<string | null>(null);
     const [endTime, setEndTime] = useState<string | null>(null);
     const [app, setApp] = useState<string | null>(null);
-
+    
+    // Select menu options
     const [userApps, setUserApps] = useState<any>([]);
-    const [reset, setReset] = useState(false);
 
+    // Control reset
+    const [reset, setReset] = useState(false);
+    
+    // Fetch all or fitered shifts
     const fetchShifts = async () => {
+        // If any filters applied, call filteredShifts
         if (startTime || endTime || app) {
             const filters: ShiftFilters = {
                 startTime: startTime,
@@ -28,7 +33,10 @@ export default function MyShifts({ myShifts, setMyShifts }: {
             }
 
             const shifts = await client.getFilteredShifts(filters);
+
+            // Sort shifts by date
             shifts.sort((a: any, b: any) => new Date(b.endTime).getTime() - new Date(a.endTime).getTime());
+
             setMyShifts(shifts);
             setShowForm(false);
             return;
@@ -41,22 +49,26 @@ export default function MyShifts({ myShifts, setMyShifts }: {
         return;
     }
 
+    // Delete shift from db
     const deleteShift = async (shiftId: number) => {
         await client.deleteUserShift(shiftId);
         fetchShifts();
     }
 
+    // Fetch list of user used apps
     const fetchApps = async () => {
         const apps = await client.getUserApps();
         setUserApps(apps);
     }
 
+    // Display time as date, time
     const formatTime = (date: string) => {
         const newDate = new Date(date);
         const readable = newDate.toLocaleString();
         return readable;
     }
 
+    // Clear all filters
     const resetFilters = () => {
         setStartTime(null);
         setEndTime(null);
@@ -69,6 +81,7 @@ export default function MyShifts({ myShifts, setMyShifts }: {
         fetchApps();
     }, [])
 
+    // useEffect for reset filters
     useEffect(() => {
         const allCleared =
             startTime === null &&
@@ -90,6 +103,7 @@ export default function MyShifts({ myShifts, setMyShifts }: {
                 Reset filters
             </Button>
             
+            {/*Modal to filter shifts*/}
             <Modal show={showForm} onHide={() => setShowForm(false)} centered size="lg">
                 <Modal.Header closeButton>
                     <Modal.Title>Filter Shifts</Modal.Title>
@@ -134,13 +148,16 @@ export default function MyShifts({ myShifts, setMyShifts }: {
                     </div>
                 </Modal.Body>
             </Modal>
-
+            
+            {/*Display Shift details on cards*/}
             <Row>
                 {myShifts.map((shift: any) =>
                     <Col sm={6}>
                         <Card className="mb-3 text-start user-delivery-card">
                             <Card.Body style={{ padding: '0.5rem' }}>
+                                {/*Fix dropdown menu to top right corner of card*/}
                                 <div style={{ position: 'absolute', top: '0.5rem', right: '0.5rem'}}>
+                                    {/*Dropdown menu for delete Shift*/}
                                     <Dropdown>
                                         <Dropdown.Toggle variant="secondary" size="sm">
                                             &#x22EE;
@@ -153,14 +170,17 @@ export default function MyShifts({ myShifts, setMyShifts }: {
                                         </Dropdown.Menu>
                                     </Dropdown>
                                 </div>
+
                                 <Card.Title className="fw-bold">
                                     {formatTime(shift.startTime)} {" - "} {formatTime(shift.endTime)}
                                 </Card.Title>
                                 <Card.Text>
                                     <strong>App:</strong> {shift.app} {" "} <br />
                                 </Card.Text>
+
+                                {/*Modal to confirm delete shift*/}
                                 <>
-                                    <Modal show={showModal} onHide={() => setShowModal(false)} centered>
+                                    <Modal show={showModal} onHide={() => setShowModal(false)} centered size="lg">
                                         <Modal.Header closeButton>
                                             <Modal.Title>Confirm Deletion</Modal.Title>
                                         </Modal.Header>

@@ -224,7 +224,9 @@ export default function MyDeliveries({ myDeliveries, setMyDeliveries }: {
                     <Col sm={6}>
                         <Card className="mb-3 text-start user-delivery-card">
                             <Card.Body style={{ padding: '0.5rem' }}>
+                                {/*Fix dropdown to top right corner of card*/}
                                 <div style={{ position: 'absolute', top: '0.5rem', right: '0.5rem' }}>
+                                    {/*Dropdown menu for delete delivery*/}
                                     <Dropdown>
                                         <Dropdown.Toggle variant="secondary" size="sm">
                                             &#x22EE;
@@ -250,8 +252,9 @@ export default function MyDeliveries({ myDeliveries, setMyDeliveries }: {
                                     <strong>Notes:</strong> {delivery.notes} {" "}
                                 </Card.Text>
 
+                                {/*Modal to confirm delete delivery*/}
                                 <>
-                                    <Modal show={showModal} onHide={() => setShowModal(false)} centered>
+                                    <Modal show={showModal} onHide={() => setShowModal(false)} centered size="lg">
                                         <Modal.Header closeButton>
                                             <Modal.Title>Confirm Deletion</Modal.Title>
                                         </Modal.Header>
