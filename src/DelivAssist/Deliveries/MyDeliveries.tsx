@@ -258,7 +258,7 @@ export default function MyDeliveries({ myDeliveries, setMyDeliveries }: {
                                         <Modal.Header closeButton>
                                             <Modal.Title>Confirm Deletion</Modal.Title>
                                         </Modal.Header>
-                                        <Modal.Body>Are you sure you want to delete this shift?</Modal.Body>
+                                        <Modal.Body>Are you sure you want to delete this delivery?</Modal.Body>
                                         <Modal.Footer>
                                             <Button variant="secondary" onClick={() => setShowModal(false)}>
                                                 Cancel
