@@ -26,36 +26,59 @@ export default function Statistics() {
     const [monthlySpending, setMonthlySpending] = useState(0);
     const [monthlySpendingByType, setMonthlySpendingByType] = useState<MonthlySpendingType[]>([]);
 
+
     const fetchStatistics = async () => {
         // Fetch statistics
-        const avgPay = await client.findAvgDeliveryPay();
-        const avgBase = await client.findAvgBasePay();
-        const avgTip = await client.findAvgTipPay();
-        const dollarPerMile = await client.findDollarPerMile();
 
-        const bestNeighborhood = await client.findHighestPayingNeighborhood();
-        const bestRestaurant = await client.findHighestPayingRestaurant();
+        try {
+            const avgPay = await client.findAvgDeliveryPay();
+            const avgBase = await client.findAvgBasePay();
+            const avgTip = await client.findAvgTipPay();
+            const dollarPerMile = await client.findDollarPerMile();
 
-        const bestBaseApp = await client.findHighestPayingBaseApp();
-        const bestTipApp = await client.findHighestPayingTipApp();
+            setAveragePay(avgPay ?? 0);
+            setAverageBase(avgBase ?? 0);
+            setAverageTip(avgTip ?? 0);
+            setAvgDollarPerMile(dollarPerMile ?? 0);
+        } catch {
+            setAveragePay(0)
+            setAverageBase(0)
+            setAverageTip(0);
+            setAvgDollarPerMile(0);
+        }
 
-        const averageMonthlyExpenses = await client.findAverageMonthlySpending();
-        const avgMonthlySpendingByType = await client.findMonthlySpendingByType();
+        try {
+            const bestNeighborhood = await client.findHighestPayingNeighborhood();
+            const bestRestaurant = await client.findHighestPayingRestaurant();
 
-        // Set statistics
-        setAveragePay(avgPay);
-        setAverageBase(avgBase);
-        setAverageTip(avgTip);
-        setAvgDollarPerMile(dollarPerMile);
+            setNeighborhood(bestNeighborhood ?? {neighborhood: "N/A", averageTipPay: 0});
+            setRestaurant(bestRestaurant ?? {restaurant: "N/A", avgTotalPay: 0});
+        } catch {
+            setNeighborhood({neighborhood: "N/A", averageTipPay: 0});
+            setRestaurant({restaurant: "N/A", avgTotalPay: 0});
+        }
 
-        setNeighborhood(bestNeighborhood);
-        setRestaurant(bestRestaurant);
+        try {
+            const bestBaseApp = await client.findHighestPayingBaseApp();
+            const bestTipApp = await client.findHighestPayingTipApp();
 
-        setBaseApp(bestBaseApp);
-        setTipApp(bestTipApp);
+            setBaseApp(bestBaseApp ?? {app: "N/A", avgBase: 0});
+            setTipApp(bestTipApp ?? {app: "", avgTip: 0});
+        } catch {
+            setBaseApp({app: "N/A", avgBase: 0});
+            setTipApp({app: "N/A", avgTip: 0});
+        }
 
-        setMonthlySpending(averageMonthlyExpenses);
-        setMonthlySpendingByType(avgMonthlySpendingByType);
+        try {
+            const averageMonthlyExpenses = await client.findAverageMonthlySpending();
+            const avgMonthlySpendingByType = await client.findMonthlySpendingByType();
+
+            setMonthlySpending(averageMonthlyExpenses ?? 0);
+            setMonthlySpendingByType(avgMonthlySpendingByType ?? []);
+        } catch {
+            setMonthlySpending(0);
+            setMonthlySpendingByType([]);
+        }
     }
 
     useEffect(() => {
