@@ -19,11 +19,13 @@ builder.Services.AddControllers()
     });
 
 // Add CORS
+var allowedOrigin = Environment.GetEnvironmentVariable("ALLOWED_ORIGIN") ?? "http://localhost:5173";
+
 builder.Services.AddCors(options =>
 {
-    options.AddPolicy("AllowAll", policy =>
+    options.AddPolicy("AllowFrontend", policy =>
     {
-        policy.AllowAnyOrigin()
+        policy.WithOrigins(allowedOrigin)
               .AllowAnyMethod()
               .AllowAnyHeader();
     });
@@ -60,7 +62,7 @@ builder.Services.AddSwaggerGen();
 
 var app = builder.Build();
 
-app.UseCors("AllowAll");
+app.UseCors("AllowFrontend");
 
 using (var scope = app.Services.CreateScope())
 {
