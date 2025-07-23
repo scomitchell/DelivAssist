@@ -60,7 +60,7 @@ namespace DelivAssist.Data
                 .HasForeignKey(us => us.ShiftId);
 
             modelBuilder.Entity<ShiftDelivery>()
-                .HasKey(sd => new { sd.ShiftId, sd.DeliveryId });
+                .HasKey(sd => new { sd.ShiftId, sd.UserId, sd.DeliveryId });
 
             modelBuilder.Entity<ShiftDelivery>()
                 .HasOne(sd => sd.Shift)
@@ -71,6 +71,11 @@ namespace DelivAssist.Data
                 .HasOne(sd => sd.Delivery)
                 .WithMany(sd => sd.ShiftDeliveries)
                 .HasForeignKey(sd => sd.DeliveryId);
+
+            modelBuilder.Entity<ShiftDelivery>()
+                .HasOne(sd => sd.User)
+                .WithMany(sd => sd.ShiftDeliveries)
+                .HasForeignKey(sd => sd.UserId);
         }
     }
 }

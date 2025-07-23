@@ -20,5 +20,6 @@ namespace DelivAssist.Models
 
         public List<UserShift> UserShifts { get; set; } = new();
 
+        public List<ShiftDelivery> ShiftDeliveries { get; set; } = new();
     }
 }
