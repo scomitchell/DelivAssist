@@ -10,6 +10,5 @@ namespace DelivAssist.Models
         public User User { get; set; }
 
         public Delivery Delivery { get; set; }
-
     }
 }
