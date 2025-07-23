@@ -223,30 +223,6 @@ namespace DelivAssist.Controllers
             return Ok(result);
         }
 
-        [HttpGet("expenses/highest-type")]
-        public async Task<IActionResult> GetHighestExpenseType() {
-            var userId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier));
-
-            var result = await _context.UserExpenses
-                .Where(ue => ue.UserId == userId)
-                .GroupBy(ue => ue.Expense.Type)
-                .Select(g => new {
-                    Type = g.Key,
-                    AvgAmount = g.Average(ue => ue.Expense.Amount)
-                })
-                .OrderByDescending(x => x.AvgAmount)
-                .FirstOrDefaultAsync();
-
-            if (result == null) {
-                return NotFound("No expenses found");
-            }
-
-            return Ok(new {
-                type = result.Type,
-                avgAmount = result.AvgAmount
-            });
-        }
-
         [HttpGet("expenses/average-monthly-spending")]
         public async Task<IActionResult> GetAverageMonthlySpending() {
             var userId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier));
