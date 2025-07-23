@@ -1,6 +1,12 @@
 import * as client from "./client";
 import { useEffect, useState } from "react";
 import { Row, Col, Card } from "react-bootstrap";
+
+type MonthlySpendingType = {
+  type: string;
+  avgExpense: number;
+};
+
 export default function Statistics() {
     // Pay statistics
     const [averagePay, setAveragePay] = useState(0);
@@ -16,6 +22,11 @@ export default function Statistics() {
     const [baseApp, setBaseApp] = useState({ app: "", avgBase: 0 });
     const [tipApp, setTipApp] = useState({ app: "", avgTip: 0 });
 
+    // Expense statistics
+    const [highestType, setHighestType] = useState({type: "", avgAmount: 0});
+    const [monthlySpending, setMonthlySpending] = useState(0);
+    const [monthlySpendingByType, setMonthlySpendingByType] = useState<MonthlySpendingType[]>([]);
+
     const fetchStatistics = async () => {
         // Fetch statistics
         const avgPay = await client.findAvgDeliveryPay();
@@ -29,6 +40,10 @@ export default function Statistics() {
         const bestBaseApp = await client.findHighestPayingBaseApp();
         const bestTipApp = await client.findHighestPayingTipApp();
 
+        const mostExpensiveType = await client.findHighestExpenseType();
+        const averageMonthlyExpenses = await client.findAverageMonthlySpending();
+        const avgMonthlySpendingByType = await client.findMonthlySpendingByType();
+
         // Set statistics
         setAveragePay(avgPay);
         setAverageBase(avgBase);
@@ -40,6 +55,10 @@ export default function Statistics() {
 
         setBaseApp(bestBaseApp);
         setTipApp(bestTipApp);
+
+        setHighestType(mostExpensiveType);
+        setMonthlySpending(averageMonthlyExpenses);
+        setMonthlySpendingByType(avgMonthlySpendingByType);
     }
 
     useEffect(() => {
@@ -53,7 +72,7 @@ export default function Statistics() {
                 <Row>
                     {/*Pay Statistics*/}
                     <Col sm={5}>
-                        <Card className="me-1 mb-3 user-delivery-card">
+                        <Card className="me-1 mb-3 user-statistics-card">
                             <Card.Body style={{ padding: '0.25rem' }}>
                                 <Card.Title className="fw-bold">Pay Statistics</Card.Title>
                                 <Card.Text>
@@ -68,7 +87,7 @@ export default function Statistics() {
 
                     {/*Location Statistics*/}
                     <Col sm={5}>
-                        <Card className="me-1 mb-3 user-delivery-card">
+                        <Card className="me-1 mb-3 user-statistics-card">
                             <Card.Body style={{ padding: '0.25rem' }}>
                                 <Card.Title className="fw-bold">Location Statistics</Card.Title>
                                 <Card.Text>
@@ -87,7 +106,7 @@ export default function Statistics() {
 
                     {/*App Statistics*/}
                     <Col sm={5}>
-                        <Card className="me-1 mb-3 user-delivery-card">
+                        <Card className="me-1 mb-3 user-statistics-card">
                             <Card.Body style={{ padding: '0.25rem' }}>
                                 <Card.Title className="fw-bold">App Statistics</Card.Title>
                                 <Card.Text>
@@ -99,6 +118,30 @@ export default function Statistics() {
                                     <span style={{ marginLeft: "1rem" }}>
                                         <strong>- Average:</strong> ${tipApp.avgTip.toFixed(2)}
                                     </span>
+                                </Card.Text>
+                            </Card.Body>
+                        </Card>
+                    </Col>
+
+                    {/*Expense Statistics*/}
+                    <Col sm={5}>
+                        <Card className="me-1 mb-3 user-statistics-card">
+                            <Card.Body style={{padding: "0.25rem"}}>
+                                <Card.Title className="fw-bold">Expense Statistics</Card.Title>
+                                <Card.Text>
+                                    <strong>Average monthly spending:</strong> ${monthlySpending.toFixed(2)} <br />
+                                    <strong>Most expensive type:</strong> {highestType.type} <br />
+                                    <span style={{marginLeft: "1rem"}}>
+                                        <strong>- Average spent:</strong> ${highestType.avgAmount.toFixed(2)} <br />
+                                    </span>
+                                    <strong>Monthly spending by type:</strong>
+                                    <div style={{ marginLeft: "1rem" }}>
+                                        {monthlySpendingByType.map((average, idx) => (
+                                            <div key={idx}>
+                                                <strong>- {average.type}:</strong> ${average.avgExpense.toFixed(2)}
+                                            </div>
+                                        ))}
+                                    </div>
                                 </Card.Text>
                             </Card.Body>
                         </Card>

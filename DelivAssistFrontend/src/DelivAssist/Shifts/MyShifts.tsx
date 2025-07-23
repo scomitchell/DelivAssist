@@ -153,7 +153,7 @@ export default function MyShifts({ myShifts, setMyShifts }: {
             <Row>
                 {myShifts.map((shift: any) =>
                     <Col sm={6}>
-                        <Card className="mb-3 text-start user-delivery-card">
+                        <Card className="mb-3 text-start user-shift-card">
                             <Card.Body style={{ padding: '0.5rem' }}>
                                 {/*Fix dropdown menu to top right corner of card*/}
                                 <div style={{ position: 'absolute', top: '0.5rem', right: '0.5rem'}}>

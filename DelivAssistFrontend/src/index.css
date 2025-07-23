@@ -78,4 +78,21 @@ nav {
 .user-delivery-card {
     border-width: 2px !important;
     border-color: #000000 !important;
+    min-height: 300px;
+    height: 100%;  
+}
+
+.user-statistics-card {
+  border-width: 2px !important;
+  border-color: #000000 !important;
+  min-height: 200px;
+  height: 100%;  
+}
+
+.user-expense-card,
+.user-shift-card {
+  border-width: 2px !important;
+  border-color: #000000 !important;
+  min-height: 100px;
+  height: 100%; 
 }

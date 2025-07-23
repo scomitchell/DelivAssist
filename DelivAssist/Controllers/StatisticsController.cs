@@ -222,5 +222,69 @@ namespace DelivAssist.Controllers
 
             return Ok(result);
         }
+
+        [HttpGet("expenses/highest-type")]
+        public async Task<IActionResult> GetHighestExpenseType() {
+            var userId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier));
+
+            var result = await _context.UserExpenses
+                .Where(ue => ue.UserId == userId)
+                .GroupBy(ue => ue.Expense.Type)
+                .Select(g => new {
+                    Type = g.Key,
+                    AvgAmount = g.Average(ue => ue.Expense.Amount)
+                })
+                .OrderByDescending(x => x.AvgAmount)
+                .FirstOrDefaultAsync();
+
+            if (result == null) {
+                return NotFound("No expenses found");
+            }
+
+            return Ok(new {
+                type = result.Type,
+                avgAmount = result.AvgAmount
+            });
+        }
+
+        [HttpGet("expenses/average-monthly-spending")]
+        public async Task<IActionResult> GetAverageMonthlySpending() {
+            var userId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier));
+
+            var result = _context.UserExpenses
+                .Where(ue => ue.UserId == userId)
+                .GroupBy(ue => new { ue.Expense.Date.Year, ue.Expense.Date.Month })
+                .Select(g => g.Sum(ue => ue.Expense.Amount))
+                .Average();
+
+            if (result == null) {
+                return NotFound("No expenses found");
+            }
+
+            return Ok(result);
+        }
+
+        [HttpGet("expenses/average-spending-by-type")]
+        public async Task<IActionResult> GetAverageSpendingByType() {
+            var userId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier));
+
+            var result = await _context.UserExpenses
+                .Where(ue => ue.UserId == userId)
+                .GroupBy(ue => new {ue.Expense.Date.Year, ue.Expense.Date.Month, ue.Expense.Type})
+                .Select(g => new {
+                    Type = g.Key.Type,
+                    Month = g.Key.Month,
+                    Year = g.Key.Year,
+                    MonthlyTotal = g.Sum(x => x.Expense.Amount)
+                })
+                .GroupBy(x => x.Type)
+                .Select(g => new {
+                    Type = g.Key,
+                    AvgExpense = g.Average(x => x.MonthlyTotal)
+                })
+                .ToListAsync();
+
+            return Ok(result);
+        }
     }
 }
