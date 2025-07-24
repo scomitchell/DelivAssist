@@ -89,11 +89,6 @@ export default function Statistics() {
         setLoading(false);
     }, [])
 
-    if (loading) {
-        return (
-            <h1>Loading your statistics...</h1>
-        );
-    }
     return (
         <div id="da-statistics">
             <h1 className="mb-3">Your Statistics</h1>
@@ -105,10 +100,21 @@ export default function Statistics() {
                             <Card.Body style={{ padding: '0.25rem' }}>
                                 <Card.Title className="fw-bold">Pay Statistics</Card.Title>
                                 <Card.Text>
-                                    <strong>Average total pay:</strong> ${averagePay.toFixed(2)} <br />
-                                    <strong>Average base pay:</strong> ${averageBase.toFixed(2)} <br/>
-                                    <strong>Average tip pay:</strong> ${averageTip.toFixed(2)} <br />
-                                    <strong>Average dollar/mile:</strong> ${avgDollarPerMile.toFixed(2)} <br />
+                                    {loading ? 
+                                        <div>
+                                            <p><strong>Average total pay:</strong> Loading...</p> <br />
+                                            <p><strong>Average base pay:</strong> Loading...</p> <br/>
+                                            <p><strong>Average tip pay:</strong> Loading...</p> <br />
+                                            <p><strong>Average dollar/mile:</strong> Loading...</p> <br />
+                                        </div>
+                                        :
+                                        <div>
+                                            <strong>Average total pay:</strong> ${averagePay.toFixed(2)} <br />
+                                            <strong>Average base pay:</strong> ${averageBase.toFixed(2)} <br/>
+                                            <strong>Average tip pay:</strong> ${averageTip.toFixed(2)} <br />
+                                            <strong>Average dollar/mile:</strong> ${avgDollarPerMile.toFixed(2)} <br />
+                                        </div>
+                                    }
                                 </Card.Text>
                             </Card.Body>
                         </Card>
