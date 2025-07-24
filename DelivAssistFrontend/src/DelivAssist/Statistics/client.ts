@@ -1,12 +1,13 @@
 import axios from "axios";
 
+const axiosWithCredentials = axios.create({withCredentials: true});
 export const REMOTE_SERVER = import.meta.env.VITE_REMOTE_SERVER;
 export const STATISTICS_API = `${REMOTE_SERVER}/api/statistics`;
 
 export const findAvgDeliveryPay = async () => {
     const token = localStorage.getItem("token");
 
-    const response = await axios.get(`${STATISTICS_API}/deliveries/avg-delivery-pay`, {
+    const response = await axiosWithCredentials.get(`${STATISTICS_API}/deliveries/avg-delivery-pay`, {
         headers: {
             Authorization: `Bearer ${token}`,
         }
@@ -18,7 +19,7 @@ export const findAvgDeliveryPay = async () => {
 export const findAvgBasePay = async () => {
     const token = localStorage.getItem("token");
 
-    const response = await axios.get(`${STATISTICS_API}/deliveries/average-base-pay`, {
+    const response = await axiosWithCredentials.get(`${STATISTICS_API}/deliveries/average-base-pay`, {
         headers: {
             Authorization: `Bearer ${token}`,
         }
@@ -30,7 +31,7 @@ export const findAvgBasePay = async () => {
 export const findAvgTipPay = async () => {
     const token = localStorage.getItem("token");
 
-    const response = await axios.get(`${STATISTICS_API}/deliveries/average-tip`, {
+    const response = await axiosWithCredentials.get(`${STATISTICS_API}/deliveries/average-tip`, {
         headers: {
             Authorization: `Bearer ${token}`
         }
@@ -42,7 +43,7 @@ export const findAvgTipPay = async () => {
 export const findHighestPayingNeighborhood = async () => {
     const token = localStorage.getItem("token");
 
-    const response = await axios.get(`${STATISTICS_API}/deliveries/highest-paying-neighborhood`, {
+    const response = await axiosWithCredentials.get(`${STATISTICS_API}/deliveries/highest-paying-neighborhood`, {
         headers: {
             Authorization: `Bearer ${token}`,
         }
@@ -54,7 +55,7 @@ export const findHighestPayingNeighborhood = async () => {
 export const findHighestPayingRestaurant = async () => {
     const token = localStorage.getItem("token");
 
-    const response = await axios.get(`${STATISTICS_API}/deliveries/highest-paying-restaurant`, {
+    const response = await axiosWithCredentials.get(`${STATISTICS_API}/deliveries/highest-paying-restaurant`, {
         headers: {
             Authorization: `Bearer ${token}`,
         }
@@ -66,7 +67,7 @@ export const findHighestPayingRestaurant = async () => {
 export const findDollarPerMile = async () => {
     const token = localStorage.getItem("token");
 
-    const response = await axios.get(`${STATISTICS_API}/deliveries/dollar-per-mile`, {
+    const response = await axiosWithCredentials.get(`${STATISTICS_API}/deliveries/dollar-per-mile`, {
         headers: {
             Authorization: `Bearer ${token}`,
         }
@@ -78,7 +79,7 @@ export const findDollarPerMile = async () => {
 export const findHighestPayingBaseApp = async () => {
     const token = localStorage.getItem("token");
 
-    const response = await axios.get(`${STATISTICS_API}/deliveries/highest-paying-base-app`, {
+    const response = await axiosWithCredentials.get(`${STATISTICS_API}/deliveries/highest-paying-base-app`, {
         headers: {
             Authorization: `Bearer ${token}`,
         }
@@ -90,7 +91,7 @@ export const findHighestPayingBaseApp = async () => {
 export const findHighestPayingTipApp = async () => {
     const token = localStorage.getItem("token");
 
-    const response = await axios.get(`${STATISTICS_API}/deliveries/highest-paying-tip-app`, {
+    const response = await axiosWithCredentials.get(`${STATISTICS_API}/deliveries/highest-paying-tip-app`, {
         headers: {
             Authorization: `Bearer ${token}`,
         }
@@ -102,7 +103,7 @@ export const findHighestPayingTipApp = async () => {
 export const findAverageMonthlySpending = async () => {
     const token = localStorage.getItem("token");
 
-    const response = await axios.get(`${STATISTICS_API}/expenses/average-monthly-spending`, {
+    const response = await axiosWithCredentials.get(`${STATISTICS_API}/expenses/average-monthly-spending`, {
         headers: {
             Authorization: `Bearer ${token}`,
         }
@@ -114,7 +115,7 @@ export const findAverageMonthlySpending = async () => {
 export const findMonthlySpendingByType = async () => {
     const token = localStorage.getItem("token");
 
-    const response = await axios.get(`${STATISTICS_API}/expenses/average-spending-by-type`, {
+    const response = await axiosWithCredentials.get(`${STATISTICS_API}/expenses/average-spending-by-type`, {
         headers: {
             Authorization: `Bearer ${token}`,
         }

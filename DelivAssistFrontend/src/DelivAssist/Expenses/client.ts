@@ -1,12 +1,13 @@
 import axios from "axios";
 
+const axiosWithCredentials = axios.create({withCredentials: true});
 const REMOTE_SERVER = import.meta.env.VITE_REMOTE_SERVER;
 const EXPENSES_API = `${REMOTE_SERVER}/api/userexpense`;
 
 export const addExpense = async (userExpense: any) => {
     const token = localStorage.getItem("token");
 
-    const response = await axios.post(`${EXPENSES_API}`, userExpense, {
+    const response = await axiosWithCredentials.post(`${EXPENSES_API}`, userExpense, {
         headers: {
             Authorization: `Bearer ${token}`,
         }
@@ -18,7 +19,7 @@ export const addExpense = async (userExpense: any) => {
 export const findMyExpenses = async () => {
     const token = localStorage.getItem("token");
 
-    const response = await axios.get(`${EXPENSES_API}/my-expenses`, {
+    const response = await axiosWithCredentials.get(`${EXPENSES_API}/my-expenses`, {
         headers: {
             Authorization: `Bearer ${token}`,
         }
@@ -30,7 +31,7 @@ export const findMyExpenses = async () => {
 export const findExpenseById = async (expenseId: number) => {
     const token = localStorage.getItem("token");
 
-    const response = await axios.get(`${EXPENSES_API}/${expenseId}`, {
+    const response = await axiosWithCredentials.get(`${EXPENSES_API}/${expenseId}`, {
         headers: {
             Authorization: `Bearer ${token}`,
         }
@@ -42,7 +43,7 @@ export const findExpenseById = async (expenseId: number) => {
 export const deleteExpense = async (expenseId: number) => {
     const token = localStorage.getItem("token");
 
-    const response = await axios.delete(`${EXPENSES_API}/${expenseId}`, {
+    const response = await axiosWithCredentials.delete(`${EXPENSES_API}/${expenseId}`, {
         headers: {
             Authorization: `Bearer ${token}`,
         }
@@ -60,7 +61,7 @@ export type ExpenseFilters = {
 export const findFilteredExpenses = async (filters: ExpenseFilters) => {
     const token = localStorage.getItem("token");
 
-    const response = await axios.get(`${EXPENSES_API}/filtered-expenses`, {
+    const response = await axiosWithCredentials.get(`${EXPENSES_API}/filtered-expenses`, {
         params: filters,
         headers: {
             Authorization: `Bearer ${token}`,
@@ -73,7 +74,7 @@ export const findFilteredExpenses = async (filters: ExpenseFilters) => {
 export const findExpenseTypes = async () => {
     const token = localStorage.getItem("token");
 
-    const response = await axios.get(`${EXPENSES_API}/types`, {
+    const response = await axiosWithCredentials.get(`${EXPENSES_API}/types`, {
         headers: {
             Authorization: `Bearer ${token}`,
         }

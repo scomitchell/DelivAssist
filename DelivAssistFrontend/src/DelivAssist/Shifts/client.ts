@@ -1,12 +1,13 @@
 import axios from "axios";
 
+const axiosWithCredentials = axios.create({withCredentials: true});
 export const REMOTE_SERVER = import.meta.env.VITE_REMOTE_SERVER;
 export const SHIFTS_API = `${REMOTE_SERVER}/api/usershift`;
 
 export const findUserShifts = async () => {
     const token = localStorage.getItem("token");
 
-    const response = await axios.get(`${SHIFTS_API}/my-shifts`, {
+    const response = await axiosWithCredentials.get(`${SHIFTS_API}/my-shifts`, {
         headers: {
             Authorization: `Bearer ${token}`,
         }
@@ -18,7 +19,7 @@ export const findUserShifts = async () => {
 export const findShiftById = async (id: number) => {
     const token = localStorage.getItem("token");
 
-    const response = await axios.get(`${SHIFTS_API}/${id}`, {
+    const response = await axiosWithCredentials.get(`${SHIFTS_API}/${id}`, {
         headers: {
             Authorization: `Bearer ${token}`,
         }
@@ -30,7 +31,7 @@ export const findShiftById = async (id: number) => {
 export const addShift = async (userShift: any) => {
     const token = localStorage.getItem("token");
 
-    const response = await axios.post(`${SHIFTS_API}`, userShift, {
+    const response = await axiosWithCredentials.post(`${SHIFTS_API}`, userShift, {
         headers: {
             Authorization: `Bearer ${token}`
         }
@@ -42,7 +43,7 @@ export const addShift = async (userShift: any) => {
 export const getUserApps = async () => {
     const token = localStorage.getItem("token");
 
-    const response = await axios.get(`${SHIFTS_API}/apps`, {
+    const response = await axiosWithCredentials.get(`${SHIFTS_API}/apps`, {
         headers: {
             Authorization: `Bearer ${token}`,
         }
@@ -60,7 +61,7 @@ export type ShiftFilters = {
 export const getFilteredShifts = async (filters: ShiftFilters) => {
     const token = localStorage.getItem("token");
 
-    const response = await axios.get(`${SHIFTS_API}/filtered-shifts`, {
+    const response = await axiosWithCredentials.get(`${SHIFTS_API}/filtered-shifts`, {
         params: filters,
         headers: {
             Authorization: `Bearer ${token}`,
@@ -73,7 +74,7 @@ export const getFilteredShifts = async (filters: ShiftFilters) => {
 export const deleteUserShift = async (shiftId: number) => {
     const token = localStorage.getItem("token");
 
-    const response = await axios.delete(`${SHIFTS_API}/${shiftId}`, {
+    const response = await axiosWithCredentials.delete(`${SHIFTS_API}/${shiftId}`, {
         headers: {
             Authorization: `Bearer ${token}`,
         }

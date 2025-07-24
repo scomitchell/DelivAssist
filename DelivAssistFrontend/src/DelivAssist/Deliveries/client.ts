@@ -7,7 +7,7 @@ export const DELIVERIES_API = `${REMOTE_SERVER}/api/userdelivery`;
 export const findUserDeliveries = async () => {
     const token = localStorage.getItem("token");
 
-    const response = await axios.get(`${DELIVERIES_API}/my-deliveries`, {
+    const response = await axiosWithCredentials.get(`${DELIVERIES_API}/my-deliveries`, {
         headers: {
             Authorization: `Bearer ${token}`,
         }
@@ -19,7 +19,7 @@ export const findUserDeliveries = async () => {
 export const findUserNeighborhoods = async () => {
     const token = localStorage.getItem("token");
 
-    const response = await axios.get(`${DELIVERIES_API}/delivery-neighborhoods`, {
+    const response = await axiosWithCredentials.get(`${DELIVERIES_API}/delivery-neighborhoods`, {
         headers: {
             Authorization: `Bearer ${token}`,
         }
@@ -31,7 +31,7 @@ export const findUserNeighborhoods = async () => {
 export const findUserApps = async () => {
     const token = localStorage.getItem("token");
 
-    const response = await axios.get(`${DELIVERIES_API}/delivery-apps`, {
+    const response = await axiosWithCredentials.get(`${DELIVERIES_API}/delivery-apps`, {
         headers: {
             Authorization: `Bearer ${token}`,
         }
@@ -43,7 +43,7 @@ export const findUserApps = async () => {
 export const addUserDelivery = async (userDelivery: any) => {
     const token = localStorage.getItem("token");
 
-    const response = await axios.post(`${DELIVERIES_API}`, userDelivery, {
+    const response = await axiosWithCredentials.post(`${DELIVERIES_API}`, userDelivery, {
         headers: {
             Authorization: `Bearer ${token}`,
         }
@@ -65,7 +65,7 @@ export type DeliveryFilters = {
 export const getFilteredDeliveries = async (filters: DeliveryFilters) => {
     const token = localStorage.getItem("token");
 
-    const response = await axios.get(`${DELIVERIES_API}/filtered-deliveries`, {
+    const response = await axiosWithCredentials.get(`${DELIVERIES_API}/filtered-deliveries`, {
         params: filters,
         headers: {
             Authorization: `Bearer ${token}`
@@ -77,7 +77,7 @@ export const getFilteredDeliveries = async (filters: DeliveryFilters) => {
 export const deleteUserDelivery = async (deliveryId: number) => {
     const token = localStorage.getItem("token");
 
-    const response = await axios.delete(`${DELIVERIES_API}/${deliveryId}`, {
+    const response = await axiosWithCredentials.delete(`${DELIVERIES_API}/${deliveryId}`, {
         headers: {
             Authorization: `Bearer ${token}`,
         }
