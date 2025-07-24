@@ -26,6 +26,9 @@ export default function Statistics() {
     const [monthlySpending, setMonthlySpending] = useState(0);
     const [monthlySpendingByType, setMonthlySpendingByType] = useState<MonthlySpendingType[]>([]);
 
+    // Loading
+    const [loading, setLoading] = useState(true);
+
 
     const fetchStatistics = async () => {
         // Fetch statistics
@@ -83,8 +86,14 @@ export default function Statistics() {
 
     useEffect(() => {
         fetchStatistics();
+        setLoading(false);
     }, [])
 
+    if (loading) {
+        return (
+            <h1>Loading your statistics...</h1>
+        );
+    }
     return (
         <div id="da-statistics">
             <h1 className="mb-3">Your Statistics</h1>
