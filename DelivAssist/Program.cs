@@ -70,6 +70,12 @@ using (var scope = app.Services.CreateScope())
     var context = services.GetRequiredService<ApplicationDbContext>();
 }
 
+using (var scope = app.Services.CreateScope())
+{
+    var db = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+    db.Database.Migrate(); // Automatically runs all migrations
+}
+
 app.UseAuthentication();
 app.UseAuthorization();
 
