@@ -27,7 +27,8 @@ builder.Services.AddCors(options =>
     {
         policy.WithOrigins(allowedOrigin)
             .AllowAnyMethod()
-            .AllowAnyHeader();
+            .AllowAnyHeader()
+            .AllowCredentials();
     });
 });
 
