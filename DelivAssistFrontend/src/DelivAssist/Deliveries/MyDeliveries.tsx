@@ -26,7 +26,6 @@ export default function MyDeliveries({ myDeliveries, setMyDeliveries }: {
 
     // Reset and error handling
     const [reset, setReset] = useState(false);
-    const [error, setError] = useState("");
 
 
     // Initial fetch deliveries
@@ -116,12 +115,6 @@ export default function MyDeliveries({ myDeliveries, setMyDeliveries }: {
             setReset(false); // Reset the flag
         }
     }, [totalPay, basePay, tipPay, neighborhood, app, reset]);
-
-    if (error.length > 0) {
-        return (
-            <p>{error}</p>
-        );
-    }
 
     return (
         <div id="da-my-deliveries" className="mt-3 col-sm-8">
