@@ -269,5 +269,43 @@ namespace DelivAssist.Controllers
 
             return Ok(result);
         }
+
+        [HttpGet("shifts/average-shift-length")]
+        public async Task<IActionResult> getAverageShiftLength() {
+            var userId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier));
+
+            var durations = await _context.UserShifts
+                .Where(us => us.UserId == userId)
+                .Select(us => us.Shift.EndTime - us.Shift.StartTime)
+                .ToListAsync();
+
+            if (durations.Count == 0)
+                return Ok(0);
+
+            var averageMinutes = durations.Average(d => d.TotalMinutes);
+
+            return Ok(averageMinutes);
+        }
+
+        [HttpGet("shifts/app-with-most-shifts")]
+        public async Task<IActionResult> getAppWithMostShifts() {
+            var userId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier));
+
+            var result = await _context.UserShifts
+                .Where(us => us.UserId == userId)
+                .GroupBy(us => us.Shift.App)
+                .Select(g => new {
+                    App = g.Key,
+                    ShiftCount = g.Count()
+                })
+                .OrderByDescending(g => g.ShiftCount)
+                .FirstOrDefaultAsync();
+
+            if (result == null) {
+                return Ok(null);
+            }
+
+            return Ok(result.App);
+        }
     }
 }
