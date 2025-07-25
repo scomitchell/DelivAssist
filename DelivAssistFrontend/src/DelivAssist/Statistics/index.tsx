@@ -26,6 +26,10 @@ export default function Statistics() {
     const [monthlySpending, setMonthlySpending] = useState(0);
     const [monthlySpendingByType, setMonthlySpendingByType] = useState<MonthlySpendingType[]>([]);
 
+    // Shift statistics
+    const [averageShiftLength, setAverageShiftLength] = useState<number | null>(null);
+    const [appWithMostShifts, setAppWithMostShifts] = useState<string | null>(null);
+
     // Loading
     const [loading, setLoading] = useState(true);
 
@@ -81,6 +85,17 @@ export default function Statistics() {
         } catch {
             setMonthlySpending(0);
             setMonthlySpendingByType([]);
+        }
+
+        try {
+            const averageUserShiftLength = await client.findAverageShiftLength();
+            const appWithMostUserShifts = await client.findAppWithMostShifts();
+
+            setAverageShiftLength(averageUserShiftLength);
+            setAppWithMostShifts(appWithMostUserShifts);
+        } catch {
+            setAverageShiftLength(0);
+            setAppWithMostShifts("N/A");
         }
     }
 
@@ -173,6 +188,19 @@ export default function Statistics() {
                                             </div>
                                         ))}
                                     </div>
+                                </Card.Text>
+                            </Card.Body>
+                        </Card>
+                    </Col>
+
+                    {/*Shift Statistics*/}
+                    <Col sm={5}>
+                        <Card className="me-1 mb-3 user-statistics-card">
+                            <Card.Body style={{padding: "0.25rem"}}>
+                                <Card.Title className="fw-bold">Shift Statistics</Card.Title>
+                                <Card.Text>
+                                    <strong>Average shift length:</strong> {averageShiftLength} minutes <br />
+                                    <strong>App with most shifts:</strong> {appWithMostShifts} <br />
                                 </Card.Text>
                             </Card.Body>
                         </Card>

@@ -1,6 +1,7 @@
 import { Button, Modal, FormGroup, FormControl, FormLabel, Row, Col, Card, Dropdown } from "react-bootstrap";
 import { useEffect, useState } from "react";
 import * as client from "./client";
+import * as deliveryClient from "../Deliveries/client";
 import type { ShiftFilters } from "./client";
 
 export default function MyShifts({ myShifts, setMyShifts }: {
@@ -9,6 +10,7 @@ export default function MyShifts({ myShifts, setMyShifts }: {
     // Modal control state
     const [showForm, setShowForm] = useState(false);
     const [showModal, setShowModal] = useState(false)
+    const [showSDModal, setShowSDModal] = useState(false);
 
     // User entered Filters
     const [startTime, setStartTime] = useState<string | null>(null);
@@ -20,6 +22,7 @@ export default function MyShifts({ myShifts, setMyShifts }: {
 
     // Control reset
     const [reset, setReset] = useState(false);
+    const [deliveries, setDeliveries] = useState<any[]>([]);
     
     // Fetch all or fitered shifts
     const fetchShifts = async () => {
@@ -46,6 +49,11 @@ export default function MyShifts({ myShifts, setMyShifts }: {
         setMyShifts(shifts);
         setShowForm(false);
         return;
+    }
+
+    const fetchDeliveries = async () => {
+        const userDeliveries = await deliveryClient.findUserDeliveries();
+        setDeliveries(userDeliveries);
     }
 
     // Delete shift from db
@@ -78,6 +86,7 @@ export default function MyShifts({ myShifts, setMyShifts }: {
     useEffect(() => {
         fetchShifts();
         fetchApps();
+        fetchDeliveries();
     }, [])
 
     // useEffect for reset filters
@@ -166,6 +175,9 @@ export default function MyShifts({ myShifts, setMyShifts }: {
                                             <Dropdown.Item onClick={() => setShowModal(true)} className="text-danger">
                                                 Delete Shift
                                             </Dropdown.Item>
+                                            <Dropdown.Item onClick={() => setShowSDModal(true)} className="text-warning">
+                                                Add Deliveries to Shift
+                                            </Dropdown.Item>
                                         </Dropdown.Menu>
                                     </Dropdown>
                                 </div>
@@ -198,6 +210,26 @@ export default function MyShifts({ myShifts, setMyShifts }: {
                                                 Delete
                                             </Button>
                                         </Modal.Footer>
+                                    </Modal>
+
+                                    <Modal show={showSDModal} onHide={() => setShowSDModal(false)} centered size="lg">
+                                        <Modal.Header closeButton>
+                                                <Modal.Title>Select deliveries to add to shift</Modal.Title>
+                                        </Modal.Header>
+                                        <Modal.Body>
+                                            <FormGroup as={Row} className="d-flex align-items-center mb-2">
+                                                <FormLabel column sm={4}>App</FormLabel>
+                                                <Col sm={7}>
+                                                    <select onChange={(e) => setApp(e.target.value)}
+                                                        className="form-control mb-2" id="da-app">
+                                                        <option value=""></option>
+                                                        {deliveries.map((delivery: any) =>
+                                                        <option value={delivery.Id}>{formatTime(delivery.deliveryTime)}</option>
+                                                        ) }
+                                                    </select>
+                                                </Col>
+                                            </FormGroup>
+                                        </Modal.Body>
                                     </Modal>
                                 </>
                             </Card.Body>
