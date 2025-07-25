@@ -123,3 +123,27 @@ export const findMonthlySpendingByType = async () => {
 
     return response.data;
 }
+
+export const findAverageShiftLength = async () => {
+    const token = localStorage.getItem("token");
+
+    const response = await axiosWithCredentials.get(`${STATISTICS_API}/shifts/average-shift-length`, {
+        headers: {
+            Authorization: `Bearer ${token}`,
+        }
+    });
+
+    return response.data;
+}
+
+export const findAppWithMostShifts = async () => {
+    const token = localStorage.getItem("token");
+
+    const response = await axiosWithCredentials.get(`${STATISTICS_API}/shifts/app-with-most-shifts`, {
+        headers: {
+            Authorization: `Bearer ${token}`,
+        }
+    });
+
+    return response.data;
+}
