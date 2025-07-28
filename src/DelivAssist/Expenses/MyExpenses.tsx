@@ -9,7 +9,6 @@ export default function MyExpenses({myExpenses, setMyExpenses} : {
     
     // Modal Control
     const [showForm, setShowForm] = useState(false);
-    const [showModal, setShowModal] = useState(false);
 
     // User entered filters
     const [amount, setAmount] = useState<number | null>(null);
@@ -21,6 +20,8 @@ export default function MyExpenses({myExpenses, setMyExpenses} : {
 
     // Filter dropdowns
     const [types, setTypes] = useState<any>([]);
+
+    const [expenseToDelete, setExpenseToDelete] = useState(-1);
 
     // Fetch filtered or all expenses from db
     const fetchExpenses = async () => {
@@ -58,6 +59,7 @@ export default function MyExpenses({myExpenses, setMyExpenses} : {
     const deleteExpense = async (expenseId: number) => {
         await client.deleteExpense(expenseId);
         fetchExpenses();
+        setExpenseToDelete(-1);
     }
 
     // Show DateTime as date
@@ -166,7 +168,8 @@ export default function MyExpenses({myExpenses, setMyExpenses} : {
                                         </Dropdown.Toggle>
 
                                         <Dropdown.Menu>
-                                            <Dropdown.Item onClick={() => setShowModal(true)} className="text-danger">
+                                            <Dropdown.Item onClick={() => setExpenseToDelete(expense.id)} 
+                                                className="text-danger">
                                                 Delete Expense
                                             </Dropdown.Item>
                                         </Dropdown.Menu>
@@ -181,20 +184,20 @@ export default function MyExpenses({myExpenses, setMyExpenses} : {
 
                                 {/*Modal to confirm expense deletion*/}
                                 <>
-                                    <Modal show={showModal} onHide={() => setShowModal(false)} centered size="lg">
+                                    <Modal show={expenseToDelete !== -1} 
+                                        onHide={() => setExpenseToDelete(-1)} centered size="lg">
                                         <Modal.Header closeButton>
                                             <Modal.Title>Confirm Deletion</Modal.Title>
                                         </Modal.Header>
                                         <Modal.Body>Are you sure you want to delete this expense?</Modal.Body>
                                         <Modal.Footer>
-                                            <Button variant="secondary" onClick={() => setShowModal(false)}>
+                                            <Button variant="secondary" onClick={() => setExpenseToDelete(-1)}>
                                                 Cancel
                                             </Button>
                                             <Button
                                                 variant="danger"
                                                 onClick={() => {
-                                                    deleteExpense(expense.id);
-                                                    setShowModal(false);
+                                                    deleteExpense(expenseToDelete);
                                                 }}
                                             >
                                                 Delete
