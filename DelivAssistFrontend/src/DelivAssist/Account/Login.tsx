@@ -17,6 +17,7 @@ export default function Login() {
         setTimeout(() => {
             // Clear token and log out user
             localStorage.removeItem("token");
+            dispatch(setCurrentUser(null));
             navigate("/DelivAssist/Account/Login");
         }, 60 * 60 * 1000);
     }
