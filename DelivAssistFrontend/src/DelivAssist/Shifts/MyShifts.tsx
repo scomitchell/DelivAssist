@@ -1,5 +1,6 @@
 import { Button, Modal, FormGroup, FormControl, FormLabel, Row, Col, Card, Dropdown } from "react-bootstrap";
 import { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
 import * as client from "./client";
 import * as deliveryClient from "../Deliveries/client";
 import type { ShiftFilters } from "./client";
@@ -23,6 +24,10 @@ export default function MyShifts({ myShifts, setMyShifts }: {
     // Control reset
     const [reset, setReset] = useState(false);
     const [deliveries, setDeliveries] = useState<any[]>([]);
+
+    // Shift deliveries
+    const [deliveryToAdd, setDeliveryToAdd] = useState<number>(-1);
+    const [shiftForDelivery, setShiftForDelivery] = useState<number>(-1);
     
     // Fetch all or fitered shifts
     const fetchShifts = async () => {
@@ -52,9 +57,33 @@ export default function MyShifts({ myShifts, setMyShifts }: {
     }
 
     const fetchDeliveries = async () => {
-        const userDeliveries = await deliveryClient.findUserDeliveries();
+        const userDeliveries = await deliveryClient.findUnassignedUserDeliveries();
         setDeliveries(userDeliveries);
     }
+
+      // Single handler to open the modal for a given shift:
+    const openAddDelivery = (shiftId: number) => {
+        console.log(shiftId);
+        setShiftForDelivery(shiftId);
+        setDeliveryToAdd(-1);        // reset previous
+        setShowSDModal(true);
+    };
+
+    // Unified “add” handler, always logs the actual payload:
+    const handleAddDelivery = async () => {
+        console.log("ADDING DELIVERY:", {
+        shiftForDelivery,
+        deliveryToAdd
+        });
+
+        if (shiftForDelivery > 0 && deliveryToAdd > 0) {
+        await client.AddShiftDelivery(shiftForDelivery, deliveryToAdd);
+        setShowSDModal(false);
+        fetchShifts();
+        } else {
+        alert("Please select a valid shift & delivery.");
+        }
+    };
 
     // Delete shift from db
     const deleteShift = async (shiftId: number) => {
@@ -172,22 +201,33 @@ export default function MyShifts({ myShifts, setMyShifts }: {
                                         </Dropdown.Toggle>
 
                                         <Dropdown.Menu>
-                                            <Dropdown.Item onClick={() => setShowModal(true)} className="text-danger">
+                                            <Dropdown.Item onClick={(e) => {
+                                                e.preventDefault();
+                                                setShowModal(true);
+                                                }} 
+                                                className="text-danger">
                                                 Delete Shift
                                             </Dropdown.Item>
-                                            <Dropdown.Item onClick={() => setShowSDModal(true)} className="text-warning">
+                                            <Dropdown.Item onClick={(e) => {
+                                                e.preventDefault();
+                                                openAddDelivery(shift.id);
+                                            }} 
+                                                className="text-warning">
                                                 Add Deliveries to Shift
                                             </Dropdown.Item>
                                         </Dropdown.Menu>
                                     </Dropdown>
                                 </div>
 
-                                <Card.Title className="fw-bold">
-                                    {formatTime(shift.startTime)} {" - "} {formatTime(shift.endTime)}
-                                </Card.Title>
-                                <Card.Text>
-                                    <strong>App:</strong> {shift.app} {" "} <br />
-                                </Card.Text>
+                                {/* Only this part is clickable */}
+                                <Link to={`/DelivAssist/Shifts/${shift.id}`} className="text-decoration-none text-dark">
+                                    <Card.Title className="fw-bold">
+                                        {formatTime(shift.startTime)} {" - "} {formatTime(shift.endTime)}
+                                    </Card.Title>
+                                    <Card.Text>
+                                        <strong>App:</strong> {shift.app} <br />
+                                    </Card.Text>
+                                </Link>
 
                                 {/*Modal to confirm delete shift*/}
                                 <>
@@ -214,21 +254,31 @@ export default function MyShifts({ myShifts, setMyShifts }: {
 
                                     <Modal show={showSDModal} onHide={() => setShowSDModal(false)} centered size="lg">
                                         <Modal.Header closeButton>
-                                                <Modal.Title>Select deliveries to add to shift</Modal.Title>
+                                            <Modal.Title>Select deliveries to add to shift</Modal.Title>
                                         </Modal.Header>
                                         <Modal.Body>
                                             <FormGroup as={Row} className="d-flex align-items-center mb-2">
-                                                <FormLabel column sm={4}>App</FormLabel>
+                                                <FormLabel column sm={4}>Delivery</FormLabel>
                                                 <Col sm={7}>
-                                                    <select onChange={(e) => setApp(e.target.value)}
-                                                        className="form-control mb-2" id="da-app">
-                                                        <option value=""></option>
+                                                    <select onChange={(e) => setDeliveryToAdd(Number(e.target.value))}
+                                                        className="form-control mb-2" 
+                                                        id="da-delivery">
+                                                        <option value={-1}></option>
                                                         {deliveries.map((delivery: any) =>
-                                                        <option value={delivery.Id}>{formatTime(delivery.deliveryTime)}</option>
-                                                        ) }
+                                                            <option value={delivery.id}>
+                                                                {formatTime(delivery.deliveryTime)}
+                                                            </option>
+                                                        )}
                                                     </select>
                                                 </Col>
-                                            </FormGroup>
+                                                </FormGroup>
+                                            <Button onClick={(e) => {
+                                                    e.preventDefault();
+                                                    handleAddDelivery();
+                                                }} 
+                                                className="btn btn-primary">
+                                                Add Delivery to Shift
+                                            </Button>
                                         </Modal.Body>
                                     </Modal>
                                 </>

@@ -86,6 +86,30 @@ namespace DelivAssist.Controllers
             return Ok(userDeliveries);
         }
 
+        [HttpGet("unassigned-deliveries")]
+        public async Task<IActionResult> GetUnassignedDeliveries() {
+            var userId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier));
+
+            var unassignedDeliveries = await _context.UserDeliveries
+                .Where(ud => ud.UserId == userId && !_context.ShiftDeliveries.Any(sd => sd.DeliveryId == ud.DeliveryId))
+                .Include(ud => ud.Delivery)
+                .Select(ud => new{
+                    ud.Delivery.Id,
+                    ud.Delivery.App,
+                    ud.Delivery.DeliveryTime,
+                    ud.Delivery.BasePay,
+                    ud.Delivery.TipPay,
+                    ud.Delivery.TotalPay,
+                    ud.Delivery.Restaurant,
+                    ud.Delivery.CustomerNeighborhood,
+                    ud.Delivery.Notes,
+                    ud.Delivery.Mileage
+                })
+                .ToListAsync();
+
+            return Ok(unassignedDeliveries);
+        }
+
         [HttpGet("filtered-deliveries")]
         public async Task<IActionResult> GetDeliveriesByApp([FromQuery] DeliveryApp? app,
             [FromQuery] double? basePay,
