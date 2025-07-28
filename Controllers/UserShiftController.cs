@@ -125,6 +125,7 @@ namespace DelivAssist.Controllers
             var userId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier));
 
             var userShift = await _context.UserShifts
+                .Include(us => us.Shift)
                 .FirstOrDefaultAsync(us => us.UserId == userId && us.ShiftId == shiftId);
 
             if (userShift == null)
@@ -132,7 +133,14 @@ namespace DelivAssist.Controllers
                 return NotFound("Shift not found");
             }
 
-            return Ok(userShift);
+            var shift = new {
+                Id = userShift.Shift.Id,
+                App = userShift.Shift.App,
+                StartTime = userShift.Shift.StartTime,
+                EndTime = userShift.Shift.EndTime
+            };
+
+            return Ok(shift);
         }
 
         [HttpDelete("{shiftId}")]

@@ -18,7 +18,7 @@ namespace DelivAssist.Controllers {
         }
 
         [HttpPost("{shiftId:int}")]
-        public async Task<IActionResult> AddShiftDelivery([FromBody] Delivery delivery, int shiftId) {
+        public async Task<IActionResult> AddShiftDelivery(int shiftId, [FromQuery] int deliveryId) {
             var userId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier));
 
             var userExists = await _context.Users.AnyAsync(u => u.Id == userId);
@@ -27,10 +27,30 @@ namespace DelivAssist.Controllers {
                 return BadRequest("User does not exist");
             }
 
+            var shift = await _context.Shifts.FindAsync(shiftId);
+
+            if (shift == null) {
+                return BadRequest("Shift does not exist");
+            }
+
+            var delivery = await _context.Deliveries.FindAsync(deliveryId);
+
+            if (delivery == null) {
+                return BadRequest("Delivery does not exist");
+            }
+
+            if (delivery.DeliveryTime < shift.StartTime || delivery.DeliveryTime > shift.EndTime) {
+                return BadRequest("Delivery does not fit within shift time");
+            }
+
+            if (delivery.App != shift.App) {
+                return BadRequest("Delivery app does not match shift app");
+            }
+
             var shiftDelivery = new ShiftDelivery {
                 ShiftId = shiftId,
                 UserId = userId,
-                DeliveryId = delivery.Id
+                DeliveryId = deliveryId
             };
 
             _context.ShiftDeliveries.Add(shiftDelivery);
