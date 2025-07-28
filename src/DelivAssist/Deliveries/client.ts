@@ -16,6 +16,18 @@ export const findUserDeliveries = async () => {
     return response.data;
 }
 
+export const findUnassignedUserDeliveries = async () => {
+    const token = localStorage.getItem("token");
+
+    const response = await axiosWithCredentials.get(`${DELIVERIES_API}/unassigned-deliveries`, {
+        headers: {
+            Authorization: `Bearer ${token}`,
+        }
+    });
+
+    return response.data;
+}
+
 export const findUserNeighborhoods = async () => {
     const token = localStorage.getItem("token");
 
