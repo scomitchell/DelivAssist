@@ -36,6 +36,13 @@ namespace DelivAssist.Controllers
             _context.Deliveries.Add(delivery);
             await _context.SaveChangesAsync();
 
+            var userShift = await _context.UserShifts
+                .Where(us => us.UserId == userId)
+                .Include(us => us.Shift)
+                .FirstOrDefaultAsync(us => us.Shift.StartTime <= delivery.DeliveryTime 
+                    && us.Shift.EndTime >= delivery.DeliveryTime
+                    && us.Shift.App == delivery.App);
+
             var userDelivery = new UserDelivery
             {
                 UserId = userId,
@@ -44,6 +51,17 @@ namespace DelivAssist.Controllers
             };
 
             _context.UserDeliveries.Add(userDelivery);
+
+            if (userShift != null) {
+                var shiftDelivery = new ShiftDelivery {
+                    UserId = userId,
+                    ShiftId = userShift.Shift.Id,
+                    DeliveryId = delivery.Id
+                };
+
+                _context.ShiftDeliveries.Add(shiftDelivery);
+            }
+
             await _context.SaveChangesAsync();
 
             return Ok(new
@@ -238,9 +256,21 @@ namespace DelivAssist.Controllers
             {
                 return NotFound("Delivery not found");
             }
+            
+            var shiftDelivery = await _context.ShiftDeliveries
+                .FirstOrDefaultAsync(sd => sd.UserId == userId && sd.DeliveryId == deliveryId);
 
+
+            // Remove userDelivery
             _context.UserDeliveries.Remove(userDelivery);
             await _context.SaveChangesAsync();
+
+
+            // If delivery is associated with shift, remove shiftDelivery
+            if (shiftDelivery != null) {
+                _context.ShiftDeliveries.Remove(shiftDelivery);
+                await _context.SaveChangesAsync();
+            }
 
             return Ok("Delivery removed");
         }

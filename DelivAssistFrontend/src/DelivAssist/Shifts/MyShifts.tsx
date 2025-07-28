@@ -10,7 +10,6 @@ export default function MyShifts({ myShifts, setMyShifts }: {
     setMyShifts: React.Dispatch<React.SetStateAction<any[]>>}) {
     // Modal control state
     const [showForm, setShowForm] = useState(false);
-    const [showModal, setShowModal] = useState(false)
     const [showSDModal, setShowSDModal] = useState(false);
 
     // User entered Filters
@@ -28,6 +27,9 @@ export default function MyShifts({ myShifts, setMyShifts }: {
     // Shift deliveries
     const [deliveryToAdd, setDeliveryToAdd] = useState<number>(-1);
     const [shiftForDelivery, setShiftForDelivery] = useState<number>(-1);
+
+    // Delete
+    const [shiftToDelete, setShiftToDelete] = useState(-1);
     
     // Fetch all or fitered shifts
     const fetchShifts = async () => {
@@ -71,17 +73,13 @@ export default function MyShifts({ myShifts, setMyShifts }: {
 
     // Unified “add” handler, always logs the actual payload:
     const handleAddDelivery = async () => {
-        console.log("ADDING DELIVERY:", {
-        shiftForDelivery,
-        deliveryToAdd
-        });
-
         if (shiftForDelivery > 0 && deliveryToAdd > 0) {
-        await client.AddShiftDelivery(shiftForDelivery, deliveryToAdd);
-        setShowSDModal(false);
-        fetchShifts();
+            await client.AddShiftDelivery(shiftForDelivery, deliveryToAdd);
+            setShowSDModal(false);
+            fetchShifts();
+            fetchDeliveries();
         } else {
-        alert("Please select a valid shift & delivery.");
+            alert("Please select a valid shift & delivery.");
         }
     };
 
@@ -89,6 +87,7 @@ export default function MyShifts({ myShifts, setMyShifts }: {
     const deleteShift = async (shiftId: number) => {
         await client.deleteUserShift(shiftId);
         fetchShifts();
+        setShiftToDelete(-1);
     }
 
     // Fetch list of user used apps
@@ -203,7 +202,7 @@ export default function MyShifts({ myShifts, setMyShifts }: {
                                         <Dropdown.Menu>
                                             <Dropdown.Item onClick={(e) => {
                                                 e.preventDefault();
-                                                setShowModal(true);
+                                                setShiftToDelete(shift.id);
                                                 }} 
                                                 className="text-danger">
                                                 Delete Shift
@@ -231,20 +230,19 @@ export default function MyShifts({ myShifts, setMyShifts }: {
 
                                 {/*Modal to confirm delete shift*/}
                                 <>
-                                    <Modal show={showModal} onHide={() => setShowModal(false)} centered size="lg">
+                                    <Modal show={shiftToDelete !== -1} onHide={() => setShiftToDelete(-1)} centered size="lg">
                                         <Modal.Header closeButton>
                                             <Modal.Title>Confirm Deletion</Modal.Title>
                                         </Modal.Header>
                                         <Modal.Body>Are you sure you want to delete this shift?</Modal.Body>
                                         <Modal.Footer>
-                                            <Button variant="secondary" onClick={() => setShowModal(false)}>
+                                            <Button variant="secondary" onClick={() => setShiftToDelete(-1)}>
                                                 Cancel
                                             </Button>
                                             <Button
                                                 variant="danger"
                                                 onClick={() => {
-                                                    deleteShift(shift.id);
-                                                    setShowModal(false);
+                                                    deleteShift(shiftToDelete);
                                                 }}
                                             >
                                                 Delete

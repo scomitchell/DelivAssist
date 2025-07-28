@@ -9,7 +9,6 @@ export default function MyDeliveries({ myDeliveries, setMyDeliveries }: {
     setMyDeliveries: React.Dispatch<React.SetStateAction<any[]>>}) {
     // Control Modal
     const [showForm, setShowForm] = useState(false);
-    const [showModal, setShowModal] = useState(false);
 
     // User entered filters
     const [totalPay, setTotalPay] = useState<number | null>(null);
@@ -27,6 +26,8 @@ export default function MyDeliveries({ myDeliveries, setMyDeliveries }: {
     // Reset and error handling
     const [reset, setReset] = useState(false);
 
+    // Delivery to delete
+    const [deliveryToDelete, setDeliveryToDelete] = useState(-1);
 
     // Initial fetch deliveries
     const fetchDeliveries = async () => {
@@ -58,6 +59,7 @@ export default function MyDeliveries({ myDeliveries, setMyDeliveries }: {
     const deleteDelivery = async (deliveryId: number) => {
         await client.deleteUserDelivery(deliveryId);
         fetchDeliveries();
+        setDeliveryToDelete(-1);
     }
 
 
@@ -226,7 +228,8 @@ export default function MyDeliveries({ myDeliveries, setMyDeliveries }: {
                                         </Dropdown.Toggle>
 
                                         <Dropdown.Menu>
-                                            <Dropdown.Item onClick={() => setShowModal(true)} className="text-danger">
+                                            <Dropdown.Item onClick={() => setDeliveryToDelete(delivery.id)} 
+                                                className="text-danger">
                                                 Delete Delivery
                                             </Dropdown.Item>
                                         </Dropdown.Menu>
@@ -247,20 +250,20 @@ export default function MyDeliveries({ myDeliveries, setMyDeliveries }: {
 
                                 {/*Modal to confirm delete delivery*/}
                                 <>
-                                    <Modal show={showModal} onHide={() => setShowModal(false)} centered size="lg">
+                                    <Modal show={deliveryToDelete !== -1} 
+                                        onHide={() => setDeliveryToDelete(-1)} centered size="lg">
                                         <Modal.Header closeButton>
                                             <Modal.Title>Confirm Deletion</Modal.Title>
                                         </Modal.Header>
                                         <Modal.Body>Are you sure you want to delete this delivery?</Modal.Body>
                                         <Modal.Footer>
-                                            <Button variant="secondary" onClick={() => setShowModal(false)}>
+                                            <Button variant="secondary" onClick={() => setDeliveryToDelete(-1)}>
                                                 Cancel
                                             </Button>
                                             <Button
                                                 variant="danger"
                                                 onClick={() => {
-                                                    deleteDelivery(delivery.id);
-                                                    setShowModal(false);
+                                                    deleteDelivery(deliveryToDelete);
                                                 }}
                                             >
                                                 Delete
