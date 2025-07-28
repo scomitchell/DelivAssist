@@ -116,7 +116,7 @@ export default function Deliveries() {
                                     <FormControl
                                         type="number"
                                         step="0.01"
-                                        min="1.00"
+                                        min="0.01"
                                         placeholder="Mileage"
                                         onChange={(e) => setDelivery({ ...delivery, mileage: e.target.value })}
                                     />
