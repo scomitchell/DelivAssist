@@ -197,6 +197,37 @@ namespace DelivAssist.Controllers
             _context.ShiftDeliveries.RemoveRange(deliveriesToRemove);
             await _context.SaveChangesAsync();
 
+
+            // Add deliveries if updated time or app matches an existing delivery
+            var matchingUserDeliveries = await _context.UserDeliveries
+                .Include(ud => ud.Delivery)
+                .Where(ud =>
+                    ud.UserId == userId &&
+                    ud.Delivery.App == targetShift.App &&
+                    ud.Delivery.DeliveryTime >= targetShift.StartTime &&
+                    ud.Delivery.DeliveryTime <= targetShift.EndTime
+                )
+                .ToListAsync();
+
+            var existingDeliveryIds = await _context.ShiftDeliveries
+                .Where(sd => sd.UserId == userId && sd.ShiftId == targetShift.Id)
+                .Select(sd => sd.DeliveryId)
+                .ToListAsync();
+
+            var newShiftDeliveries = matchingUserDeliveries
+                .Where(ud => !existingDeliveryIds.Contains(ud.DeliveryId))
+                .Select(ud => new ShiftDelivery {
+                    UserId = userId,
+                    ShiftId = targetShift.Id,
+                    DeliveryId = ud.DeliveryId
+                })
+                .ToList();
+
+            _context.ShiftDeliveries.AddRange(newShiftDeliveries);
+            await _context.SaveChangesAsync();
+
+
+            // Response
             var responseShift = new {
                 targetShift.Id,
                 targetShift.StartTime,

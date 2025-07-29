@@ -150,6 +150,39 @@ namespace DelivAssist.Controllers
 
             return Ok("Expense Deleted");
         }
+
+        [HttpPut]
+        public async Task<IActionResult> UpdateExpense([FromBody] Expense expense) {
+            var userId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier));
+
+            var existingExpense = await _context.UserExpenses
+                .Where(ue => ue.UserId == userId && ue.ExpenseId == expense.Id)
+                .Include(ue => ue.Expense)
+                .FirstOrDefaultAsync();
+
+            if (existingExpense == null) {
+                return BadRequest("Expense does not exist");
+            }
+
+            var targetExpense = existingExpense.Expense;
+
+            targetExpense.Amount = expense.Amount;
+            targetExpense.Date = expense.Date;
+            targetExpense.Type = expense.Type;
+            targetExpense.Notes = expense.Notes;
+
+            _context.Expenses.Update(targetExpense);
+            await _context.SaveChangesAsync();
+
+            var responseExpense = new {
+                targetExpense.Amount,
+                targetExpense.Date,
+                targetExpense.Type,
+                targetExpense.Notes
+            };
+
+            return Ok(responseExpense);
+        }
     }
 
 }
