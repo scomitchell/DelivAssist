@@ -82,3 +82,15 @@ export const findExpenseTypes = async () => {
 
     return response.data;
 }
+
+export const UpdateUserExpense = async (expense: any) => {
+    const token = localStorage.getItem("token");
+
+    const response = await axiosWithCredentials.put(`${EXPENSES_API}`, expense, {
+        headers: {
+            Authorization: `Bearer ${token}`
+        }
+    });
+
+    return response.data;
+}

@@ -22,6 +22,7 @@ export default function MyExpenses({myExpenses, setMyExpenses} : {
     const [types, setTypes] = useState<any>([]);
 
     const [expenseToDelete, setExpenseToDelete] = useState(-1);
+    const [expenseToUpdate, setExpenseToUpdate] = useState<any | null>(null);
 
     // Fetch filtered or all expenses from db
     const fetchExpenses = async () => {
@@ -60,6 +61,12 @@ export default function MyExpenses({myExpenses, setMyExpenses} : {
         await client.deleteExpense(expenseId);
         fetchExpenses();
         setExpenseToDelete(-1);
+    }
+
+    const updateExpense = async () => {
+        await client.UpdateUserExpense(expenseToUpdate);
+        fetchExpenses();
+        setExpenseToUpdate(null);
     }
 
     // Show DateTime as date
@@ -172,6 +179,10 @@ export default function MyExpenses({myExpenses, setMyExpenses} : {
                                                 className="text-danger">
                                                 Delete Expense
                                             </Dropdown.Item>
+                                            <Dropdown.Item onClick={() => setExpenseToUpdate(expense)}
+                                                className="text-warning">
+                                                Update Expense
+                                            </Dropdown.Item>
                                         </Dropdown.Menu>
                                     </Dropdown>
                                 </div>
@@ -203,6 +214,60 @@ export default function MyExpenses({myExpenses, setMyExpenses} : {
                                                 Delete
                                             </Button>
                                         </Modal.Footer>
+                                    </Modal>
+
+                                    <Modal show={expenseToUpdate !== null} onHide={() => setExpenseToUpdate(null)} centered size="lg">
+                                        <Modal.Header closeButton>
+                                            <Modal.Title>Update Expense</Modal.Title>
+                                        </Modal.Header>
+                                        <Modal.Body>
+                                            <div id="add-expense-details">
+                                                <FormGroup as={Row} className="d-flex align-items-center mb-2">
+                                                    <FormLabel column sm={4} className="me-3">Expense Amount</FormLabel>
+                                                    <Col sm={7}>
+                                                        <FormControl 
+                                                            type="number"
+                                                            min="0.01"
+                                                            step="0.01"
+                                                            placeholder="Expense Amount"
+                                                            onChange={(e) => setExpenseToUpdate({...expenseToUpdate, amount: e.target.value})}
+                                                        />
+                                                    </Col>
+                                                </FormGroup>
+                                                <FormGroup as={Row} className="d-flex align-items-center mb-2">
+                                                    <FormLabel column sm={4} className="me-3">Date</FormLabel>
+                                                    <Col sm={7}>
+                                                        <FormControl
+                                                            type="date"
+                                                            onChange={(e) => setExpenseToUpdate({ ...expenseToUpdate, date: e.target.value })}
+                                                        />
+                                                    </Col>
+                                                </FormGroup>
+                                                <FormGroup as={Row} className="d-flex align-items-center mb-2">
+                                                    <FormLabel column sm={4} className="me-3">Expense Type</FormLabel>
+                                                    <Col sm={7}>
+                                                        <FormControl 
+                                                            type="text"
+                                                            placeholder="Expense Type"
+                                                            onChange={(e) => setExpenseToUpdate({...expenseToUpdate, type: e.target.value})}
+                                                        />
+                                                    </Col>
+                                                </FormGroup>
+                                                <FormGroup as={Row} className="d-flex align-items-center mb-2">
+                                                    <FormLabel column sm={4} className="me-3">Expense Notes</FormLabel>
+                                                    <Col sm={7}>
+                                                        <FormControl 
+                                                            type="text"
+                                                            placeholder="Expense Notes"
+                                                            onChange={(e) => setExpenseToUpdate({...expenseToUpdate, notes: e.target.value})}
+                                                        />
+                                                    </Col>
+                                                </FormGroup>
+                                                <Button onClick={updateExpense} className="btn btn-primary">
+                                                    Update Expense
+                                                </Button>
+                                            </div>
+                                        </Modal.Body>
                                     </Modal>
                                 </>
                             </Card.Body>
