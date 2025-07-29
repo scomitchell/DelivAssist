@@ -97,3 +97,15 @@ export const deleteUserDelivery = async (deliveryId: number) => {
 
     return response.data;
 }
+
+export const updateUserDelivery = async (delivery: any) => {
+    const token = localStorage.getItem("token");
+
+    const response = await axiosWithCredentials.put(`${DELIVERIES_API}`, delivery, {
+        headers: {
+            Authorization: `Bearer ${token}`
+        }
+    });
+
+    return response.data;
+}

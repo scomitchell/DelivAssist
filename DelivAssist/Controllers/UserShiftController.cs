@@ -161,5 +161,50 @@ namespace DelivAssist.Controllers
 
             return Ok("Shift Deleted");
         }
+
+        [HttpPut]
+        public async Task<IActionResult> UpdateShift([FromBody] Shift shift) {
+            var userId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier));
+
+            var existingShift = await _context.UserShifts
+                .Where(us => us.UserId == userId && us.ShiftId == shift.Id)
+                .Include(us => us.Shift)
+                .FirstOrDefaultAsync();
+
+            if (existingShift == null) {
+                return BadRequest("Shift does not exist");
+            }
+
+            var targetShift = existingShift.Shift;
+
+            targetShift.StartTime = shift.StartTime;
+            targetShift.EndTime = shift.EndTime;
+            targetShift.App = shift.App;
+
+            _context.Shifts.Update(targetShift);
+            await _context.SaveChangesAsync();
+
+
+            // Remove deliveries if app or time no longer matches after update
+            var deliveriesToRemove = await _context.ShiftDeliveries
+                .Where(sd =>
+                    sd.UserId == userId && sd.ShiftId == targetShift.Id &&
+                    (sd.Delivery.DeliveryTime < targetShift.StartTime || sd.Delivery.DeliveryTime > targetShift.EndTime
+                        || sd.Delivery.App != targetShift.App)
+                )
+                .ToListAsync();
+
+            _context.ShiftDeliveries.RemoveRange(deliveriesToRemove);
+            await _context.SaveChangesAsync();
+
+            var responseShift = new {
+                targetShift.Id,
+                targetShift.StartTime,
+                targetShift.EndTime,
+                targetShift.App
+            };
+
+            return Ok(responseShift);
+        }
     }
 }

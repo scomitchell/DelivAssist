@@ -30,6 +30,7 @@ export default function MyShifts({ myShifts, setMyShifts }: {
 
     // Delete
     const [shiftToDelete, setShiftToDelete] = useState(-1);
+    const [shiftToUpdate, setShiftToUpdate] = useState<any | null>(null);
     
     // Fetch all or fitered shifts
     const fetchShifts = async () => {
@@ -88,6 +89,13 @@ export default function MyShifts({ myShifts, setMyShifts }: {
         await client.deleteUserShift(shiftId);
         fetchShifts();
         setShiftToDelete(-1);
+    }
+
+    // Update shift in db
+    const updateShift = async () => {
+        await client.updateUserShift(shiftToUpdate);
+        fetchShifts();
+        setShiftToUpdate(null);
     }
 
     // Fetch list of user used apps
@@ -211,8 +219,15 @@ export default function MyShifts({ myShifts, setMyShifts }: {
                                                 e.preventDefault();
                                                 openAddDelivery(shift.id);
                                             }} 
-                                                className="text-warning">
+                                                className="text-primary">
                                                 Add Deliveries to Shift
+                                            </Dropdown.Item>
+                                            <Dropdown.Item onClick={(e) => {
+                                                e.preventDefault();
+                                                setShiftToUpdate(shift);
+                                            }}
+                                                className="text-warning">
+                                                Update Shift
                                             </Dropdown.Item>
                                         </Dropdown.Menu>
                                     </Dropdown>
@@ -248,6 +263,50 @@ export default function MyShifts({ myShifts, setMyShifts }: {
                                                 Delete
                                             </Button>
                                         </Modal.Footer>
+                                    </Modal>
+
+                                    <Modal show={shiftToUpdate !== null} onHide={() => setShiftToUpdate(null)} centered size="lg">
+                                        <Modal.Header closeButton>
+                                            <Modal.Title>Update Delivery</Modal.Title>
+                                        </Modal.Header>
+                                        <Modal.Body>
+                                            <div id="add-shift-details">
+                                                <FormGroup as={Row} className="d-flex align-items-center mb-2">
+                                                    <FormLabel column sm={4} className="me-3">Start Time</FormLabel>
+                                                    <Col sm={7}>
+                                                        <FormControl
+                                                            type="datetime-local"
+                                                            onChange={(e) => setShiftToUpdate({ ...shiftToUpdate, startTime: e.target.value })}
+                                                        />
+                                                    </Col>
+                                                </FormGroup>
+                                                <FormGroup as={Row} className="d-flex align-items-center mb-2">
+                                                    <FormLabel column sm={4} className="me-3">End Time</FormLabel>
+                                                    <Col sm={7}>
+                                                        <FormControl
+                                                            type="datetime-local"
+                                                            onChange={(e) => setShiftToUpdate({ ...shiftToUpdate, endTime: e.target.value })}
+                                                        />
+                                                    </Col>
+                                                </FormGroup>
+                                                <FormGroup as={Row} className="d-flex align-items-center mb-2">
+                                                    <FormLabel column sm={4} className="me-3">App</FormLabel>
+                                                    <Col sm={7}>
+                                                        <select onChange={(e) => setShiftToUpdate({ ...shiftToUpdate, app: e.target.value })}
+                                                            className="form-control mb-2" id="da-app">
+                                                            <option value=""></option>
+                                                            <option value="Doordash">Doordash</option>
+                                                            <option value="UberEats">Uber Eats</option>
+                                                            <option value="Grubhub">Grubhub</option>
+                                                            <option value="Instacart">Instacart</option>
+                                                        </select>
+                                                    </Col>
+                                                </FormGroup>
+                                                <Button onClick={updateShift} className="btn btn-primary">
+                                                    Update Shift
+                                                </Button>
+                                            </div>
+                                        </Modal.Body>
                                     </Modal>
 
                                     <Modal show={showSDModal} onHide={() => setShowSDModal(false)} centered size="lg">
