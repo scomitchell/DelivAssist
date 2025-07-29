@@ -107,3 +107,15 @@ export const findDeliveriesForShift = async (shiftId: number) => {
 
     return response.data;
 }
+
+export const updateUserShift = async (shift: any) => {
+    const token = localStorage.getItem("token");
+
+    const response = await axiosWithCredentials.put(`${SHIFTS_API}`, shift, {
+        headers: {
+            Authorization: `Bearer ${token}`
+        }
+    });
+
+    return response.data;
+}

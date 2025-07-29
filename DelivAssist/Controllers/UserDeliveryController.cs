@@ -274,5 +274,49 @@ namespace DelivAssist.Controllers
 
             return Ok("Delivery removed");
         }
+
+        [HttpPut]
+        public async Task<IActionResult> UpdateDelivery([FromBody] Delivery delivery) {
+            var userId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier));
+
+            var existingDelivery = await _context.UserDeliveries
+                .Where(ud => ud.UserId == userId && ud.Delivery.Id == delivery.Id)
+                .Include(ud => ud.Delivery)
+                .FirstOrDefaultAsync();
+
+            if (existingDelivery == null) {
+                return BadRequest("Delivery does not exist");
+            }
+
+            var targetDelivery = existingDelivery.Delivery;
+
+            targetDelivery.App = delivery.App;
+            targetDelivery.TotalPay = delivery.TotalPay;
+            targetDelivery.TipPay = delivery.TipPay;
+            targetDelivery.BasePay = delivery.BasePay;
+            targetDelivery.Mileage = delivery.Mileage;
+            targetDelivery.Restaurant = delivery.Restaurant;
+            targetDelivery.CustomerNeighborhood = delivery.CustomerNeighborhood;
+            targetDelivery.DeliveryTime = delivery.DeliveryTime;
+            targetDelivery.Notes = delivery.Notes;
+
+            _context.Deliveries.Update(targetDelivery);
+            await _context.SaveChangesAsync();
+
+            var responseDelivery = new {
+                targetDelivery.Id,
+                targetDelivery.App,
+                targetDelivery.TotalPay,
+                targetDelivery.TipPay,
+                targetDelivery.BasePay,
+                targetDelivery.Mileage,
+                targetDelivery.Restaurant,
+                targetDelivery.CustomerNeighborhood,
+                targetDelivery.DeliveryTime,
+                targetDelivery.Notes
+            };
+
+            return Ok(responseDelivery);
+        }
     }
 }
