@@ -267,7 +267,7 @@ export default function MyShifts({ myShifts, setMyShifts }: {
 
                                     <Modal show={shiftToUpdate !== null} onHide={() => setShiftToUpdate(null)} centered size="lg">
                                         <Modal.Header closeButton>
-                                            <Modal.Title>Update Delivery</Modal.Title>
+                                            <Modal.Title>Update Shift</Modal.Title>
                                         </Modal.Header>
                                         <Modal.Body>
                                             <div id="add-shift-details">
