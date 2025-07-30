@@ -307,5 +307,71 @@ namespace DelivAssist.Controllers
 
             return Ok(result.App);
         }
+
+        [HttpGet("deliveries/restaurant-with-most-deliveries")]
+        public async Task<IActionResult> GetRestaurantWithMostDeliveries() {
+            var userId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier));
+
+            var result = await _context.UserDeliveries
+                .Where(ud => ud.UserId == userId)
+                .GroupBy(ud => ud.Delivery.Restaurant)
+                .Select(g => new {
+                    Restaurant = g.Key,
+                    OrderCount = g.Count()
+                })
+                .OrderByDescending(g => g.OrderCount)
+                .FirstOrDefaultAsync();
+
+            if (result == null) {
+                return NotFound("No deliveries found");
+            }
+
+            return Ok(new {
+                restaurant = result.Restaurant,
+                orderCount = result.OrderCount
+            });
+        }
+
+        [HttpGet("deliveries/tip-per-mile")]
+        public async Task<IActionResult> GetTipPerMile()
+        {
+            var userId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier));
+
+            var miles = await _context.UserDeliveries
+                .Where(ud => ud.UserId == userId)
+                .SumAsync(ud => ud.Delivery.Mileage);
+
+            var tipPay = await _context.UserDeliveries
+                .Where(ud => ud.UserId == userId)
+                .SumAsync(ud => ud.Delivery.TipPay);
+
+            if (miles == 0 || tipPay == 0)
+            {
+                return Ok(0);
+            }
+
+            var result = tipPay / miles;
+
+            return Ok(result);
+        }
+
+        [HttpGet("shifts/average-num-deliveries")]
+        public async Task<IActionResult> GetAverageDeliveriesPerShift() {
+            var userId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier));
+
+            var shiftDeliveryCounts = await _context.ShiftDeliveries
+                .Where(sd => sd.UserId == userId)
+                .GroupBy(sd => sd.ShiftId)
+                .Select(g => g.Count())
+                .ToListAsync();
+
+            if (!shiftDeliveryCounts.Any()) {
+                return Ok(0);
+            }
+
+            var average = shiftDeliveryCounts.Average();
+
+            return Ok(average);
+        }
     }
 }

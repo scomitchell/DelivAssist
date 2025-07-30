@@ -147,3 +147,39 @@ export const findAppWithMostShifts = async () => {
 
     return response.data;
 }
+
+export const findRestaurantWithMostDeliveries = async () => {
+    const token = localStorage.getItem("token");
+
+    const response = await axiosWithCredentials.get(`${STATISTICS_API}/deliveries/restaurant-with-most-deliveries`, {
+        headers: {
+            Authorization: `Bearer ${token}`
+        }
+    });
+
+    return response.data;
+}
+
+export const findAverageTipPerMile = async () => {
+    const token = localStorage.getItem("token");
+
+    const response = await axiosWithCredentials.get(`${STATISTICS_API}/deliveries/tip-per-mile`, {
+        headers: {
+            Authorization: `Bearer ${token}`
+        }
+    });
+
+    return response.data;
+}
+
+export const findAverageDeliveriesPerShift = async () => {
+    const token = localStorage.getItem("token");
+
+    const response = await axiosWithCredentials.get(`${STATISTICS_API}/shifts/average-num-deliveries`, {
+        headers: {
+            Authorization: `Bearer ${token}`
+        }
+    });
+
+    return response.data;
+}
