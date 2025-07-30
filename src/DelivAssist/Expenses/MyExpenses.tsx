@@ -191,6 +191,7 @@ export default function MyExpenses({myExpenses, setMyExpenses} : {
                                 <Card.Text>
                                     <strong>Date:</strong> {formatTime(expense.date)} {" "} <br />
                                     <strong>Type:</strong> {expense.type} {" "} <br />
+                                    <strong>Notes:</strong> {expense.notes} {" "} <br />
                                 </Card.Text>
 
                                 {/*Modal to confirm expense deletion*/}
@@ -221,6 +222,7 @@ export default function MyExpenses({myExpenses, setMyExpenses} : {
                                             <Modal.Title>Update Expense</Modal.Title>
                                         </Modal.Header>
                                         <Modal.Body>
+                                            {expenseToUpdate &&
                                             <div id="add-expense-details">
                                                 <FormGroup as={Row} className="d-flex align-items-center mb-2">
                                                     <FormLabel column sm={4} className="me-3">Expense Amount</FormLabel>
@@ -230,6 +232,7 @@ export default function MyExpenses({myExpenses, setMyExpenses} : {
                                                             min="0.01"
                                                             step="0.01"
                                                             placeholder="Expense Amount"
+                                                            defaultValue={expenseToUpdate.amount}
                                                             onChange={(e) => setExpenseToUpdate({...expenseToUpdate, amount: e.target.value})}
                                                         />
                                                     </Col>
@@ -239,6 +242,7 @@ export default function MyExpenses({myExpenses, setMyExpenses} : {
                                                     <Col sm={7}>
                                                         <FormControl
                                                             type="date"
+                                                            defaultValue={expenseToUpdate.date ? new Date(expenseToUpdate.date).toISOString().split('T')[0] : ''}
                                                             onChange={(e) => setExpenseToUpdate({ ...expenseToUpdate, date: e.target.value })}
                                                         />
                                                     </Col>
@@ -249,6 +253,7 @@ export default function MyExpenses({myExpenses, setMyExpenses} : {
                                                         <FormControl 
                                                             type="text"
                                                             placeholder="Expense Type"
+                                                            defaultValue={expenseToUpdate.type}
                                                             onChange={(e) => setExpenseToUpdate({...expenseToUpdate, type: e.target.value})}
                                                         />
                                                     </Col>
@@ -259,6 +264,7 @@ export default function MyExpenses({myExpenses, setMyExpenses} : {
                                                         <FormControl 
                                                             type="text"
                                                             placeholder="Expense Notes"
+                                                            defaultValue={expenseToUpdate.notes}
                                                             onChange={(e) => setExpenseToUpdate({...expenseToUpdate, notes: e.target.value})}
                                                         />
                                                     </Col>
@@ -267,6 +273,7 @@ export default function MyExpenses({myExpenses, setMyExpenses} : {
                                                     Update Expense
                                                 </Button>
                                             </div>
+                                            }
                                         </Modal.Body>
                                     </Modal>
                                 </>

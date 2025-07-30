@@ -270,12 +270,14 @@ export default function MyShifts({ myShifts, setMyShifts }: {
                                             <Modal.Title>Update Shift</Modal.Title>
                                         </Modal.Header>
                                         <Modal.Body>
+                                            {shiftToUpdate &&
                                             <div id="add-shift-details">
                                                 <FormGroup as={Row} className="d-flex align-items-center mb-2">
                                                     <FormLabel column sm={4} className="me-3">Start Time</FormLabel>
                                                     <Col sm={7}>
                                                         <FormControl
                                                             type="datetime-local"
+                                                            defaultValue={shiftToUpdate.startTime}
                                                             onChange={(e) => setShiftToUpdate({ ...shiftToUpdate, startTime: e.target.value })}
                                                         />
                                                     </Col>
@@ -285,6 +287,7 @@ export default function MyShifts({ myShifts, setMyShifts }: {
                                                     <Col sm={7}>
                                                         <FormControl
                                                             type="datetime-local"
+                                                            defaultValue={shiftToUpdate.endTime}
                                                             onChange={(e) => setShiftToUpdate({ ...shiftToUpdate, endTime: e.target.value })}
                                                         />
                                                     </Col>
@@ -293,7 +296,9 @@ export default function MyShifts({ myShifts, setMyShifts }: {
                                                     <FormLabel column sm={4} className="me-3">App</FormLabel>
                                                     <Col sm={7}>
                                                         <select onChange={(e) => setShiftToUpdate({ ...shiftToUpdate, app: e.target.value })}
-                                                            className="form-control mb-2" id="da-app">
+                                                            className="form-control mb-2" 
+                                                            defaultValue={shiftToUpdate.app}
+                                                            id="da-app">
                                                             <option value=""></option>
                                                             <option value="Doordash">Doordash</option>
                                                             <option value="UberEats">Uber Eats</option>
@@ -306,6 +311,7 @@ export default function MyShifts({ myShifts, setMyShifts }: {
                                                     Update Shift
                                                 </Button>
                                             </div>
+                                            }
                                         </Modal.Body>
                                     </Modal>
 
