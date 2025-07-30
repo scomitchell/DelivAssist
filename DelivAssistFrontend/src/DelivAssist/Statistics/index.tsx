@@ -13,10 +13,12 @@ export default function Statistics() {
     const [averageBase, setAverageBase] = useState(0);
     const [averageTip, setAverageTip] = useState(0);
     const [avgDollarPerMile, setAvgDollarPerMile] = useState(0);
+    const [avgTipPerMile, setAvgTipPerMile] = useState(0);
 
     // Location Statistics
     const [neighborhood, setNeighborhood] = useState({ neighborhood: "", averageTipPay: 0 });
     const [restaurant, setRestaurant] = useState({ restaurant: "", avgTotalPay: 0 });
+    const [restaurantWithMost, setRestaurantWithMost] = useState({restaurant: "", orderCount: 0});
 
     // App statistics
     const [baseApp, setBaseApp] = useState({ app: "", avgBase: 0 });
@@ -29,6 +31,7 @@ export default function Statistics() {
     // Shift statistics
     const [averageShiftLength, setAverageShiftLength] = useState<number | null>(null);
     const [appWithMostShifts, setAppWithMostShifts] = useState<string | null>(null);
+    const [avgDeliveriesPerShift, setAvgDeliveriesPerShift] = useState(0);
 
     // Loading
     const [loading, setLoading] = useState(true);
@@ -42,27 +45,33 @@ export default function Statistics() {
             const avgBase = await client.findAvgBasePay();
             const avgTip = await client.findAvgTipPay();
             const dollarPerMile = await client.findDollarPerMile();
+            const tipPerMile = await client.findAverageTipPerMile();
 
             setAveragePay(avgPay ?? 0);
             setAverageBase(avgBase ?? 0);
             setAverageTip(avgTip ?? 0);
             setAvgDollarPerMile(dollarPerMile ?? 0);
+            setAvgTipPerMile(tipPerMile ?? 0);
         } catch {
             setAveragePay(0)
             setAverageBase(0)
             setAverageTip(0);
             setAvgDollarPerMile(0);
+            setAvgTipPerMile(0);
         }
 
         try {
             const bestNeighborhood = await client.findHighestPayingNeighborhood();
             const bestRestaurant = await client.findHighestPayingRestaurant();
+            const restaurantWithMostOrders = await client.findRestaurantWithMostDeliveries();
 
             setNeighborhood(bestNeighborhood ?? {neighborhood: "N/A", averageTipPay: 0});
             setRestaurant(bestRestaurant ?? {restaurant: "N/A", avgTotalPay: 0});
+            setRestaurantWithMost(restaurantWithMostOrders ?? {restaurant: "N/A", orderCount: 0});
         } catch {
             setNeighborhood({neighborhood: "N/A", averageTipPay: 0});
             setRestaurant({restaurant: "N/A", avgTotalPay: 0});
+            setRestaurantWithMost({restaurant: "N/A", orderCount: 0});
         }
 
         try {
@@ -90,12 +99,15 @@ export default function Statistics() {
         try {
             const averageUserShiftLength = await client.findAverageShiftLength();
             const appWithMostUserShifts = await client.findAppWithMostShifts();
+            const avgOrdersPerShift = await client.findAverageDeliveriesPerShift();
 
             setAverageShiftLength(averageUserShiftLength);
             setAppWithMostShifts(appWithMostUserShifts);
+            setAvgDeliveriesPerShift(avgOrdersPerShift);
         } catch {
             setAverageShiftLength(0);
             setAppWithMostShifts("N/A");
+            setAvgDeliveriesPerShift(0);
         }
     }
 
@@ -119,15 +131,17 @@ export default function Statistics() {
                                         <div>
                                             <p><strong>Average total pay:</strong> Loading...</p> <br />
                                             <p><strong>Average base pay:</strong> Loading...</p> <br/>
-                                            <p><strong>Average tip pay:</strong> Loading...</p> <br />
+                                            <p><strong>Average tip pay:</strong> Loading...</p> <br /> <br />
                                             <p><strong>Average dollar/mile:</strong> Loading...</p> <br />
+                                            <p><strong>Average tip/mile:</strong> Loading...</p> <br />
                                         </div>
                                         :
                                         <div>
                                             <strong>Average total pay:</strong> ${averagePay.toFixed(2)} <br />
                                             <strong>Average base pay:</strong> ${averageBase.toFixed(2)} <br/>
-                                            <strong>Average tip pay:</strong> ${averageTip.toFixed(2)} <br />
+                                            <strong>Average tip pay:</strong> ${averageTip.toFixed(2)} <br /> <br />
                                             <strong>Average dollar/mile:</strong> ${avgDollarPerMile.toFixed(2)} <br />
+                                            <strong>Average tip/mile</strong> ${avgTipPerMile.toFixed(2)} <br />
                                         </div>
                                     }
                                 </Card.Text>
@@ -141,13 +155,17 @@ export default function Statistics() {
                             <Card.Body style={{ padding: '0.25rem' }}>
                                 <Card.Title className="fw-bold">Location Statistics</Card.Title>
                                 <Card.Text>
-                                    <strong>Best neighborhood:</strong> {neighborhood.neighborhood} <br />
+                                    <strong>Best tip neighborhood:</strong> {neighborhood.neighborhood} <br />
                                     <span style={{ marginLeft: "1rem" }}>
                                         <strong>- Average Tip:</strong> ${neighborhood.averageTipPay.toFixed(2)}
                                     </span> <br />
-                                    <strong>Best restaurant:</strong> {restaurant.restaurant} <br />
+                                    <strong>Best paying restaurant:</strong> {restaurant.restaurant} <br />
                                     <span style={{ marginLeft: "1rem" }}>
-                                        <strong>- Average Total:</strong> ${restaurant.avgTotalPay.toFixed(2)}
+                                        <strong>- Average Total:</strong> ${restaurant.avgTotalPay.toFixed(2)} <br />
+                                    </span>
+                                    <strong>Restaurant with most orders:</strong> {restaurantWithMost.restaurant} <br />
+                                    <span style={{marginLeft:"1rem"}}>
+                                        <strong>- Number of Orders:</strong> {restaurantWithMost.orderCount}
                                     </span>
                                 </Card.Text>
                             </Card.Body>
@@ -200,6 +218,7 @@ export default function Statistics() {
                                 <Card.Title className="fw-bold">Shift Statistics</Card.Title>
                                 <Card.Text>
                                     <strong>Average shift length:</strong> {averageShiftLength} minutes <br />
+                                    <strong>Average number of deliveries per shift:</strong> {Math.floor(avgDeliveriesPerShift)} <br />
                                     <strong>App with most shifts:</strong> {appWithMostShifts} <br />
                                 </Card.Text>
                             </Card.Body>
