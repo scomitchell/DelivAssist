@@ -37,12 +37,13 @@ namespace DelivAssist.Controllers
             _context.UserExpenses.Add(userExpense);
             await _context.SaveChangesAsync();
 
-            return Ok(new
+            return Ok(new ExpenseDto
             {
-                expense.Amount,
-                expense.Date,
-                expense.Type,
-                expense.Notes
+                Id = expense.Id,
+                Amount = expense.Amount,
+                Date = expense.Date,
+                Type = expense.Type,
+                Notes = expense.Notes
             });
         }
 
@@ -54,13 +55,13 @@ namespace DelivAssist.Controllers
             var userExpenses = await _context.UserExpenses
                 .Where(ue => ue.UserId == userId)
                 .Include(ue => ue.Expense)
-                .Select(ue => new
+                .Select(ue => new ExpenseDto
                 {
-                    ue.Expense.Id,
-                    ue.Expense.Amount,
-                    ue.Expense.Date,
-                    ue.Expense.Type,
-                    ue.Expense.Notes
+                    Id = ue.Expense.Id,
+                    Amount = ue.Expense.Amount,
+                    Date = ue.Expense.Date,
+                    Type = ue.Expense.Type,
+                    Notes = ue.Expense.Notes
                 })
                 .ToListAsync();
 
@@ -92,11 +93,11 @@ namespace DelivAssist.Controllers
             }
 
             var userExpenses = await userExpensesQuery
-                .Select(ue => new {
-                    ue.Expense.Id,
-                    ue.Expense.Amount,
-                    ue.Expense.Date,
-                    ue.Expense.Type
+                .Select(ue => new ExpenseDto {
+                    Id = ue.Expense.Id,
+                    Amount = ue.Expense.Amount,
+                    Date = ue.Expense.Date,
+                    Type = ue.Expense.Type
                 })
                 .ToListAsync();
 
@@ -148,6 +149,13 @@ namespace DelivAssist.Controllers
             _context.UserExpenses.Remove(userExpense);
             await _context.SaveChangesAsync();
 
+            var expense = await _context.Expenses.FindAsync(expenseId);
+            if (expense != null) 
+            {
+                _context.Expenses.Remove(expense);
+                await _context.SaveChangesAsync();
+            }
+
             return Ok("Expense Deleted");
         }
 
@@ -174,11 +182,12 @@ namespace DelivAssist.Controllers
             _context.Expenses.Update(targetExpense);
             await _context.SaveChangesAsync();
 
-            var responseExpense = new {
-                targetExpense.Amount,
-                targetExpense.Date,
-                targetExpense.Type,
-                targetExpense.Notes
+            var responseExpense = new ExpenseDto {
+                Id = targetExpense.Id,
+                Amount = targetExpense.Amount,
+                Date = targetExpense.Date,
+                Type = targetExpense.Type,
+                Notes = targetExpense.Notes
             };
 
             return Ok(responseExpense);

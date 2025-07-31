@@ -160,7 +160,8 @@ namespace DelivAssist.Controllers
             await _context.SaveChangesAsync();
 
             var shift = await _context.Shifts.FindAsync(shiftId);
-            if (shift != null) {
+            if (shift != null) 
+            {
                 _context.Shifts.Remove(shift);
                 await _context.SaveChangesAsync();
             }
