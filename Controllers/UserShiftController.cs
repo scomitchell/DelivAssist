@@ -53,12 +53,12 @@ namespace DelivAssist.Controllers
             var userShifts = await _context.UserShifts
                 .Where(us => us.UserId == userId)
                 .Include(us => us.Shift)
-                .Select(us => new
+                .Select(us => new ShiftDto
                 {
-                    us.Shift.Id,
-                    us.Shift.StartTime,
-                    us.Shift.EndTime,
-                    us.Shift.App
+                    Id = us.Shift.Id,
+                    StartTime = us.Shift.StartTime,
+                    EndTime = us.Shift.EndTime,
+                    App = us.Shift.App
                 })
                 .ToListAsync();
 
@@ -107,12 +107,12 @@ namespace DelivAssist.Controllers
             }
 
             var userShifts = await userShiftsQuery
-                .Select(us => new
+                .Select(us => new ShiftDto
                 {
-                    us.Shift.Id,
-                    us.Shift.StartTime,
-                    us.Shift.EndTime,
-                    us.Shift.App
+                    Id = us.Shift.Id,
+                    StartTime = us.Shift.StartTime,
+                    EndTime = us.Shift.EndTime,
+                    App = us.Shift.App
                 })
                 .ToListAsync();
 
@@ -133,7 +133,7 @@ namespace DelivAssist.Controllers
                 return NotFound("Shift not found");
             }
 
-            var shift = new {
+            var shift = new ShiftDto {
                 Id = userShift.Shift.Id,
                 App = userShift.Shift.App,
                 StartTime = userShift.Shift.StartTime,
@@ -158,6 +158,12 @@ namespace DelivAssist.Controllers
 
             _context.UserShifts.Remove(userShift);
             await _context.SaveChangesAsync();
+
+            var shift = await _context.Shifts.FindAsync(shiftId);
+            if (shift != null) {
+                _context.Shifts.Remove(shift);
+                await _context.SaveChangesAsync();
+            }
 
             return Ok("Shift Deleted");
         }
@@ -228,11 +234,11 @@ namespace DelivAssist.Controllers
 
 
             // Response
-            var responseShift = new {
-                targetShift.Id,
-                targetShift.StartTime,
-                targetShift.EndTime,
-                targetShift.App
+            var responseShift = new ShiftDto {
+                Id = targetShift.Id,
+                StartTime = targetShift.StartTime,
+                EndTime = targetShift.EndTime,
+                App = targetShift.App
             };
 
             return Ok(responseShift);
