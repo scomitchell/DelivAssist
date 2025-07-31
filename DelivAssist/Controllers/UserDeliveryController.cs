@@ -64,17 +64,18 @@ namespace DelivAssist.Controllers
 
             await _context.SaveChangesAsync();
 
-            return Ok(new
+            return Ok(new DeliveryDto
             {
-                delivery.App,
-                delivery.TotalPay,
-                delivery.BasePay,
-                delivery.TipPay,
-                delivery.Mileage,
-                delivery.CustomerNeighborhood,
-                delivery.Restaurant,
-                delivery.DeliveryTime,
-                delivery.Notes,
+                Id = delivery.Id,
+                App = delivery.App,
+                TotalPay = delivery.TotalPay,
+                BasePay = delivery.BasePay,
+                TipPay = delivery.TipPay,
+                Mileage = delivery.Mileage,
+                CustomerNeighborhood = delivery.CustomerNeighborhood,
+                Restaurant = delivery.Restaurant,
+                DeliveryTime = delivery.DeliveryTime,
+                Notes = delivery.Notes,
             });
         }
 
@@ -86,18 +87,18 @@ namespace DelivAssist.Controllers
             var userDeliveries = await _context.UserDeliveries
                 .Where(ud => ud.UserId == userId)
                 .Include(ud => ud.Delivery)
-                .Select(ud => new
+                .Select(ud => new DeliveryDto
                 {
-                    ud.Delivery.Id,
-                    ud.Delivery.App,
-                    ud.Delivery.DeliveryTime,
-                    ud.Delivery.BasePay,
-                    ud.Delivery.TipPay,
-                    ud.Delivery.TotalPay,
-                    ud.Delivery.Restaurant,
-                    ud.Delivery.CustomerNeighborhood,
-                    ud.Delivery.Mileage,
-                    ud.Delivery.Notes
+                    Id = ud.Delivery.Id,
+                    App = ud.Delivery.App,
+                    DeliveryTime = ud.Delivery.DeliveryTime,
+                    BasePay = ud.Delivery.BasePay,
+                    TipPay = ud.Delivery.TipPay,
+                    TotalPay = ud.Delivery.TotalPay,
+                    Restaurant = ud.Delivery.Restaurant,
+                    CustomerNeighborhood = ud.Delivery.CustomerNeighborhood,
+                    Mileage = ud.Delivery.Mileage,
+                    Notes = ud.Delivery.Notes
                 })
                 .ToListAsync();
 
@@ -181,18 +182,18 @@ namespace DelivAssist.Controllers
             }
 
             var userDeliveries = await userDeliveriesQuery
-                .Select(ud => new
+                .Select(ud => new DeliveryDto
                 {
-                    ud.Delivery.Id,
-                    ud.Delivery.App,
-                    ud.Delivery.DeliveryTime,
-                    ud.Delivery.BasePay,
-                    ud.Delivery.TipPay,
-                    ud.Delivery.TotalPay,
-                    ud.Delivery.Restaurant,
-                    ud.Delivery.CustomerNeighborhood,
-                    ud.Delivery.Mileage,
-                    ud.Delivery.Notes
+                    Id = ud.Delivery.Id,
+                    App = ud.Delivery.App,
+                    DeliveryTime = ud.Delivery.DeliveryTime,
+                    BasePay = ud.Delivery.BasePay,
+                    TipPay = ud.Delivery.TipPay,
+                    TotalPay = ud.Delivery.TotalPay,
+                    Restaurant = ud.Delivery.Restaurant,
+                    CustomerNeighborhood = ud.Delivery.CustomerNeighborhood,
+                    Mileage = ud.Delivery.Mileage,
+                    Notes = ud.Delivery.Notes
                 })
                 .ToListAsync();
 
