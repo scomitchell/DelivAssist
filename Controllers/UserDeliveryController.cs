@@ -273,6 +273,13 @@ namespace DelivAssist.Controllers
                 await _context.SaveChangesAsync();
             }
 
+            var delivery = await _context.Deliveries.FindAsync(deliveryId);
+            if (delivery != null)
+            {
+                _context.Deliveries.Remove(delivery);
+                await _context.SaveChangesAsync();
+            }
+
             return Ok("Delivery removed");
         }
 
