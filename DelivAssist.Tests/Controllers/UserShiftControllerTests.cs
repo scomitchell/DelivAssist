@@ -137,5 +137,38 @@ namespace DelivAssist.Tests.Controllers
             var okResult = Assert.IsType<OkObjectResult>(result);
             Assert.False(_context.Shifts.Any());
         }
+
+        [Fact]
+        public async Task AddShifts_PostsShift()
+        {
+            var shift3 = new Shift
+            {
+                Id = 3,
+                StartTime = DateTime.Now.AddHours(-1),
+                EndTime = DateTime.Now,
+                App = DeliveryApp.Grubhub
+            };
+
+            var result = await _controller.AddShift(shift3);
+
+            var okResult = Assert.IsType<OkObjectResult>(result);
+            var userShift = await _context.UserShifts
+                .FirstOrDefaultAsync(us => us.UserId == 1 && us.ShiftId == shift3.Id);
+
+            Assert.NotNull(userShift);
+        }
+
+        [Fact]
+        public async Task GetShiftById_ReturnsShift()
+        {
+            var result = await _controller.GetShiftById(1);
+            
+            var okResult = Assert.IsType<OkObjectResult>(result);
+            var userShift = Assert.IsAssignableFrom<ShiftDto>(okResult.Value);
+            Assert.Equal(DeliveryApp.UberEats, userShift.App);
+
+            var result2 = await _controller.GetShiftById(2);
+            var notFoundResult = Assert.IsType<NotFoundObjectResult>(result2);
+        }
     }
 }
