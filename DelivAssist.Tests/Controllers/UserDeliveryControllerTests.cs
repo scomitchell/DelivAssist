@@ -12,12 +12,13 @@ using DelivAssist.Data;
 
 namespace DelivAssist.Tests.Controllers 
 {
-    public class UserDeliveryControllerTests 
+    public class UserDeliveryControllerTests : IDisposable
     {
         private readonly UserDeliveryController _controller;
         private readonly ApplicationDbContext _context;
 
-        public UserDeliveryControllerTests() {
+        public UserDeliveryControllerTests() 
+        {
             var options = new DbContextOptionsBuilder<ApplicationDbContext>()
                 .UseInMemoryDatabase(Guid.NewGuid().ToString())
                 .Options;
@@ -83,6 +84,11 @@ namespace DelivAssist.Tests.Controllers
             }
         }
 
+        public void Dispose()
+        {
+            _context.Dispose();
+        }
+
         [Fact]
         public async Task GetDeliveries_ReturnsUserDeliveries()
         {
@@ -95,7 +101,7 @@ namespace DelivAssist.Tests.Controllers
         }
 
         [Fact]
-        public async Task AddDelivery_AddsTo_ToUserList()
+        public async Task AddDelivery_AddsTo_UserList()
         {
             var delivery2 = new Delivery
             {
@@ -158,6 +164,28 @@ namespace DelivAssist.Tests.Controllers
             Assert.Contains(deliveries, d => (string)d.Restaurant == "YGF Malatang");
             Assert.DoesNotContain(deliveries, d => d.Id == 1);
             Assert.DoesNotContain(deliveries, d => (string)d.Restaurant == "Love Art Sushi");
+        }
+
+        [Fact]
+        public async Task GetDeliveryById_ReturnsDelivery() {
+            var result = await _controller.GetDeliveryById(1);
+
+            var okResult = Assert.IsType<OkObjectResult>(result);
+            var userDelivery = Assert.IsAssignableFrom<UserDelivery>(okResult.Value);
+            Assert.Equal("Love Art Sushi", userDelivery.Delivery.Restaurant);
+
+            var result2 = await _controller.GetDeliveryById(4);
+            Assert.IsType<NotFoundObjectResult>(result2);
+        }
+
+        [Fact]
+        public async Task DeleteDelivery_DeletesDelivery()
+        {
+            Assert.True(_context.Deliveries.Any(d => d.Id == 1));
+            var result = await _controller.DeleteDelivery(1);
+
+            var okResult = Assert.IsType<OkObjectResult>(result);
+            Assert.False(_context.Deliveries.Any());
         }
     }
 }
