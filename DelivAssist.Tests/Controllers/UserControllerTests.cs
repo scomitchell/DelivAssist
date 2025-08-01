@@ -58,6 +58,15 @@ namespace DelivAssist.Tests.Controllers
                     Password = BCrypt.Net.BCrypt.HashPassword("password123")
                 });
 
+                _context.Users.Add(new User { 
+                    Id = 2, 
+                    FirstName="Harry",
+                    LastName="Williams",
+                    Email = "example2@example.com",
+                    Username="hwilliams",
+                    Password = BCrypt.Net.BCrypt.HashPassword("password1234")
+                });
+
                 _context.SaveChanges();
             }
         }
@@ -120,6 +129,51 @@ namespace DelivAssist.Tests.Controllers
 
             var badResult = await _controller.Login(user2);
             var unauthorizedResult = Assert.IsType<UnauthorizedObjectResult>(badResult);
+        }
+
+        [Fact]
+        public async Task UpdateUser_PutsUser()
+        {
+            var user1 = new User 
+            { 
+                Id = 1, 
+                FirstName="John",
+                LastName="Smith",
+                Email = "example@example.com",
+                Username="jsmith"
+            };
+
+            var user2 = new User
+            {
+                Id = 1,
+                FirstName="John",
+                LastName="Smith",
+                Email = "test@example.com",
+                Username = "hwilliams"
+            };
+
+            var goodResult = await _controller.UpdateUser(user1);
+            var okResult = Assert.IsType<OkObjectResult>(goodResult);
+            var user = Assert.IsAssignableFrom<UserDto>(okResult.Value);
+
+            Assert.Equal("example@example.com", user.Email);
+
+            var badResult = await _controller.UpdateUser(user2);
+            var badRequestResult = Assert.IsType<BadRequestObjectResult>(badResult);
+        }
+
+        [Fact]
+        public async Task GetUserByUsername_ReturnsUser()
+        {
+            var result = await _controller.GetUserByUsername("jsmith");
+            var badResult = await _controller.GetUserByUsername("jsmith2");
+
+            var okResult = Assert.IsType<OkObjectResult>(result);
+            var user = Assert.IsAssignableFrom<UserDto>(okResult.Value);
+
+            var notFoundResult = Assert.IsType<NotFoundResult>(badResult);
+
+            Assert.Equal(1, user.Id);
         }
     }
 }
