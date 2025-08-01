@@ -66,17 +66,17 @@ namespace DelivAssist.Controllers {
             var shiftDeliveries = await _context.ShiftDeliveries
                 .Where(sd => sd.UserId == userId && sd.ShiftId == shiftId)
                 .Include(sd => sd.Delivery)
-                .Select(sd => new {
-                    sd.Delivery.Id,
-                    sd.Delivery.App,
-                    sd.Delivery.DeliveryTime,
-                    sd.Delivery.BasePay,
-                    sd.Delivery.TipPay,
-                    sd.Delivery.TotalPay,
-                    sd.Delivery.Mileage,
-                    sd.Delivery.Restaurant,
-                    sd.Delivery.CustomerNeighborhood,
-                    sd.Delivery.Notes
+                .Select(sd => new DeliveryDto {
+                    Id = sd.Delivery.Id,
+                    App = sd.Delivery.App,
+                    DeliveryTime = sd.Delivery.DeliveryTime,
+                    BasePay = sd.Delivery.BasePay,
+                    TipPay = sd.Delivery.TipPay,
+                    TotalPay = sd.Delivery.TotalPay,
+                    Mileage = sd.Delivery.Mileage,
+                    Restaurant = sd.Delivery.Restaurant,
+                    CustomerNeighborhood = sd.Delivery.CustomerNeighborhood,
+                    Notes = sd.Delivery.Notes
                 })
                 .ToListAsync();
 
