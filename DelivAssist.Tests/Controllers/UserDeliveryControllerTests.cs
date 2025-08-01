@@ -187,5 +187,103 @@ namespace DelivAssist.Tests.Controllers
             var okResult = Assert.IsType<OkObjectResult>(result);
             Assert.False(_context.Deliveries.Any());
         }
+
+        [Fact]
+        public async Task GetNeighborhoods_ReturnsNeighborhoods()
+        {
+            var delivery3 = new Delivery
+            {
+                Id = 3,
+                App = DeliveryApp.Grubhub,
+                DeliveryTime = DateTime.Now,
+                BasePay = 2.43,
+                TipPay = 2.00,
+                TotalPay = 4.43,
+                Mileage = 1.4,
+                Restaurant = "Serafina",
+                CustomerNeighborhood = "Mission Hill",
+                Notes = "test3"
+            };
+            _context.Deliveries.Add(delivery3);
+
+            var userDelivery = new UserDelivery
+            {
+                UserId = 1,
+                DeliveryId = delivery3.Id
+            };
+            _context.UserDeliveries.Add(userDelivery);
+
+            await _context.SaveChangesAsync();
+
+            var result = await _controller.GetUserDeliveryNeighborhoods();
+
+            var okResult = Assert.IsType<OkObjectResult>(result);
+            var neighborhoods = Assert.IsAssignableFrom<IEnumerable<string>>(okResult.Value);
+
+            Assert.Contains("Mission Hill", neighborhoods);
+            Assert.Contains("Back Bay", neighborhoods);
+        }
+
+        [Fact]
+        public async Task GetApps_ReturnsApps()
+        {
+            var delivery4 = new Delivery
+            {
+                Id = 4,
+                App = DeliveryApp.Doordash,
+                DeliveryTime = DateTime.Now,
+                BasePay = 2.43,
+                TipPay = 2.00,
+                TotalPay = 4.43,
+                Mileage = 1.4,
+                Restaurant = "El Jefe's",
+                CustomerNeighborhood = "Fenway",
+                Notes = "test4"
+            };
+            _context.Deliveries.Add(delivery4);
+
+            var userDelivery = new UserDelivery
+            {
+                UserId = 1,
+                DeliveryId = delivery4.Id
+            };
+            _context.UserDeliveries.Add(userDelivery);
+
+            await _context.SaveChangesAsync();
+
+            var result = await _controller.GetUserDeliveryApps();
+
+            var okResult = Assert.IsType<OkObjectResult>(result);
+            var apps = Assert.IsAssignableFrom<IEnumerable<DeliveryApp>>(okResult.Value);
+
+            Assert.Contains(DeliveryApp.UberEats, apps);
+            Assert.Contains(DeliveryApp.Doordash, apps);
+        }
+
+        [Fact]
+        public async Task UpdateDelivery_PutsDelivery()
+        {
+            var delivery1 = new Delivery 
+            {
+                Id = 1,
+                App = DeliveryApp.UberEats,
+                DeliveryTime = DateTime.Now,
+                BasePay = 5.0,
+                TipPay = 2.50,
+                TotalPay = 7.50,
+                Mileage = 1.2,
+                Restaurant = "Love Art Sushi",
+                CustomerNeighborhood= "Back Bay",
+                Notes = "test 1"
+            };
+
+            var result = await _controller.UpdateDelivery(delivery1);
+
+            var okResult = Assert.IsType<OkObjectResult>(result);
+            var delivery = Assert.IsAssignableFrom<DeliveryDto>(okResult.Value);
+
+            Assert.Equal(5.0, delivery.BasePay);
+            Assert.Equal(7.50, delivery.TotalPay);
+        }
     }
 }

@@ -107,5 +107,125 @@ namespace DelivAssist.Tests.Controllers
             var okResult = Assert.IsType<OkObjectResult>(result);
             Assert.False(_context.Expenses.Any());
         }
+
+        [Fact]
+        public async Task GetExpenseById_ReturnsExpense()
+        {
+            var result = await _controller.GetExpenseById(1);
+
+            var okResult = Assert.IsType<OkObjectResult>(result);
+            var userExpense = Assert.IsAssignableFrom<UserExpense>(okResult.Value);
+            Assert.Equal(30, userExpense.Expense.Amount);
+
+            var result2 = await _controller.GetExpenseById(2);
+            var notFoundResult = Assert.IsType<NotFoundObjectResult>(result2);
+        }
+
+        [Fact]
+        public async Task GetFilteredExpenses_FiltersExpenses()
+        {
+            Assert.Contains(_context.UserExpenses, ue => ue.ExpenseId == 1);
+
+            var expense2 = new Expense
+            {
+                Id = 2,
+                Amount = 20.50,
+                Date = DateTime.Now,
+                Type = "Car Maintenance",
+                Notes = "Test 2"
+            };
+            _context.Expenses.Add(expense2);
+            
+            var userExpense = new UserExpense
+            {
+                UserId = 1,
+                ExpenseId = expense2.Id
+            };
+            _context.UserExpenses.Add(userExpense);
+
+            await _context.SaveChangesAsync();
+
+            var result = await _controller.GetFilteredExpenses(amount: null,
+                date: null,
+                type: "Car Maintenance");
+
+            var okResult = Assert.IsType<OkObjectResult>(result);
+            var expenses = Assert.IsAssignableFrom<IEnumerable<ExpenseDto>>(okResult.Value);
+
+            Assert.Contains(expenses, e => e.Id == 2);
+            Assert.DoesNotContain(expenses, e => e.Id == 1);
+        }
+
+        [Fact]
+        public async Task AddExpense_PostsExpense()
+        {
+            var expense3 = new Expense
+            {
+                Id = 3,
+                Amount = 25,
+                Date = DateTime.Now,
+                Type = "Gas",
+                Notes = "Test 3"
+            };
+
+            var result = await _controller.AddExpense(expense3);
+
+            var okResult = Assert.IsType<OkObjectResult>(result);
+            var userExpense = await _context.UserExpenses
+                .FirstOrDefaultAsync(ue => ue.UserId == 1 && ue.ExpenseId == expense3.Id);
+
+            Assert.NotNull(userExpense);
+        }
+
+        [Fact]
+        public async Task GetExpenseTypes_ReturnsTypes()
+        {
+            var expense4 = new Expense
+            {
+                Id = 4,
+                Amount = 34,
+                Date = DateTime.Now,
+                Type = "Car Maintenance",
+                Notes = "Test 4"
+            };
+            _context.Expenses.Add(expense4);
+
+            var userExpense = new UserExpense
+            {
+                UserId = 1,
+                ExpenseId = expense4.Id
+            };
+            _context.UserExpenses.Add(userExpense);
+
+            await _context.SaveChangesAsync();
+
+            var result = await _controller.GetExpenseTypes();
+
+            var okResult = Assert.IsType<OkObjectResult>(result);
+            var types = Assert.IsAssignableFrom<IEnumerable<string>>(okResult.Value);
+
+            Assert.Contains("Car Maintenance", types);
+            Assert.Contains("Gas", types);
+        }
+
+        [Fact]
+        public async Task UpdateExpense_PutsExpense()
+        {
+            var expense1 = new Expense
+            {
+                Id = 1,
+                Amount = 33,
+                Date = DateTime.Now,
+                Type = "Gas",
+                Notes = "Test1"
+            };
+
+            var result = await _controller.UpdateExpense(expense1);
+
+            var okResult = Assert.IsType<OkObjectResult>(result);
+            var expense = Assert.IsAssignableFrom<ExpenseDto>(okResult.Value);
+
+            Assert.Equal(33, expense.Amount);
+        }
     }
 }
