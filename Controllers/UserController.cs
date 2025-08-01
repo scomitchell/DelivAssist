@@ -46,7 +46,10 @@ namespace DelivAssist.Controllers
             var userDto = new UserDto
             {
                 Id = user.Id,
-                Username = user.Username
+                Username = user.Username,
+                FirstName = user.FirstName,
+                LastName = user.LastName,
+                Email = user.Email
             };
 
             var response = new TokenResponse { 
@@ -72,7 +75,10 @@ namespace DelivAssist.Controllers
             var userDto = new UserDto
             {
                 Id = existingUser.Id,
-                Username = existingUser.Username
+                Username = existingUser.Username,
+                FirstName = existingUser.FirstName,
+                LastName = existingUser.LastName,
+                Email = existingUser.Email
             };
 
             var response = new TokenResponse { 
@@ -128,13 +134,13 @@ namespace DelivAssist.Controllers
             _context.Users.Update(existingUser);
             await _context.SaveChangesAsync();
 
-            var responseUser = new
+            var responseUser = new UserDto
             {
-                existingUser.Id,
-                existingUser.FirstName,
-                existingUser.LastName,
-                existingUser.Email,
-                existingUser.Username
+                Id = existingUser.Id,
+                FirstName = existingUser.FirstName,
+                LastName = existingUser.LastName,
+                Email = existingUser.Email,
+                Username = existingUser.Username
             };
 
             return Ok(responseUser);
@@ -151,13 +157,13 @@ namespace DelivAssist.Controllers
                 return NotFound();
             }
 
-            return Ok(new
+            return Ok(new UserDto
             {
-                user.Id,
-                user.FirstName,
-                user.LastName,
-                user.Email,
-                user.Username
+                Id = user.Id,
+                FirstName = user.FirstName,
+                LastName = user.LastName,
+                Email = user.Email,
+                Username = user.Username
             });
         }
     }
