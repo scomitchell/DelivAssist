@@ -170,5 +170,55 @@ namespace DelivAssist.Tests.Controllers
             var result2 = await _controller.GetShiftById(2);
             var notFoundResult = Assert.IsType<NotFoundObjectResult>(result2);
         }
+
+        [Fact]
+        public async Task GetShiftApps_ReturnsApps()
+        {
+            var shift4 = new Shift
+            {
+                Id = 4,
+                StartTime = DateTime.Now.AddHours(-1),
+                EndTime = DateTime.Now,
+                App = DeliveryApp.Grubhub
+            };
+            _context.Shifts.Add(shift4);
+
+            var userShift = new UserShift
+            {
+                UserId = 1,
+                ShiftId = shift4.Id
+            };
+            _context.UserShifts.Add(userShift);
+
+            await _context.SaveChangesAsync();
+
+            var result = await _controller.GetUserShiftApps();
+
+            var okResult = Assert.IsType<OkObjectResult>(result);
+            var apps = Assert.IsAssignableFrom<IEnumerable<DeliveryApp>>(okResult.Value);
+
+            Assert.Contains(DeliveryApp.Grubhub, apps);
+            Assert.Contains(DeliveryApp.UberEats, apps);
+            Assert.DoesNotContain(DeliveryApp.Doordash, apps);
+        }
+
+        [Fact]
+        public async Task UpdateShift_PutsShift()
+        {
+            var shift1 = new Shift
+            {
+                Id = 1,
+                StartTime = DateTime.Now.AddHours(-1),
+                EndTime = DateTime.Now,
+                App = DeliveryApp.Doordash
+            };
+
+            var result = await _controller.UpdateShift(shift1);
+
+            var okResult = Assert.IsType<OkObjectResult>(result);
+            var shift = Assert.IsAssignableFrom<ShiftDto>(okResult.Value);
+
+            Assert.Equal(DeliveryApp.Doordash, shift.App);
+        }
     }
 }

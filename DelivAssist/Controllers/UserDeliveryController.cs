@@ -311,17 +311,17 @@ namespace DelivAssist.Controllers
             _context.Deliveries.Update(targetDelivery);
             await _context.SaveChangesAsync();
 
-            var responseDelivery = new {
-                targetDelivery.Id,
-                targetDelivery.App,
-                targetDelivery.TotalPay,
-                targetDelivery.TipPay,
-                targetDelivery.BasePay,
-                targetDelivery.Mileage,
-                targetDelivery.Restaurant,
-                targetDelivery.CustomerNeighborhood,
-                targetDelivery.DeliveryTime,
-                targetDelivery.Notes
+            var responseDelivery = new DeliveryDto {
+                Id = targetDelivery.Id,
+                App = targetDelivery.App,
+                TotalPay = targetDelivery.TotalPay,
+                TipPay = targetDelivery.TipPay,
+                BasePay = targetDelivery.BasePay,
+                Mileage = targetDelivery.Mileage,
+                Restaurant = targetDelivery.Restaurant,
+                CustomerNeighborhood = targetDelivery.CustomerNeighborhood,
+                DeliveryTime = targetDelivery.DeliveryTime,
+                Notes = targetDelivery.Notes
             };
 
             return Ok(responseDelivery);
