@@ -36,7 +36,7 @@ jobs:
 
       - name: Publish test results
         uses: dorny/test-reporter@v1
-        if: alwys()
+        if: always()
         with:
           name: .NET Test Results
           path: ./TestResults/test_results.trx
