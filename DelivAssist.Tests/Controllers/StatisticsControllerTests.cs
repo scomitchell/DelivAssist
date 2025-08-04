@@ -188,6 +188,20 @@ namespace DelivAssist.Tests.Controllers
                     ShiftId = 3
                 });
 
+                _context.ShiftDeliveries.Add(new ShiftDelivery
+                {
+                    UserId = 1,
+                    ShiftId = 1,
+                    DeliveryId = 1
+                });
+
+                _context.ShiftDeliveries.Add(new ShiftDelivery
+                {
+                    UserId = 1,
+                    ShiftId = 2,
+                    DeliveryId = 2
+                });
+
                 _context.SaveChanges();
             }
         }
@@ -402,6 +416,17 @@ namespace DelivAssist.Tests.Controllers
             var app = Assert.IsAssignableFrom<DeliveryApp>(okResult.Value);
 
             Assert.Equal(DeliveryApp.UberEats, app);
+        }
+
+        [Fact]
+        public async Task GetAverageDeliveries_ReturnsAvgNum()
+        {
+            var result = await _controller.GetAverageDeliveriesPerShift();
+
+            var okResult = Assert.IsType<OkObjectResult>(result);
+            var average = Assert.IsAssignableFrom<double>(okResult.Value);
+
+            Assert.Equal(1, average, precision: 0);
         }
     }
 }
