@@ -102,6 +102,94 @@ namespace DelivAssist.Tests.Controllers
 
                 _context.SaveChanges();
             }
+
+            if (!_context.Expenses.Any())
+            {
+                var expense1 = new Expense
+                {
+                    Id = 1,
+                    Amount = 100,
+                    Date = DateTime.Now,
+                    Type = "Gas",
+                    Notes = "Test1"
+                };
+
+                var expense2 = new Expense
+                {
+                    Id = 2,
+                    Amount = 40,
+                    Date = DateTime.Now,
+                    Type = "Car Maintenance",
+                    Notes = "Test2"
+                };
+
+                _context.Expenses.AddRange(expense1, expense2);
+                _context.SaveChanges();
+
+                _context.UserExpenses.Add(new UserExpense
+                {
+                    UserId = 1,
+                    ExpenseId = 1
+                });
+
+                _context.UserExpenses.Add(new UserExpense
+                {
+                    UserId = 1,
+                    ExpenseId = 2
+                });
+
+                _context.SaveChanges();
+            }
+
+            if (!_context.Shifts.Any())
+            {
+                var shift1 = new Shift
+                {
+                    Id = 1,
+                    StartTime = DateTime.Now.AddHours(-1),
+                    EndTime = DateTime.Now,
+                    App = DeliveryApp.UberEats
+                };
+
+                var shift2 = new Shift
+                {
+                    Id = 2,
+                    StartTime = DateTime.Now.AddHours(-2),
+                    EndTime = DateTime.Now,
+                    App = DeliveryApp.Doordash
+                };
+
+                var shift3 = new Shift
+                {
+                    Id = 3,
+                    StartTime = DateTime.Now.AddHours(-1),
+                    EndTime = DateTime.Now,
+                    App = DeliveryApp.UberEats
+                };
+
+                _context.Shifts.AddRange(shift1, shift2, shift3);
+                _context.SaveChanges();
+
+                _context.UserShifts.Add(new UserShift
+                {
+                    UserId = 1,
+                    ShiftId = 1
+                });
+
+                _context.UserShifts.Add(new UserShift
+                {
+                    UserId = 1,
+                    ShiftId = 2
+                });
+
+                _context.UserShifts.Add(new UserShift
+                {
+                    UserId = 1,
+                    ShiftId = 3
+                });
+
+                _context.SaveChanges();
+            }
         }
 
         public void Dispose()
@@ -243,6 +331,77 @@ namespace DelivAssist.Tests.Controllers
 
             Assert.Equal("Love Art Sushi", (string)dict["restaurant"]);
             Assert.Equal(2, dict["orderCount"]);
+        }
+
+        [Fact]
+        public async Task GetTipPerMile_ReturnsTipRate()
+        {
+            var result = await _controller.GetTipPerMile();
+
+            var okResult = Assert.IsType<OkObjectResult>(result);
+            var tipPerMile = Assert.IsAssignableFrom<double>(okResult.Value);
+
+            Assert.Equal(1.67, tipPerMile, precision: 2);
+        }
+
+        [Fact]
+        public async Task GetMonthlySpending_ReturnsSpending()
+        {
+            var result = await _controller.GetAverageMonthlySpending();
+
+            var okResult = Assert.IsType<OkObjectResult>(result);
+            var avgMonthlySpending = Assert.IsAssignableFrom<double>(okResult.Value);
+
+            Assert.Equal(140, avgMonthlySpending);
+        }
+
+        [Fact]
+        public async Task GetSpendingByType_ReturnsSpending()
+        {
+            var result = await _controller.GetAverageSpendingByType();
+
+            var okResult = Assert.IsType<OkObjectResult>(result);
+            
+            var value = okResult.Value;
+            var resultList = value as IEnumerable<object>;
+            Assert.NotNull(resultList);
+
+            var dictList = resultList.Select(item => 
+            {
+                var props = item.GetType().GetProperties();
+                return props.ToDictionary(p => p.Name, p => p.GetValue(item));
+            }).ToList();
+
+            var gas = dictList.FirstOrDefault(d => (string)d["Type"] == "Gas");
+            var maintenance = dictList.FirstOrDefault(d => (string)d["Type"] == "Car Maintenance");
+
+            Assert.NotNull(gas);
+            Assert.NotNull(maintenance);
+
+            Assert.Equal(100.00, (double)gas["AvgExpense"], precision: 2);
+            Assert.Equal(40.00, (double)maintenance["AvgExpense"], precision: 2);
+        }
+
+        [Fact]
+        public async Task GetAvgShiftLength_CalculatesShiftLength()
+        {
+            var result = await _controller.getAverageShiftLength();
+
+            var okResult = Assert.IsType<OkObjectResult>(result);
+            var avgShift = Assert.IsAssignableFrom<double>(okResult.Value);
+
+            Assert.Equal(80, avgShift, precision: 0);
+        }
+
+        [Fact]
+        public async Task GetAppWithMostShifts_ReturnsApp()
+        {
+            var result = await _controller.getAppWithMostShifts();
+
+            var okResult = Assert.IsType<OkObjectResult>(result);
+            var app = Assert.IsAssignableFrom<DeliveryApp>(okResult.Value);
+
+            Assert.Equal(DeliveryApp.UberEats, app);
         }
     }
 }
