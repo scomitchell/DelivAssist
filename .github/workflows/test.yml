@@ -26,4 +26,4 @@ jobs:
         run: dotnet build --no-restore
 
       - name: Run tests and generate report
-        run: dotnet test DelivAssist.Tests/DelivAssist.Tests.csproj --logger "console;verbosity=detailed" --logger "trx;LogFileName=test_results.trx" --results-directory ./TestResults
+        run: dotnet test DelivAssist.Tests/DelivAssist.Tests.csproj --logger "console;verbosity=detailed"
