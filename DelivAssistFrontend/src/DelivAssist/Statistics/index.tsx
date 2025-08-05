@@ -7,6 +7,10 @@ type MonthlySpendingType = {
   avgExpense: number;
 };
 
+interface EarningsChartResponse {
+    base64Image: string;
+}
+
 export default function Statistics() {
     // Pay statistics
     const [averagePay, setAveragePay] = useState(0);
@@ -32,6 +36,9 @@ export default function Statistics() {
     const [averageShiftLength, setAverageShiftLength] = useState<number | null>(null);
     const [appWithMostShifts, setAppWithMostShifts] = useState<string | null>(null);
     const [avgDeliveriesPerShift, setAvgDeliveriesPerShift] = useState(0);
+
+    // Charts
+    const [earningsChart, setEarningsChart] = useState<EarningsChartResponse | null>(null);
 
     // Loading
     const [loading, setLoading] = useState(true);
@@ -108,6 +115,14 @@ export default function Statistics() {
             setAverageShiftLength(0);
             setAppWithMostShifts("N/A");
             setAvgDeliveriesPerShift(0);
+        }
+
+        try {
+            const userEarningsChart = await client.findEarningsChart();
+
+            setEarningsChart(userEarningsChart);
+        } catch {
+            setEarningsChart(null);
         }
     }
 
@@ -223,6 +238,12 @@ export default function Statistics() {
                                 </Card.Text>
                             </Card.Body>
                         </Card>
+                    </Col>
+                    
+                    <Col sm={10}>
+                        {earningsChart && (
+                            <img src={`data:image/png;base64,${earningsChart.base64Image}`} alt="Earnings Chart" />
+                        )}
                     </Col>
                 </Row>
             </div>
