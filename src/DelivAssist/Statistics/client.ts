@@ -183,3 +183,15 @@ export const findAverageDeliveriesPerShift = async () => {
 
     return response.data;
 }
+
+export const findEarningsChart = async () => {
+    const token = localStorage.getItem("token");
+
+    const response = await axiosWithCredentials.get(`${STATISTICS_API}/charts/earnings-over-time`, {
+        headers: {
+            Authorization: `Bearer ${token}`
+        }
+    });
+
+    return response.data;
+}
