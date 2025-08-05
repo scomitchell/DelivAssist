@@ -365,3 +365,5 @@ FodyWeavers.xsd
 *.db
 *.db-shm
 *.db-wal
+
+delivassist-analytics/venv/
