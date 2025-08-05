@@ -5,7 +5,12 @@ using Microsoft.EntityFrameworkCore;
 using Xunit;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
+using Moq;
+using Moq.Protected;
+using System.Net;
+using System.Net.Http;
 using DelivAssist.Controllers;
 using DelivAssist.Models;
 using DelivAssist.Data;
@@ -27,7 +32,30 @@ namespace DelivAssist.Tests.Controllers
 
             SeedDatabase();
 
-            _controller = new StatisticsController(_context);
+            // Mock the HttpMessageHandler to control responses
+            var mockHttpMessageHandler = new Mock<HttpMessageHandler>();
+
+            mockHttpMessageHandler.Protected()
+                .Setup<Task<HttpResponseMessage>>(
+                    "SendAsync",
+                    ItExpr.IsAny<HttpRequestMessage>(),
+                    ItExpr.IsAny<CancellationToken>())
+                .ReturnsAsync(new HttpResponseMessage
+                {
+                    StatusCode = HttpStatusCode.OK,
+                    Content = new StringContent("{\"image\":\"dummyBase64ImageString\"}")
+                });
+
+            var httpClient = new HttpClient(mockHttpMessageHandler.Object);
+
+            // Mock IHttpClientFactory to return the mocked HttpClient
+            var mockHttpClientFactory = new Mock<IHttpClientFactory>();
+
+            mockHttpClientFactory
+                .Setup(_ => _.CreateClient(It.IsAny<string>()))
+                .Returns(httpClient);
+
+            _controller = new StatisticsController(_context, mockHttpClientFactory.Object);
 
             var user = new ClaimsPrincipal(new ClaimsIdentity(new Claim[]
             {
