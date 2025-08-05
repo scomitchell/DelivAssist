@@ -1,6 +1,7 @@
 import * as client from "./client";
 import { useEffect, useState } from "react";
 import { Row, Col, Card } from "react-bootstrap";
+import "../../index.css";
 
 type MonthlySpendingType = {
   type: string;
@@ -40,6 +41,7 @@ export default function Statistics() {
     // Charts
     const [earningsChart, setEarningsChart] = useState<EarningsChartResponse | null>(null);
     const [tnHistogram, setTnHistogram] = useState<EarningsChartResponse | null>(null);
+    const [baseByAppHist, setBaseByAppHist] = useState<EarningsChartResponse | null>(null);
 
     // Loading
     const [loading, setLoading] = useState(true);
@@ -123,33 +125,36 @@ export default function Statistics() {
 
         try {
             const userEarningsChart = await client.findEarningsChart();
-            const userTnHistogram = await client.findTipNeighborhoodHist();
 
             setEarningsChart(userEarningsChart);
-            setTnHistogram(userTnHistogram);
         } catch {
             setEarningsChart(null);
+        }
+
+        try {
+            const userTnHistogram = await client.findTipNeighborhoodHist();
+
+            setTnHistogram(userTnHistogram);
+        } catch {
             setTnHistogram(null);
+        }
+
+        try {
+            const userBaseHist = await client.findBaseByAppHist();
+
+            setBaseByAppHist(userBaseHist);
+        }
+        catch {
+            setBaseByAppHist(null);
         }
 
         setLoading(false);
     }
 
-    useEffect(() => {
-        fetchStatistics();
-    }, [])
-
-    return (
-        <div id="da-statistics">
-            <h1 className="mb-3">Your Statistics</h1>
-            <Col sm={6}>
-                <select onChange={(e) => setPage(e.target.value)} className="form-control mb-3">
-                    <option value="stats">Stats</option>
-                    <option value="charts">Charts</option>
-                </select>
-            </Col>
-            {page == "stats" ?
-            <div id="stats" className="d-flex">
+    const getContent = () => {
+        if (page === "stats") {
+            return (
+                <div id="stats" className="d-flex">
                 <Row>
                     {/*Pay Statistics*/}
                     <Col sm={5}>
@@ -159,11 +164,11 @@ export default function Statistics() {
                                 <Card.Text>
                                     {loading ? 
                                         <div>
-                                            <p><strong>Average total pay:</strong> Loading...</p> <br />
-                                            <p><strong>Average base pay:</strong> Loading...</p> <br/>
-                                            <p><strong>Average tip pay:</strong> Loading...</p> <br /> <br />
-                                            <p><strong>Average dollar/mile:</strong> Loading...</p> <br />
-                                            <p><strong>Average tip/mile:</strong> Loading...</p> <br />
+                                            <strong>Average total pay:</strong> Loading... <br />
+                                            <strong>Average base pay:</strong> Loading... <br/>
+                                            <strong>Average tip pay:</strong> Loading...<br /> <br />
+                                            <strong>Average dollar/mile:</strong> Loading...<br />
+                                            <strong>Average tip/mile:</strong> Loading...<br />
                                         </div>
                                         :
                                         <div>
@@ -256,23 +261,64 @@ export default function Statistics() {
                     </Col>
                 </Row>
             </div>
-
-            :
-
-            <div id="charts">
-                <Col sm={5}>
+            );
+        } else if (page === "earnings-over-time") {
+            return (
+                <div id="charts">
                     {earningsChart && (
-                        <img src={`data:image/png;base64,${earningsChart.base64Image}`} 
-                            alt="Earnings Chart" className="mb-2"/>
+                        <img
+                            src={`data:image/png;base64,${earningsChart.base64Image}`} 
+                            alt="Earnings Chart"
+                            className="mb-2"
+                            style={{ maxWidth: "100%", height: "auto", display: "block"}}
+                        />
                     )}
-                </Col>
-                <Col sm={5}>
+                </div>
+            );
+        } else if (page === "tips-by-neighborhood") {
+            return (
+                <div id="charts">
                     {tnHistogram && (
-                        <img src={`data:image/png;base64,${tnHistogram.base64Image}`} alt="Tip by Neighborhood Chart" />
+                        <img
+                            src={`data:image/png;base64,${tnHistogram.base64Image}`}
+                            alt="Tip by Neighborhood Chart"
+                            style={{ maxWidth: "100%", height: "auto", display: "block" }}
+                        />
                     )}
-                </Col>
-            </div>
-            }
+                </div>
+            );
+        } else if (page === "base-by-app") {
+            return (
+                <div id="charts">
+                    {baseByAppHist && (
+                        <img
+                            src={`data:image/png;base64,${baseByAppHist.base64Image}`}
+                            alt="Average Base by App Chart"
+                            style={{ maxWidth: "100%", height: "auto", display: "block"}}
+                        />
+                    )}
+                </div>
+            );
+        }
+    }
+
+    useEffect(() => {
+        fetchStatistics();
+    }, [])
+
+    return (
+        <div id="da-statistics">
+            <h1 className="mb-3">Your Statistics</h1>
+            <Col sm={6}>
+                <select onChange={(e) => setPage(e.target.value)} className="form-control mb-3">
+                    <option value="stats">Overall Statistics</option>
+                    <option value="earnings-over-time">Earnings Over Time Chart</option>
+                    <option value="tips-by-neighborhood">Average Tip by Neighborhood Chart</option>
+                    <option value="base-by-app">Average Base Pay by App Chart</option>
+                </select>
+            </Col>
+            
+            {getContent()}
         </div>
     );
 }

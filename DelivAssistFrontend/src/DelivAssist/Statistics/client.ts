@@ -207,3 +207,15 @@ export const findTipNeighborhoodHist = async () => {
 
     return response.data;
 }
+
+export const findBaseByAppHist = async () => {
+    const token = localStorage.getItem("token");
+
+    const response = await axiosWithCredentials.get(`${STATISTICS_API}/charts/apps-by-base`, {
+        headers: {
+            Authorization: `Bearer ${token}`
+        }
+    });
+
+    return response.data;
+}
