@@ -42,6 +42,7 @@ export default function Statistics() {
     const [earningsChart, setEarningsChart] = useState<EarningsChartResponse | null>(null);
     const [tnHistogram, setTnHistogram] = useState<EarningsChartResponse | null>(null);
     const [baseByAppHist, setBaseByAppHist] = useState<EarningsChartResponse | null>(null);
+    const [hourlyEarningsChart, setHourlyEarningsChart] = useState<EarningsChartResponse | null>(null);
 
     // Loading
     const [loading, setLoading] = useState(true);
@@ -146,6 +147,14 @@ export default function Statistics() {
         }
         catch {
             setBaseByAppHist(null);
+        }
+
+        try {
+            const userHourlyEarningsChart = await client.findHourlyPayChart();
+
+            setHourlyEarningsChart(userHourlyEarningsChart);
+        } catch {
+            setHourlyEarningsChart(null);
         }
 
         setLoading(false);
@@ -299,6 +308,18 @@ export default function Statistics() {
                     )}
                 </div>
             );
+        } else if (page === "hourly-pay-chart") {
+            return (
+                <div id="charts">
+                    {hourlyEarningsChart && (
+                        <img
+                            src={`data:image/png;base64,${hourlyEarningsChart.base64Image}`}
+                            alt="Average Hourly Earnings for the Past Week"
+                            style={{maxWidth: "100%", height: "auto", display: "block"}}
+                        />
+                    )}
+                </div>
+            )
         }
     }
 
@@ -315,6 +336,7 @@ export default function Statistics() {
                     <option value="earnings-over-time">Earnings Over Time Chart</option>
                     <option value="tips-by-neighborhood">Average Tip by Neighborhood Chart</option>
                     <option value="base-by-app">Average Base Pay by App Chart</option>
+                    <option value="hourly-pay-chart">Average Hourly Pay Chart</option>
                 </select>
             </Col>
             

@@ -219,3 +219,15 @@ export const findBaseByAppHist = async () => {
 
     return response.data;
 }
+
+export const findHourlyPayChart = async () => {
+    const token = localStorage.getItem("token");
+
+    const response = await axiosWithCredentials.get(`${STATISTICS_API}/charts/hourly-earnings`, {
+        headers: {
+            Authorization: `Bearer ${token}`
+        }
+    });
+
+    return response.data;
+}
