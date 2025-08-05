@@ -441,5 +441,54 @@ namespace DelivAssist.Controllers
             // Return base64 image string
             return Ok(new { base64Image = result["image"] });
         }
+
+        [HttpGet("charts/tip-neighborhoods")]
+        public async Task<IActionResult> GetTipNeighborhoodsChart()
+        {
+            var userId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier));
+
+            var deliveries = await (
+                from ud in _context.UserDeliveries
+                join d in _context.Deliveries on ud.DeliveryId equals d.Id
+                where ud.UserId == userId
+                group d by d.CustomerNeighborhood into g
+                orderby g.Key
+                select new
+                {
+                    CustomerNeighborhood = g.Key,
+                    AverageTipPay = g.Average(x => x.TipPay)
+                }
+            ).ToListAsync();
+
+            if (deliveries.Count == 0)
+            {
+                return NotFound("No deliveries found");
+            }
+
+            var neighborhoods = deliveries.Select(d => d.CustomerNeighborhood).ToList();
+            var tipPays = deliveries.Select(d => (double)d.AverageTipPay).ToList();
+
+            var payload = new
+            {
+                neighborhoods = neighborhoods,
+                tipPays = tipPays
+            };
+
+            var response = await _httpClient.PostAsJsonAsync("http://localhost:8001/charts/tips-neighborhood", payload);
+
+            if (!response.IsSuccessStatusCode)
+            {
+                return StatusCode(500, "Error retrieving tip by neighborhood chart");
+            }
+
+            var result = await response.Content.ReadFromJsonAsync<Dictionary<string, string>>();
+            if (result == null || !result.ContainsKey("image"))
+            {
+                return StatusCode(500, "Invalid response from Python API");
+            }
+
+            // Return base64 image string
+            return Ok(new { base64Image = result["image"] });
+        }
     }
 }

@@ -195,3 +195,15 @@ export const findEarningsChart = async () => {
 
     return response.data;
 }
+
+export const findTipNeighborhoodHist = async () => {
+    const token = localStorage.getItem("token");
+
+    const response = await axiosWithCredentials.get(`${STATISTICS_API}/charts/tip-neighborhoods`, {
+        headers: {
+            Authorization: `Bearer ${token}`
+        }
+    });
+
+    return response.data;
+}

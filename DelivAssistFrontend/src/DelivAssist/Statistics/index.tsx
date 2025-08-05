@@ -39,6 +39,7 @@ export default function Statistics() {
 
     // Charts
     const [earningsChart, setEarningsChart] = useState<EarningsChartResponse | null>(null);
+    const [tnHistogram, setTnHistogram] = useState<EarningsChartResponse | null>(null);
 
     // Loading
     const [loading, setLoading] = useState(true);
@@ -122,23 +123,27 @@ export default function Statistics() {
 
         try {
             const userEarningsChart = await client.findEarningsChart();
+            const userTnHistogram = await client.findTipNeighborhoodHist();
 
             setEarningsChart(userEarningsChart);
+            setTnHistogram(userTnHistogram);
         } catch {
             setEarningsChart(null);
+            setTnHistogram(null);
         }
+
+        setLoading(false);
     }
 
     useEffect(() => {
         fetchStatistics();
-        setLoading(false);
     }, [])
 
     return (
         <div id="da-statistics">
             <h1 className="mb-3">Your Statistics</h1>
             <Col sm={6}>
-                <select onChange={(e) => setPage(e.target.value)} className="form-control mb-2">
+                <select onChange={(e) => setPage(e.target.value)} className="form-control mb-3">
                     <option value="stats">Stats</option>
                     <option value="charts">Charts</option>
                 </select>
@@ -254,10 +259,16 @@ export default function Statistics() {
 
             :
 
-            <div id="charts" className="d-flex">
-                <Col sm={10}>
+            <div id="charts">
+                <Col sm={5}>
                     {earningsChart && (
-                        <img src={`data:image/png;base64,${earningsChart.base64Image}`} alt="Earnings Chart" />
+                        <img src={`data:image/png;base64,${earningsChart.base64Image}`} 
+                            alt="Earnings Chart" className="mb-2"/>
+                    )}
+                </Col>
+                <Col sm={5}>
+                    {tnHistogram && (
+                        <img src={`data:image/png;base64,${tnHistogram.base64Image}`} alt="Tip by Neighborhood Chart" />
                     )}
                 </Col>
             </div>
