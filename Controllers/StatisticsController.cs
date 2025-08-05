@@ -447,22 +447,37 @@ namespace DelivAssist.Controllers
         {
             var userId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier));
 
-            var deliveries = await (
-                from ud in _context.UserDeliveries
-                join d in _context.Deliveries on ud.DeliveryId equals d.Id
-                where ud.UserId == userId
-                group d by d.CustomerNeighborhood into g
-                orderby g.Key
-                select new
+            var deliveries = await _context.UserDeliveries
+                .Where(ud => ud.UserId == userId)
+                .Select(ud => new 
+                {
+                    Neighborhood = ud.Delivery.CustomerNeighborhood.Trim(),
+                    ud.Delivery.TipPay
+                })
+                .GroupBy(x => x.Neighborhood)
+                .Select(g => new
                 {
                     CustomerNeighborhood = g.Key,
                     AverageTipPay = g.Average(x => x.TipPay)
-                }
-            ).ToListAsync();
+                })
+                .OrderBy(x => x.CustomerNeighborhood)
+                .ToListAsync();
 
             if (deliveries.Count == 0)
             {
                 return NotFound("No deliveries found");
+            }
+
+            Console.WriteLine($"Request started at {DateTime.Now:HH:mm:ss.fff}");
+            foreach (var d in deliveries)
+            {
+                Console.WriteLine($"{d.CustomerNeighborhood}: {d.AverageTipPay}");
+            }
+
+            Console.WriteLine("Tip Neighborhoods:");
+            foreach (var d in deliveries)
+            {
+                Console.WriteLine($"{d.CustomerNeighborhood}: {d.AverageTipPay}");
             }
 
             var neighborhoods = deliveries.Select(d => d.CustomerNeighborhood).ToList();
@@ -479,6 +494,55 @@ namespace DelivAssist.Controllers
             if (!response.IsSuccessStatusCode)
             {
                 return StatusCode(500, "Error retrieving tip by neighborhood chart");
+            }
+
+            var result = await response.Content.ReadFromJsonAsync<Dictionary<string, string>>();
+            if (result == null || !result.ContainsKey("image"))
+            {
+                return StatusCode(500, "Invalid response from Python API");
+            }
+
+            // Return base64 image string
+            return Ok(new { base64Image = result["image"] });
+        }
+
+        [HttpGet("charts/apps-by-base")]
+        public async Task<IActionResult> GetAppsByBaseChart()
+        {
+            var userId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier));
+
+            var deliveries = await (
+                from ud in _context.UserDeliveries
+                join d in _context.Deliveries on ud.DeliveryId equals d.Id
+                where ud.UserId == userId
+                group d by d.App into g
+                orderby g.Key
+                select new
+                {
+                    App = g.Key,
+                    BasePay = g.Average(x => x.BasePay)
+                }
+            ).ToListAsync();
+
+            if (deliveries.Count == 0)
+            {
+                return NotFound("No deliveries found");
+            }
+
+            var apps = deliveries.Select(d => d.App.ToString()).ToList();
+            var basePays = deliveries.Select(d => (double)d.BasePay).ToList();
+
+            var payload = new
+            {
+                apps = apps,
+                basePays = basePays
+            };
+
+            var response = await _httpClient.PostAsJsonAsync("http://localhost:8001/charts/apps-by-base", payload);
+
+            if (!response.IsSuccessStatusCode)
+            {
+                return StatusCode(500, "Error getting base by apps histogram");
             }
 
             var result = await response.Content.ReadFromJsonAsync<Dictionary<string, string>>();
