@@ -43,6 +43,9 @@ export default function Statistics() {
     // Loading
     const [loading, setLoading] = useState(true);
 
+    // Page Control
+    const [page, setPage] = useState("stats");
+
 
     const fetchStatistics = async () => {
         // Fetch statistics
@@ -134,6 +137,13 @@ export default function Statistics() {
     return (
         <div id="da-statistics">
             <h1 className="mb-3">Your Statistics</h1>
+            <Col sm={6}>
+                <select onChange={(e) => setPage(e.target.value)} className="form-control mb-2">
+                    <option value="stats">Stats</option>
+                    <option value="charts">Charts</option>
+                </select>
+            </Col>
+            {page == "stats" ?
             <div id="stats" className="d-flex">
                 <Row>
                     {/*Pay Statistics*/}
@@ -239,14 +249,19 @@ export default function Statistics() {
                             </Card.Body>
                         </Card>
                     </Col>
-                    
-                    <Col sm={10}>
-                        {earningsChart && (
-                            <img src={`data:image/png;base64,${earningsChart.base64Image}`} alt="Earnings Chart" />
-                        )}
-                    </Col>
                 </Row>
             </div>
+
+            :
+
+            <div id="charts" className="d-flex">
+                <Col sm={10}>
+                    {earningsChart && (
+                        <img src={`data:image/png;base64,${earningsChart.base64Image}`} alt="Earnings Chart" />
+                    )}
+                </Col>
+            </div>
+            }
         </div>
     );
 }
