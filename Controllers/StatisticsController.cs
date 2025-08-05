@@ -6,6 +6,7 @@ using System.Net.Http.Json;
 using System.Security.Claims;
 using DelivAssist.Data;
 using DelivAssist.Models;
+using System.Net.Sockets;
 
 namespace DelivAssist.Controllers
 {
@@ -449,7 +450,7 @@ namespace DelivAssist.Controllers
 
             var deliveries = await _context.UserDeliveries
                 .Where(ud => ud.UserId == userId)
-                .Select(ud => new 
+                .Select(ud => new
                 {
                     Neighborhood = ud.Delivery.CustomerNeighborhood.Trim(),
                     ud.Delivery.TipPay
@@ -552,6 +553,62 @@ namespace DelivAssist.Controllers
             }
 
             // Return base64 image string
+            return Ok(new { base64Image = result["image"] });
+        }
+
+        [HttpGet("charts/hourly-earnings")]
+        public async Task<IActionResult> GetHourlyEarningsChart()
+        {
+            var userId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier));
+            var oneWeekAgo = DateTime.UtcNow.AddDays(-7);
+
+            var hourlyEarnings = await _context.UserDeliveries
+                .Where(ud => ud.UserId == userId && ud.Delivery.DeliveryTime >= oneWeekAgo)
+                .Select(ud => new
+                {
+                    Hour = ud.Delivery.DeliveryTime.Hour,
+                    Earnings = ud.Delivery.TotalPay
+                })
+                .GroupBy(x => x.Hour)
+                .Select(g => new
+                {
+                    Hour = g.Key,
+                    AverageEarnings = g.Average(x => x.Earnings)
+                })
+                .OrderBy(x => x.Hour)
+                .ToListAsync();
+
+            var allHours = Enumerable.Range(0, 24).ToList();
+            var earningsByHour = allHours
+                .Select(h => new
+                {
+                    Hour = h,
+                    AverageEarnings = hourlyEarnings.FirstOrDefault(x => x.Hour == h)?.AverageEarnings ?? 0
+                })
+                .ToList();
+
+            var hoursStrings = earningsByHour.Select(x => x.Hour.ToString("D2")).ToList();
+            var earnings = earningsByHour.Select(x => x.AverageEarnings).ToList();
+
+            var payload = new
+            {
+                hours = hoursStrings,
+                earnings = earnings
+            };
+
+            var response = await _httpClient.PostAsJsonAsync("http://localhost:8001/charts/hourly-earnings", payload);
+
+            if (!response.IsSuccessStatusCode)
+            {
+                return StatusCode(500, "Error retrieving hourly pay chart");
+            }
+
+            var result = await response.Content.ReadFromJsonAsync<Dictionary<string, string>>();
+            if (result == null || !result.ContainsKey("image"))
+            {
+                return StatusCode(500, "Invalid response from Python API");
+            }
+
             return Ok(new { base64Image = result["image"] });
         }
     }
