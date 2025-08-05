@@ -1,6 +1,8 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.EntityFrameworkCore;
+using System.Net.Http;
+using System.Net.Http.Json;
 using System.Security.Claims;
 using DelivAssist.Data;
 using DelivAssist.Models;
@@ -13,10 +15,12 @@ namespace DelivAssist.Controllers
     public class StatisticsController : ControllerBase
     {
         private readonly ApplicationDbContext _context;
+        private readonly HttpClient _httpClient;
 
-        public StatisticsController(ApplicationDbContext context)
+        public StatisticsController(ApplicationDbContext context, IHttpClientFactory httpClientFactory)
         {
             _context = context;
+            _httpClient = httpClientFactory.CreateClient();
         }
 
         [HttpGet("deliveries/avg-delivery-pay")]
@@ -224,7 +228,8 @@ namespace DelivAssist.Controllers
         }
 
         [HttpGet("expenses/average-monthly-spending")]
-        public async Task<IActionResult> GetAverageMonthlySpending() {
+        public async Task<IActionResult> GetAverageMonthlySpending()
+        {
             var userId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier));
 
             var result = _context.UserExpenses
@@ -233,7 +238,8 @@ namespace DelivAssist.Controllers
                 .Select(g => g.Sum(ue => ue.Expense.Amount))
                 .Average();
 
-            if (result == null) {
+            if (result == null)
+            {
                 return NotFound("No expenses found");
             }
 
@@ -241,12 +247,14 @@ namespace DelivAssist.Controllers
         }
 
         [HttpGet("expenses/average-spending-by-type")]
-        public async Task<IActionResult> GetAverageSpendingByType() {
+        public async Task<IActionResult> GetAverageSpendingByType()
+        {
             var userId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier));
 
             var userExpenses = await _context.UserExpenses
                 .Where(ue => ue.UserId == userId)
-                .Select(ue => new {
+                .Select(ue => new
+                {
                     ue.Expense.Type,
                     ue.Expense.Amount,
                     Month = ue.Expense.Date.Month,
@@ -255,13 +263,14 @@ namespace DelivAssist.Controllers
                 .ToListAsync();
 
             var totalMonths = userExpenses
-                .Select(e => new {e.Year, e.Month})
+                .Select(e => new { e.Year, e.Month })
                 .Distinct()
                 .Count();
 
             var result = userExpenses
                 .GroupBy(e => e.Type)
-                .Select(g => new {
+                .Select(g => new
+                {
                     Type = g.Key,
                     AvgExpense = totalMonths > 0 ? g.Sum(x => x.Amount) / totalMonths : 0
                 })
@@ -271,7 +280,8 @@ namespace DelivAssist.Controllers
         }
 
         [HttpGet("shifts/average-shift-length")]
-        public async Task<IActionResult> getAverageShiftLength() {
+        public async Task<IActionResult> getAverageShiftLength()
+        {
             var userId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier));
 
             var durations = await _context.UserShifts
@@ -288,20 +298,23 @@ namespace DelivAssist.Controllers
         }
 
         [HttpGet("shifts/app-with-most-shifts")]
-        public async Task<IActionResult> getAppWithMostShifts() {
+        public async Task<IActionResult> getAppWithMostShifts()
+        {
             var userId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier));
 
             var result = await _context.UserShifts
                 .Where(us => us.UserId == userId)
                 .GroupBy(us => us.Shift.App)
-                .Select(g => new {
+                .Select(g => new
+                {
                     App = g.Key,
                     ShiftCount = g.Count()
                 })
                 .OrderByDescending(g => g.ShiftCount)
                 .FirstOrDefaultAsync();
 
-            if (result == null) {
+            if (result == null)
+            {
                 return Ok(null);
             }
 
@@ -309,24 +322,28 @@ namespace DelivAssist.Controllers
         }
 
         [HttpGet("deliveries/restaurant-with-most-deliveries")]
-        public async Task<IActionResult> GetRestaurantWithMostDeliveries() {
+        public async Task<IActionResult> GetRestaurantWithMostDeliveries()
+        {
             var userId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier));
 
             var result = await _context.UserDeliveries
                 .Where(ud => ud.UserId == userId)
                 .GroupBy(ud => ud.Delivery.Restaurant)
-                .Select(g => new {
+                .Select(g => new
+                {
                     Restaurant = g.Key,
                     OrderCount = g.Count()
                 })
                 .OrderByDescending(g => g.OrderCount)
                 .FirstOrDefaultAsync();
 
-            if (result == null) {
+            if (result == null)
+            {
                 return NotFound("No deliveries found");
             }
 
-            return Ok(new {
+            return Ok(new
+            {
                 restaurant = result.Restaurant,
                 orderCount = result.OrderCount
             });
@@ -356,7 +373,8 @@ namespace DelivAssist.Controllers
         }
 
         [HttpGet("shifts/average-num-deliveries")]
-        public async Task<IActionResult> GetAverageDeliveriesPerShift() {
+        public async Task<IActionResult> GetAverageDeliveriesPerShift()
+        {
             var userId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier));
 
             var shiftDeliveryCounts = await _context.ShiftDeliveries
@@ -365,13 +383,63 @@ namespace DelivAssist.Controllers
                 .Select(g => g.Count())
                 .ToListAsync();
 
-            if (!shiftDeliveryCounts.Any()) {
+            if (!shiftDeliveryCounts.Any())
+            {
                 return Ok(0);
             }
 
             var average = shiftDeliveryCounts.Average();
 
             return Ok(average);
+        }
+
+        [HttpGet("charts/earnings-over-time")]
+        public async Task<IActionResult> GetEarningsChart()
+        {
+            var userId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier));
+
+            var deliveries = await (
+                from ud in _context.UserDeliveries
+                join d in _context.Deliveries on ud.DeliveryId equals d.Id
+                where ud.UserId == userId
+                group d by d.DeliveryTime.Date into g
+                orderby g.Key
+                select new
+                {
+                    Date = g.Key,
+                    TotalEarnings = g.Sum(x => x.TotalPay)
+                }
+            ).ToListAsync();
+
+            if (deliveries.Count == 0)
+            {
+                return NotFound("No deliveries found for user");
+            }
+
+            var dates = deliveries.Select(d => d.Date.ToString("yyyy-MM-dd")).ToList();
+            var earnings = deliveries.Select(d => (double)d.TotalEarnings).ToList();
+
+            var payload = new
+            {
+                dates = dates,
+                earnings = earnings
+            };
+
+            var response = await _httpClient.PostAsJsonAsync("http://localhost:8001/charts/earnings", payload);
+
+            if (!response.IsSuccessStatusCode)
+            {
+                return StatusCode(500, "Error generating chart from Python API");
+            }
+
+            var result = await response.Content.ReadFromJsonAsync<Dictionary<string, string>>();
+            if (result == null || !result.ContainsKey("image"))
+            {
+                return StatusCode(500, "Invalid response from Python API");
+            }
+
+            // Return base64 image string
+            return Ok(new { base64Image = result["image"] });
         }
     }
 }
