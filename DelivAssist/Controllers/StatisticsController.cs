@@ -7,6 +7,7 @@ using System.Security.Claims;
 using DelivAssist.Data;
 using DelivAssist.Models;
 using System.Net.Sockets;
+using Microsoft.AspNetCore.Builder.Extensions;
 
 namespace DelivAssist.Controllers
 {
@@ -610,6 +611,71 @@ namespace DelivAssist.Controllers
             }
 
             return Ok(new { base64Image = result["image"] });
+        }
+
+        [HttpGet("train/shift-model")]
+        public async Task<IActionResult> TrainShiftModel()
+        {
+            var userId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier));
+
+            var shiftData = await _context.ShiftDeliveries
+                .Where(sd => sd.UserId == userId)
+                .Include(sd => sd.Shift)
+                .Include(sd => sd.Delivery)
+                .Select(sd => new
+                {
+                    StartTime = sd.Shift.StartTime,
+                    EndTime = sd.Shift.EndTime,
+                    App = sd.Shift.App,
+                    Neighborhood = sd.Delivery.CustomerNeighborhood,
+                    Earnings = sd.Delivery.TotalPay
+                })
+                .ToListAsync();
+
+                var samples = shiftData.Select(d => new
+                {
+                    start_time = d.StartTime.ToString("HH:mm"),
+                    end_time = d.EndTime.ToString("HH:mm"),
+                    app = d.App.ToString(),
+                    neighborhood = d.Neighborhood,
+                    earnings = d.Earnings
+                });
+
+            var payload = new { samples };
+
+            var response = await _httpClient.PostAsJsonAsync("http://localhost:8001/train/shift-model", payload);
+
+            if (!response.IsSuccessStatusCode)
+            {
+                return StatusCode(500, "Python Training API error");
+            }
+
+            var result = await response.Content.ReadFromJsonAsync<Dictionary<string, string>>();
+
+            return Ok(result);
+        }
+
+        [HttpPost("predict/shift-earnings")]
+        public async Task<IActionResult> PredictShiftEarnings([FromBody] ShiftPredictionRequest request)
+        {
+            var payload = new
+            {
+                start_time = request.StartTime.ToString("HH:mm"),
+                end_time = request.EndTime.ToString("HH:mm"),
+                app = request.App,
+                neighborhood = request.Neighborhood
+            };
+
+            var response = await _httpClient.PostAsJsonAsync("http://localhost:8001/predict/shift-earnings", payload);
+
+            if (!response.IsSuccessStatusCode)
+            {
+                return StatusCode(500, "Python prediction API error");
+            }
+
+            var result = await response.Content.ReadFromJsonAsync<Dictionary<string, object>>();
+
+            return Ok(result);
         }
     }
 }
