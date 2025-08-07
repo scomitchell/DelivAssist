@@ -231,3 +231,27 @@ export const findHourlyPayChart = async () => {
 
     return response.data;
 }
+
+export const trainShiftModel = async () => {
+    const token = localStorage.getItem("token");
+
+    const response = await axiosWithCredentials.get(`${STATISTICS_API}/train/shift-model`, {
+        headers: {
+            Authorization: `Bearer ${token}`
+        }
+    });
+
+    return response.data;
+}
+
+export const predictShift = async (data: {startTime: string, endTime: string, app: string, neighborhood: string}) => {
+    const token = localStorage.getItem("token");
+
+    const response = await axiosWithCredentials.post(`${STATISTICS_API}/predict/shift-earnings`, data, {
+        headers: {
+            Authorization: `Bearer ${token}`
+        }
+    });
+
+    return response.data;
+}
