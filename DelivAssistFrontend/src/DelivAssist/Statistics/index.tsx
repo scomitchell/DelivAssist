@@ -1,6 +1,7 @@
 import * as client from "./client";
 import { useEffect, useState } from "react";
 import { Row, Col, Card } from "react-bootstrap";
+import PredictEarnings from "./PredictEarnings";
 import "../../index.css";
 
 type MonthlySpendingType = {
@@ -320,6 +321,12 @@ export default function Statistics() {
                     )}
                 </div>
             )
+        } else if (page === "predict-earnings") {
+            return (
+                <div id="predict-earnings">
+                    <PredictEarnings />
+                </div>
+            );
         }
     }
 
@@ -337,6 +344,7 @@ export default function Statistics() {
                     <option value="tips-by-neighborhood">Average Tip by Neighborhood Chart</option>
                     <option value="base-by-app">Average Base Pay by App Chart</option>
                     <option value="hourly-pay-chart">Average Hourly Pay Chart</option>
+                    <option value="predict-earnings">Predict Earnings</option>
                 </select>
             </Col>
             
