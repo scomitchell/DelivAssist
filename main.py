@@ -3,6 +3,12 @@ from pydantic import BaseModel
 import matplotlib
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
+import pandas as pd
+import os
+import joblib
+from sklearn.ensemble import RandomForestRegressor
+from sklearn.preprocessing import OneHotEncoder
+from datetime import datetime
 import io
 import base64
 
@@ -23,6 +29,22 @@ class BaseByAppData(BaseModel):
 class HourlyPayData(BaseModel):
     hours: list[str]
     earnings: list[float]
+
+class TrainingSample(BaseModel):
+    start_time: str
+    end_time: str
+    app: str
+    neighborhood: str
+    earnings: float
+
+class TrainingData(BaseModel):
+    samples: list[TrainingSample]
+
+class PredictionSample(BaseModel):
+    start_time: str
+    end_time: str
+    app: str
+    neighborhood: str
 
 @app.post("/charts/earnings")
 def generate_chart(data: EarningsData):
@@ -106,3 +128,73 @@ def generate_hourly_chart(data: HourlyPayData):
 
     img_base64 = base64.b64encode(buf.read()).decode("utf-8")
     return {"image": img_base64}
+
+@app.post("/train/shift-model")
+def train_shift_model(data: TrainingData):
+    df = pd.DataFrame([sample.dict() for sample in data.samples])
+
+    # Convert start time to minutes
+    df["start_minutes"] = df["start_time"].apply(lambda t: time_str_to_minutes(t))
+    df["end_minutes"] = df["end_time"].apply(lambda t: time_str_to_minutes(t))
+    df["duration"] = df["end_minutes"] - df["start_minutes"]
+
+    X = df[["start_minutes", "duration", "app", "neighborhood"]]
+    y = df["earnings"]
+
+    # Encode Categorical Data
+    encoder = OneHotEncoder()
+    X_encoded = encoder.fit_transform(X[["app", "neighborhood"]]).toarray()
+
+    encoded_feature_names = encoder.get_feature_names_out(["app", "neighborhood"])
+
+    # Join numeric and encoded categorical data tables
+    X_final = pd.concat([X[["start_minutes", "duration"]].reset_index(drop=True),
+                         pd.DataFrame(X_encoded, columns=encoded_feature_names)], axis=1)
+    
+    model = RandomForestRegressor(n_estimators=100, random_state=42)
+    model.fit(X_final, y)
+
+    joblib.dump(model, "shift_model.pkl")
+    joblib.dump(encoder, "encoder.pkl")
+
+    return {"message": "Model trained successfully"}
+
+@app.post("/predict/shift-earnings")
+def predict_shift_earnings(data: PredictionSample):
+    if not os.path.exists("shift_model.pkl") or not os.path.exists("encoder.pkl"):
+        return {"error": "Model or encoder not found. Please train the model first."}
+
+    # Load model and encodere
+    model = joblib.load("shift_model.pkl")
+    encoder = joblib.load("encoder.pkl")
+
+    # Convert data for prediction to accepted format
+    start_minutes = time_str_to_minutes(data.start_time)
+    end_minutes = time_str_to_minutes(data.end_time)
+    duration = end_minutes - start_minutes
+
+    # Create a df for prediction data
+    input_df = pd.DataFrame([{
+        "start_minutes": start_minutes,
+        "duration": duration,
+        "app": data.app,
+        "neighborhood": data.neighborhood
+    }])
+
+    # Encode categorical data and join encoded data to numerical
+    encoded = encoder.transform(input_df[["app", "neighborhood"]]).toarray()
+    encoded_df = pd.DataFrame(encoded, columns=encoder.get_feature_names_out(["app", "neighborhood"]))
+
+    X_final = pd.concat([
+        input_df[["start_minutes", "duration"]].reset_index(drop=True),
+        encoded_df.reset_index(drop=True)
+    ], axis=1)
+
+    # Predict earnings
+    prediction = model.predict(X_final)[0]
+
+    return {"predicted_earnings": round(float(prediction), 2)}
+
+def time_str_to_minutes(t: str) -> int:
+    dt = datetime.strptime(t, "%H:%M")
+    return dt.hour * 60 + dt.minute
