@@ -17,7 +17,7 @@ DelivAssist is a Full-Stack web application that empowers gig delivery drivers (
 - **Delivery Logger** - Easy-to-use forms to add, update, and remove delivery records
 - **Shift Tracker** - View, manage, and analyze delivery shifts
 - **Expense Tracker** - Log and categorize work-related expenses
-- **Dashboard** - Summary of performance statistics
+- **Dashboard** - Summary of performance statistics including charts and an earnings predictor.
 - **Search and Filters** - Quickly find deliveries, shifts, and expenses based on app, type, date, dollar amount, etc.
 
 ## Tech Stack
