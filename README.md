@@ -22,4 +22,4 @@ DelivAssist is a Full-Stack web application that empowers gig delivery drivers (
 
 ## Tech Stack
 - **Frontend** - TypeScript, React, HTML, CSS
-- **Backend** - C#, ASP.NET, SQLite
+- **Backend** - C#, ASP.NET, Python, SQLite
