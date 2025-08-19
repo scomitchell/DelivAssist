@@ -262,7 +262,7 @@ export default function Statistics() {
                             <Card.Body style={{padding: "0.25rem"}}>
                                 <Card.Title className="fw-bold">Shift Statistics</Card.Title>
                                 <Card.Text>
-                                    <strong>Average shift length:</strong> {averageShiftLength} minutes <br />
+                                    <strong>Average shift length:</strong> {averageShiftLength?.toFixed(0)} minutes <br />
                                     <strong>Average number of deliveries per shift:</strong> {Math.floor(avgDeliveriesPerShift)} <br />
                                     <strong>App with most shifts:</strong> {appWithMostShifts} <br />
                                 </Card.Text>

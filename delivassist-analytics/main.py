@@ -34,7 +34,7 @@ class TrainingSample(BaseModel):
     start_time: str
     end_time: str
     app: str
-    neighborhood: str
+    neighborhoods: list[str]
     earnings: float
 
 class TrainingData(BaseModel):
@@ -133,13 +133,18 @@ def generate_hourly_chart(data: HourlyPayData):
 def train_shift_model(data: TrainingData):
     df = pd.DataFrame([sample.dict() for sample in data.samples])
 
+    df = df.explode("neighborhoods")
+    df.rename(columns={"neighborhoods": "neighborhood"}, inplace=True)
+
     # Convert start time to minutes
     df["start_minutes"] = df["start_time"].apply(lambda t: time_str_to_minutes(t))
     df["end_minutes"] = df["end_time"].apply(lambda t: time_str_to_minutes(t))
-    df["duration"] = df["end_minutes"] - df["start_minutes"]
+    df["duration_hours"] = (df["end_minutes"] - df["start_minutes"]) / 60.0
 
-    X = df[["start_minutes", "duration", "app", "neighborhood"]]
-    y = df["earnings"]
+    df["earnings_per_hour"] = df["earnings"] / df["duration_hours"]
+
+    X = df[["start_minutes", "duration_hours", "app", "neighborhood"]]
+    y = df["earnings_per_hour"]
 
     # Encode Categorical Data
     encoder = OneHotEncoder()
@@ -148,7 +153,7 @@ def train_shift_model(data: TrainingData):
     encoded_feature_names = encoder.get_feature_names_out(["app", "neighborhood"])
 
     # Join numeric and encoded categorical data tables
-    X_final = pd.concat([X[["start_minutes", "duration"]].reset_index(drop=True),
+    X_final = pd.concat([X[["start_minutes", "duration_hours"]].reset_index(drop=True),
                          pd.DataFrame(X_encoded, columns=encoded_feature_names)], axis=1)
     
     model = RandomForestRegressor(n_estimators=100, random_state=42)
@@ -171,12 +176,12 @@ def predict_shift_earnings(data: PredictionSample):
     # Convert data for prediction to accepted format
     start_minutes = time_str_to_minutes(data.start_time)
     end_minutes = time_str_to_minutes(data.end_time)
-    duration = end_minutes - start_minutes
+    duration_hours = (end_minutes - start_minutes) / 60.0
 
     # Create a df for prediction data
     input_df = pd.DataFrame([{
         "start_minutes": start_minutes,
-        "duration": duration,
+        "duration_hours": duration_hours,
         "app": data.app,
         "neighborhood": data.neighborhood
     }])
@@ -186,14 +191,16 @@ def predict_shift_earnings(data: PredictionSample):
     encoded_df = pd.DataFrame(encoded, columns=encoder.get_feature_names_out(["app", "neighborhood"]))
 
     X_final = pd.concat([
-        input_df[["start_minutes", "duration"]].reset_index(drop=True),
+        input_df[["start_minutes", "duration_hours"]].reset_index(drop=True),
         encoded_df.reset_index(drop=True)
     ], axis=1)
 
     # Predict earnings
     prediction = model.predict(X_final)[0]
 
-    return {"predicted_earnings": round(float(prediction), 2)}
+    predicted_total_earnings = prediction * duration_hours
+
+    return {"predicted_earnings": round(float(predicted_total_earnings), 2)}
 
 def time_str_to_minutes(t: str) -> int:
     dt = datetime.strptime(t, "%H:%M")
