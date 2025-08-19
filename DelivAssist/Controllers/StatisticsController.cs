@@ -618,28 +618,36 @@ namespace DelivAssist.Controllers
         {
             var userId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier));
 
-            var shiftData = await _context.ShiftDeliveries
+            var shiftData = _context.ShiftDeliveries
                 .Where(sd => sd.UserId == userId)
                 .Include(sd => sd.Shift)
                 .Include(sd => sd.Delivery)
-                .Select(sd => new
+                .AsEnumerable()
+                .GroupBy(sd => new
                 {
-                    StartTime = sd.Shift.StartTime,
-                    EndTime = sd.Shift.EndTime,
-                    App = sd.Shift.App,
-                    Neighborhood = sd.Delivery.CustomerNeighborhood,
-                    Earnings = sd.Delivery.TotalPay
+                    sd.Shift.Id,
+                    sd.Shift.StartTime,
+                    sd.Shift.EndTime,
+                    sd.Shift.App,
                 })
-                .ToListAsync();
-
-                var samples = shiftData.Select(d => new
+                .Select(g => new
                 {
-                    start_time = d.StartTime.ToString("HH:mm"),
-                    end_time = d.EndTime.ToString("HH:mm"),
-                    app = d.App.ToString(),
-                    neighborhood = d.Neighborhood,
-                    earnings = d.Earnings
-                });
+                    StartTime = g.Key.StartTime,
+                    EndTime = g.Key.EndTime,
+                    App = g.Key.App,
+                    Neighborhoods = g.Select(x => x.Delivery.CustomerNeighborhood).Distinct().ToList(),
+                    TotalEarnings = g.Sum(x => x.Delivery.TotalPay),
+                })
+                .ToList();
+
+            var samples = shiftData.Select(d => new
+            {
+                start_time = d.StartTime.ToString("HH:mm"),
+                end_time = d.EndTime.ToString("HH:mm"),
+                app = d.App.ToString(),
+                neighborhoods = d.Neighborhoods,
+                earnings = d.TotalEarnings
+            });
 
             var payload = new { samples };
 
