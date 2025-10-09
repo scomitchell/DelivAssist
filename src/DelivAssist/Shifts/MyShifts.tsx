@@ -1,4 +1,5 @@
-import { Button, Modal, FormGroup, FormControl, FormLabel, Row, Col, Card, Dropdown } from "react-bootstrap";
+import { Modal, FormGroup, FormControl, FormLabel, Row, Col, Dropdown } from "react-bootstrap";
+import { Card, CardContent, Typography, Button } from "@mui/material";
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import * as client from "./client";
@@ -140,10 +141,16 @@ export default function MyShifts({ myShifts, setMyShifts }: {
 
     return (
         <div id="da-my-shifts" className="mt-3 col-sm-8">
-            <Button onClick={() => setShowForm(true)} className="btn btn-warning mb-3 me-2">
+            <Button onClick={() => setShowForm(true)}
+                variant="contained"
+                color="secondary"
+                sx={{mr: 1, mb: 2}}>
                 Filter Shifts
             </Button>
-            <Button onClick={resetFilters} className="btn btn-danger mb-3">
+            <Button onClick={resetFilters}
+                variant="outlined"
+                color="error"
+                sx={{mr: 1, mb: 2}}>
                 Reset filters
             </Button>
             
@@ -186,7 +193,7 @@ export default function MyShifts({ myShifts, setMyShifts }: {
                                 </select>
                             </Col>
                         </FormGroup>
-                        <Button onClick={fetchShifts} className="btn btn-primary">
+                        <Button onClick={fetchShifts} variant="contained" color="primary">
                             Apply Filters
                         </Button>
                     </div>
@@ -197,8 +204,17 @@ export default function MyShifts({ myShifts, setMyShifts }: {
             <Row>
                 {myShifts.map((shift: any) =>
                     <Col sm={6}>
-                        <Card className="mb-3 text-start user-shift-card">
-                            <Card.Body style={{ padding: '0.5rem' }}>
+                        <Card sx={{
+                            mb: 3,
+                            textAlign: "start",
+                            borderRadius: 3,
+                            boxShadow: 3,
+                            position: "relative",
+                            transition: "0.3s",
+                            minHeight: 150,
+                            "&:hover": { boxShadow: 6, transform: "translateY(-3px)" },
+                        }}>
+                            <CardContent sx={{ p: 2 }}>
                                 {/*Fix dropdown menu to top right corner of card*/}
                                 <div style={{ position: 'absolute', top: '0.5rem', right: '0.5rem'}}>
                                     {/*Dropdown menu for delete Shift*/}
@@ -235,12 +251,15 @@ export default function MyShifts({ myShifts, setMyShifts }: {
 
                                 {/* Only this part is clickable */}
                                 <Link to={`/DelivAssist/Shifts/${shift.id}`} className="text-decoration-none text-dark">
-                                    <Card.Title className="fw-bold">
-                                        {formatTime(shift.startTime)} {" - "} {formatTime(shift.endTime)}
-                                    </Card.Title>
-                                    <Card.Text>
+                                    <Typography variant="h6" fontWeight="bold">
+                                        {formatTime(shift.startTime)} {"  -"}
+                                    </Typography>
+                                    <Typography variant="h6" fontWeight="bold">
+                                        {formatTime(shift.endTime)}
+                                    </Typography>
+                                    <Typography variant="body1" sx={{ mt: 1}}>
                                         <strong>App:</strong> {shift.app} <br />
-                                    </Card.Text>
+                                    </Typography>
                                 </Link>
 
                                 {/*Modal to confirm delete shift*/}
@@ -251,11 +270,14 @@ export default function MyShifts({ myShifts, setMyShifts }: {
                                         </Modal.Header>
                                         <Modal.Body>Are you sure you want to delete this shift?</Modal.Body>
                                         <Modal.Footer>
-                                            <Button variant="secondary" onClick={() => setShiftToDelete(-1)}>
+                                            <Button variant="contained" 
+                                                color="secondary" 
+                                                sx={{mr: 2}}
+                                                onClick={() => setShiftToDelete(-1)}>
                                                 Cancel
                                             </Button>
-                                            <Button
-                                                variant="danger"
+                                            <Button variant="outlined"
+                                                color="error"
                                                 onClick={() => {
                                                     deleteShift(shiftToDelete);
                                                 }}
@@ -307,7 +329,7 @@ export default function MyShifts({ myShifts, setMyShifts }: {
                                                         </select>
                                                     </Col>
                                                 </FormGroup>
-                                                <Button onClick={updateShift} className="btn btn-primary">
+                                                <Button onClick={updateShift} variant="contained" color="primary">
                                                     Update Shift
                                                 </Button>
                                             </div>
@@ -339,13 +361,14 @@ export default function MyShifts({ myShifts, setMyShifts }: {
                                                     e.preventDefault();
                                                     handleAddDelivery();
                                                 }} 
-                                                className="btn btn-primary">
+                                                variant="contained"
+                                                color="primary">
                                                 Add Delivery to Shift
                                             </Button>
                                         </Modal.Body>
                                     </Modal>
                                 </>
-                            </Card.Body>
+                            </CardContent>
                         </Card>
                     </Col>
                 )}

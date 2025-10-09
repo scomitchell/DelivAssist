@@ -1,4 +1,5 @@
-import {Button, Modal, FormGroup, FormControl, FormLabel, Row, Col, Card, Dropdown} from "react-bootstrap";
+import {Modal, FormGroup, FormControl, FormLabel, Row, Col, Dropdown} from "react-bootstrap";
+import { Button, Card, CardContent, Typography } from "@mui/material";
 import { useEffect, useState } from "react";
 import type {ExpenseFilters} from "./client";
 import * as client from "./client";
@@ -104,10 +105,16 @@ export default function MyExpenses({myExpenses, setMyExpenses} : {
 
     return (
         <div id="da-my-expenses" className="mt-3 col-sm-8">
-            <Button onClick={() => setShowForm(true)} className="btn btn-warning mb-3 me-2">
+            <Button onClick={() => setShowForm(true)}
+                variant="contained"
+                color="secondary"
+                sx={{mr: 1, mb: 2}}>
                 Filter Expenses
             </Button>
-            <Button onClick={resetFilters} className="btn btn-danger mb-3">
+            <Button onClick={resetFilters}
+                variant="outlined"
+                color="error"
+                sx={{mr: 1, mb: 2}}>
                 Reset Filters
             </Button>
 
@@ -153,7 +160,7 @@ export default function MyExpenses({myExpenses, setMyExpenses} : {
                                 </select>
                             </Col>
                         </FormGroup>
-                        <Button onClick={fetchExpenses} className="btn btn-primary">
+                        <Button onClick={fetchExpenses} variant="contained" color="primary">
                             Filter Expenses
                         </Button>
                     </div>
@@ -164,8 +171,16 @@ export default function MyExpenses({myExpenses, setMyExpenses} : {
             <Row>
                 {myExpenses.map((expense: any) => 
                     <Col sm={6}>
-                        <Card className="mb-3 text-start user-expense-card">
-                            <Card.Body style={{ padding: '0.5rem' }}>
+                        <Card sx={{
+                            mb: 3,
+                            textAlign: "start",
+                            borderRadius: 3,
+                            boxShadow: 3,
+                            position: "relative",
+                            transition: "0.3s",
+                            "&:hover": {bowShadow: 6, transform: "translateY(-3px)"},
+                        }}>
+                            <CardContent sx={{p: 2}}>
                                 {/*Fix dropdown menu to top right corner of card*/}
                                 <div style={{ position: 'absolute', top: '0.5rem', right: '0.5rem' }}>
                                     {/*Delete expense dropdown toggle*/}
@@ -187,12 +202,12 @@ export default function MyExpenses({myExpenses, setMyExpenses} : {
                                     </Dropdown>
                                 </div>
 
-                                <Card.Title className="fw-bold">Amount: ${expense.amount.toFixed(2)}</Card.Title>
-                                <Card.Text>
+                                <Typography variant="h6" fontWeight="bold">Amount: ${expense.amount.toFixed(2)}</Typography>
+                                <Typography variant="body1">
                                     <strong>Date:</strong> {formatTime(expense.date)} {" "} <br />
                                     <strong>Type:</strong> {expense.type} {" "} <br />
                                     <strong>Notes:</strong> {expense.notes} {" "} <br />
-                                </Card.Text>
+                                </Typography>
 
                                 {/*Modal to confirm expense deletion*/}
                                 <>
@@ -203,11 +218,13 @@ export default function MyExpenses({myExpenses, setMyExpenses} : {
                                         </Modal.Header>
                                         <Modal.Body>Are you sure you want to delete this expense?</Modal.Body>
                                         <Modal.Footer>
-                                            <Button variant="secondary" onClick={() => setExpenseToDelete(-1)}>
+                                            <Button variant="contained" color="secondary" 
+                                                sx={{mr: 1}}
+                                                onClick={() => setExpenseToDelete(-1)}>
                                                 Cancel
                                             </Button>
                                             <Button
-                                                variant="danger"
+                                                variant="outlined" color="error"
                                                 onClick={() => {
                                                     deleteExpense(expenseToDelete);
                                                 }}
@@ -269,7 +286,7 @@ export default function MyExpenses({myExpenses, setMyExpenses} : {
                                                         />
                                                     </Col>
                                                 </FormGroup>
-                                                <Button onClick={updateExpense} className="btn btn-primary">
+                                                <Button onClick={updateExpense} variant="contained" color="primary">
                                                     Update Expense
                                                 </Button>
                                             </div>
@@ -277,7 +294,7 @@ export default function MyExpenses({myExpenses, setMyExpenses} : {
                                         </Modal.Body>
                                     </Modal>
                                 </>
-                            </Card.Body>
+                            </CardContent>
                         </Card>
                     </Col>
                 )}

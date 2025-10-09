@@ -1,4 +1,5 @@
-import { Button, Modal, FormGroup, FormLabel, FormControl, Row, Col } from "react-bootstrap";
+import { Modal, FormGroup, FormLabel, FormControl, Row, Col } from "react-bootstrap";
+import { Button } from "@mui/material";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import MyDeliveries from "./MyDeliveries";
@@ -54,7 +55,7 @@ export default function Deliveries() {
         <div id="da-my-deliveries">
             <div id="deliveries-header" className="d-flex align-items-center">
                 <h1 className="me-3">Your Deliveries</h1>
-                <Button onClick={() => setShowForm(true)} className="btn btn-primary">
+                <Button onClick={() => setShowForm(true)} variant="contained" color="primary">
                     Add Delivery
                 </Button>
 
@@ -152,7 +153,7 @@ export default function Deliveries() {
                                     />
                                 </Col>
                             </FormGroup>
-                            <Button onClick={addDelivery} className="btn btn-primary">
+                            <Button onClick={addDelivery} variant="contained" color="primary">
                                 Add Delivery
                             </Button>
                         </div>
