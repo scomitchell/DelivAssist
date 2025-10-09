@@ -101,3 +101,7 @@ nav {
   max-height: 500px; /* or something reasonable */
   object-fit: contain;
 }
+
+.mui-button:hover {
+  outline: none;
+}
