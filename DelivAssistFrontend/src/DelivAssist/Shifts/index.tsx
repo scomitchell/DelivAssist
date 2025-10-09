@@ -1,4 +1,5 @@
-import { Button, Modal, FormGroup, FormLabel, FormControl, Row, Col } from "react-bootstrap";
+import { Modal, FormGroup, FormLabel, FormControl, Row, Col } from "react-bootstrap";
+import { Button } from "@mui/material";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import MyShifts from "./MyShifts";
@@ -44,7 +45,7 @@ export default function Shifts() {
         <div id="da-shifts">
             <div id="da-shifts-header" className="d-flex align-items-center">
                 <h1 className="me-3">Log Shifts</h1>
-                <Button onClick={() => setShowForm(true)} className="btn btn-primary">
+                <Button onClick={() => setShowForm(true)} variant="contained" color="primary">
                     Add Shift
                 </Button>
 
@@ -86,7 +87,7 @@ export default function Shifts() {
                                     </select>
                                 </Col>
                             </FormGroup>
-                            <Button onClick={addShift} className="btn btn-primary">
+                            <Button onClick={addShift} variant="contained" color="primary">
                                 Add Shift
                             </Button>
                         </div>

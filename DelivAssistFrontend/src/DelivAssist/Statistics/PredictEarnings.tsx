@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { FormGroup, FormControl, FormLabel, Row, Col, Button } from "react-bootstrap";
+import * as deliveryClient from "../Deliveries/client";
 import * as client from "./client";
 
 export default function PredictEarnings()
@@ -8,6 +9,9 @@ export default function PredictEarnings()
     const [endTime, setEndTime] = useState("");
     const [app, setApp] = useState("");
     const [neighborhood, setNeighborhood] = useState("");
+
+    const [neighborhoods, setNeighborhoods] = useState<any>([]);
+    const [apps, setApps] = useState<any>([]);
 
     const [predictedEarnings, setPredictedEarnings] = useState<number | null>(null);
 
@@ -33,7 +37,19 @@ export default function PredictEarnings()
         setPredictedEarnings(earningsPrediction.predicted_earnings);
     }
 
+    const fetchNeighborhoods = async () => {
+        const userNeighborhoods = await deliveryClient.findUserNeighborhoods();
+        setNeighborhoods(userNeighborhoods);
+    }
+
+    const fetchApps = async () => {
+        const userApps = await deliveryClient.findUserApps();
+        setApps(userApps);
+    }
+
     useEffect(() => {
+        fetchNeighborhoods();
+        fetchApps();
         trainModel();
     }, [])
 
@@ -63,21 +79,22 @@ export default function PredictEarnings()
                     <select onChange={(e) => setApp(e.target.value)}
                         className="form-control mb-2" id="da-app">
                         <option value=""></option>
-                        <option value="Doordash">Doordash</option>
-                        <option value="UberEats">Uber Eats</option>
-                        <option value="Grubhub">Grubhub</option>
-                        <option value="Instacart">Instacart</option>
+                        {apps.map((app: any) => 
+                            <option value={app}>{app}</option>
+                        )}
                     </select>
                 </Col>
             </FormGroup>
             <FormGroup as={Row} className="d-flex align-items-center mb-2">
                 <FormLabel column sm={2}>Neighborhood</FormLabel>
                 <Col sm={4}>
-                    <FormControl 
-                        type="text"
-                        placeholder="Neighborhood"
-                        onChange={(e) => setNeighborhood(e.target.value)}
-                    />
+                    <select onChange={(e) => setNeighborhood(e.target.value)}
+                        className="form-control mb-2" id="da-neighborhood">
+                        <option value=""></option>
+                        {neighborhoods.map((neighborhood: any) => 
+                            <option value={neighborhood}>{neighborhood}</option>
+                        )}
+                    </select>
                 </Col>
             </FormGroup>
             <Button onClick={predictEarnings} className="btn btn-primary">

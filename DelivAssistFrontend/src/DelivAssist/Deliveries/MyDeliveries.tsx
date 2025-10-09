@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
-import { Card, FormGroup, FormLabel, FormControl, Modal, Button, Row, Col, Dropdown } from "react-bootstrap";
+import { FormGroup, FormLabel, FormControl, Modal, Row, Col, Dropdown } from "react-bootstrap";
+import { Card, CardContent, Typography, Button } from "@mui/material";
 import * as client from "./client";
 import type { DeliveryFilters } from "./client";
 import '../../index.css';
@@ -126,10 +127,17 @@ export default function MyDeliveries({ myDeliveries, setMyDeliveries }: {
 
     return (
         <div id="da-my-deliveries" className="mt-3 col-sm-8">
-            <Button onClick={() => setShowForm(true)} className="btn btn-warning mb-3 me-2">
+            <Button onClick={() => setShowForm(true)} 
+                variant="contained" 
+                color="secondary"
+                sx={{mr: 1, mb: 2}}>
                 Filter Deliveries
             </Button>
-            <Button onClick={resetFilters} className="btn btn-danger mb-3">
+            <Button onClick={resetFilters} 
+                variant="outlined" 
+                color="error"
+                className="mui-button"
+                sx={{mr: 1, mb: 2}}>
                 Reset Filters
             </Button>
 
@@ -212,7 +220,7 @@ export default function MyDeliveries({ myDeliveries, setMyDeliveries }: {
                                 </select>
                             </Col>
                         </FormGroup>
-                        <Button onClick={fetchDeliveries} className="btn btn-primary">
+                        <Button onClick={fetchDeliveries} variant="contained" color="primary">
                             Apply Filters
                         </Button>
                     </div>
@@ -223,8 +231,16 @@ export default function MyDeliveries({ myDeliveries, setMyDeliveries }: {
             <Row>
                 {myDeliveries.map((delivery: any) => 
                     <Col sm={6}>
-                        <Card className="mb-3 text-start user-delivery-card">
-                            <Card.Body style={{ padding: '0.5rem' }}>
+                        <Card sx={{
+                                mb: 3,
+                                textAlign: "start",
+                                borderRadius: 3,
+                                boxShadow: 3,
+                                position: "relative",
+                                transition: "0.3s",
+                                "&:hover": { boxShadow: 6, transform: "translateY(-3px)" },
+                        }}>
+                            <CardContent sx={{ p: 2 }}>
                                 {/*Fix dropdown to top right corner of card*/}
                                 <div style={{ position: 'absolute', top: '0.5rem', right: '0.5rem' }}>
                                     {/*Dropdown menu for delete delivery*/}
@@ -246,8 +262,8 @@ export default function MyDeliveries({ myDeliveries, setMyDeliveries }: {
                                     </Dropdown>
                                 </div>
 
-                                <Card.Title className="fw-bold">Total Pay: ${delivery.totalPay.toFixed(2)}</Card.Title>
-                                <Card.Text>
+                                <Typography variant="h6" fontWeight="bold">Total Pay: ${delivery.totalPay.toFixed(2)}</Typography>
+                                <Typography variant="body1" sx={{ mt: 1 }}>
                                     <strong>Date Completed:</strong> {formatTime(delivery.deliveryTime)} {" "} <br />
                                     <strong>Base Pay:</strong> ${delivery.basePay.toFixed(2)} {" "} <br />
                                     <strong>Tip Pay:</strong> ${delivery.tipPay.toFixed(2)} {" "} <br />
@@ -256,7 +272,7 @@ export default function MyDeliveries({ myDeliveries, setMyDeliveries }: {
                                     <strong>Restaurant:</strong> {delivery.restaurant} {" "} <br />
                                     <strong>Customer Neighborhood:</strong> {delivery.customerNeighborhood} {" "} <br />
                                     <strong>Notes:</strong> {delivery.notes} {" "}
-                                </Card.Text>
+                                </Typography>
 
                                 {/*Modal to delete delivery*/}
                                 <>
@@ -267,11 +283,15 @@ export default function MyDeliveries({ myDeliveries, setMyDeliveries }: {
                                         </Modal.Header>
                                         <Modal.Body>Are you sure you want to delete this delivery?</Modal.Body>
                                         <Modal.Footer>
-                                            <Button variant="secondary" onClick={() => setDeliveryToDelete(-1)}>
+                                            <Button variant="contained" 
+                                                color="secondary" 
+                                                sx={{ mr: 2}}
+                                                onClick={() => setDeliveryToDelete(-1)}>
                                                 Cancel
                                             </Button>
                                             <Button
-                                                variant="danger"
+                                                variant="outlined"
+                                                color="error"
                                                 onClick={() => {
                                                     deleteDelivery(deliveryToDelete);
                                                 }}
@@ -281,7 +301,7 @@ export default function MyDeliveries({ myDeliveries, setMyDeliveries }: {
                                         </Modal.Footer>
                                     </Modal>
                                 </>
-                            </Card.Body>
+                            </CardContent>
                         </Card>
                     </Col>
                 )}

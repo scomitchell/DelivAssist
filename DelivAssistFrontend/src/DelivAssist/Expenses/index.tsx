@@ -1,4 +1,5 @@
-import { Button, Modal, FormGroup, FormLabel, FormControl, Row, Col } from "react-bootstrap";
+import { Modal, FormGroup, FormLabel, FormControl, Row, Col } from "react-bootstrap";
+import { Button } from "@mui/material";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import MyExpenses from "./MyExpenses";
@@ -48,7 +49,7 @@ export default function Expenses() {
         <div id="da-expenses">
             <div id="da-expenses-header" className="d-flex align-items-center">
                 <h1 className="me-2">Track your expenses</h1>
-                <Button onClick={() => setShowForm(true)} className="btn btn-primary">
+                <Button onClick={() => setShowForm(true)} variant="contained" color="primary">
                     Add Expense
                 </Button>
 
@@ -99,7 +100,7 @@ export default function Expenses() {
                                     />
                                 </Col>
                             </FormGroup>
-                            <Button onClick={addExpense} className="btn btn-primary">
+                            <Button onClick={addExpense} variant="contained" color="primary">
                                 Add Expense
                             </Button>
                         </div>
