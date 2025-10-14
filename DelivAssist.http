@@ -1,0 +1,6 @@
+@DelivAssist_HostAddress = http://localhost:5129
+
+GET {{DelivAssist_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
