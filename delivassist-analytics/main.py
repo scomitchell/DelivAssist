@@ -11,6 +11,8 @@ from sklearn.preprocessing import OneHotEncoder
 from datetime import datetime
 import io
 import base64
+import os
+import uvicorn
 
 app = FastAPI()
 
@@ -205,3 +207,7 @@ def predict_shift_earnings(data: PredictionSample):
 def time_str_to_minutes(t: str) -> int:
     dt = datetime.strptime(t, "%H:%M")
     return dt.hour * 60 + dt.minute
+
+if __name__ == "__main__":
+    port = int(os.environ.get("PORT", 8888))
+    uvicorn.run(app, host="0.0.0.0", port=port)
