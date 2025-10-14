@@ -19,10 +19,14 @@ namespace DelivAssist.Controllers
         private readonly ApplicationDbContext _context;
         private readonly HttpClient _httpClient;
 
+        private readonly string _pythonServiceUrl;
+
         public StatisticsController(ApplicationDbContext context, IHttpClientFactory httpClientFactory)
         {
             _context = context;
             _httpClient = httpClientFactory.CreateClient();
+            _pythonServiceUrl = Environment.GetEnvironmentVariable("PYTHON_SERVICE_URL") 
+                ?? "http://localhost:8001";
         }
 
         [HttpGet("deliveries/avg-delivery-pay")]
@@ -427,7 +431,7 @@ namespace DelivAssist.Controllers
                 earnings = earnings
             };
 
-            var response = await _httpClient.PostAsJsonAsync("http://localhost:8001/charts/earnings", payload);
+            var response = await _httpClient.PostAsJsonAsync($"{_pythonServiceUrl}/charts/earnings", payload);
 
             if (!response.IsSuccessStatusCode)
             {
@@ -491,7 +495,7 @@ namespace DelivAssist.Controllers
                 tipPays = tipPays
             };
 
-            var response = await _httpClient.PostAsJsonAsync("http://localhost:8001/charts/tips-neighborhood", payload);
+            var response = await _httpClient.PostAsJsonAsync($"{_pythonServiceUrl}/charts/tips-neighborhood", payload);
 
             if (!response.IsSuccessStatusCode)
             {
@@ -540,7 +544,7 @@ namespace DelivAssist.Controllers
                 basePays = basePays
             };
 
-            var response = await _httpClient.PostAsJsonAsync("http://localhost:8001/charts/apps-by-base", payload);
+            var response = await _httpClient.PostAsJsonAsync($"{_pythonServiceUrl}/charts/apps-by-base", payload);
 
             if (!response.IsSuccessStatusCode)
             {
@@ -597,7 +601,7 @@ namespace DelivAssist.Controllers
                 earnings = earnings
             };
 
-            var response = await _httpClient.PostAsJsonAsync("http://localhost:8001/charts/hourly-earnings", payload);
+            var response = await _httpClient.PostAsJsonAsync($"{_pythonServiceUrl}/charts/hourly-earnings", payload);
 
             if (!response.IsSuccessStatusCode)
             {
@@ -651,7 +655,7 @@ namespace DelivAssist.Controllers
 
             var payload = new { samples };
 
-            var response = await _httpClient.PostAsJsonAsync("http://localhost:8001/train/shift-model", payload);
+            var response = await _httpClient.PostAsJsonAsync($"{_pythonServiceUrl}/train/shift-model", payload);
 
             if (!response.IsSuccessStatusCode)
             {
@@ -674,7 +678,7 @@ namespace DelivAssist.Controllers
                 neighborhood = request.Neighborhood
             };
 
-            var response = await _httpClient.PostAsJsonAsync("http://localhost:8001/predict/shift-earnings", payload);
+            var response = await _httpClient.PostAsJsonAsync($"{_pythonServiceUrl}/predict/shift-earnings", payload);
 
             if (!response.IsSuccessStatusCode)
             {
