@@ -32,126 +32,161 @@ namespace DelivAssist.Controllers
         [HttpGet("deliveries/avg-delivery-pay")]
         public async Task<IActionResult> GetAvgDeliveryPay()
         {
-            var userId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier));
+            var userIdClaim = User.FindFirstValue(ClaimTypes.NameIdentifier);
 
-            // Get all the total pays for deliveries of this user
-            var totalPays = await (
-                from ud in _context.UserDeliveries
-                join d in _context.Deliveries on ud.DeliveryId equals d.Id
-                where ud.UserId == userId
-                select d.TotalPay
-            ).ToListAsync();
-
-            // If no deliveries, average is zero (or handle differently)
-            if (totalPays.Count == 0)
+            if (int.TryParse(userIdClaim, out int userId))
             {
-                return Ok(0);
+                // Get all the total pays for deliveries of this user
+                var totalPays = await (
+                    from ud in _context.UserDeliveries
+                    join d in _context.Deliveries on ud.DeliveryId equals d.Id
+                    where ud.UserId == userId
+                    select d.TotalPay
+                ).ToListAsync();
+
+                // If no deliveries, average is zero (or handle differently)
+                if (totalPays.Count == 0)
+                {
+                    return Ok(0);
+                }
+
+                // Compute average in memory
+                var avgPay = totalPays.Average();
+
+                return Ok(avgPay);
             }
-
-            // Compute average in memory
-            var avgPay = totalPays.Average();
-
-            return Ok(avgPay);
+            else
+            {
+                return NotFound("User claim is invalid");
+            }
         }
 
         [HttpGet("deliveries/average-base-pay")]
         public async Task<IActionResult> GetAvgBasePay()
         {
-            var userId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier));
+            var userIdClaim = User.FindFirstValue(ClaimTypes.NameIdentifier);
 
-            var totalBases = await (
-                from ud in _context.UserDeliveries
-                join d in _context.Deliveries on ud.DeliveryId equals d.Id
-                where ud.UserId == userId
-                select d.BasePay
-            ).ToListAsync();
-
-            if (totalBases.Count == 0)
+            if (int.TryParse(userIdClaim, out int userId))
             {
-                return Ok(0);
+                var totalBases = await (
+                    from ud in _context.UserDeliveries
+                    join d in _context.Deliveries on ud.DeliveryId equals d.Id
+                    where ud.UserId == userId
+                    select d.BasePay
+                ).ToListAsync();
+
+                if (totalBases.Count == 0)
+                {
+                    return Ok(0);
+                }
+
+                var avgBase = totalBases.Average();
+
+                return Ok(avgBase);
             }
-
-            var avgBase = totalBases.Average();
-
-            return Ok(avgBase);
+            else
+            {
+                return NotFound("User claim is invalid");
+            }
         }
 
         [HttpGet("deliveries/average-tip")]
         public async Task<IActionResult> GetAvgTipPay()
         {
-            var userId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier));
+            var userIdClaim = User.FindFirstValue(ClaimTypes.NameIdentifier);
 
-            var totalTips = await (
-                from ud in _context.UserDeliveries
-                join d in _context.Deliveries on ud.DeliveryId equals d.Id
-                where ud.UserId == userId
-                select d.TipPay
-            ).ToListAsync();
-
-            if (totalTips.Count == 0)
+            if (int.TryParse(userIdClaim, out int userId))
             {
-                return Ok(0);
+                var totalTips = await (
+                    from ud in _context.UserDeliveries
+                    join d in _context.Deliveries on ud.DeliveryId equals d.Id
+                    where ud.UserId == userId
+                    select d.TipPay
+                ).ToListAsync();
+
+                if (totalTips.Count == 0)
+                {
+                    return Ok(0);
+                }
+
+                var avgTip = totalTips.Average();
+
+                return Ok(avgTip);
             }
-
-            var avgTip = totalTips.Average();
-
-            return Ok(avgTip);
+            else
+            {
+                return NotFound("User claim is invalid");
+            }
         }
 
         [HttpGet("deliveries/highest-paying-neighborhood")]
         public async Task<IActionResult> GetHighestPayingNeighborhood()
         {
-            var userId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier));
+            var userIdClaim = User.FindFirstValue(ClaimTypes.NameIdentifier);
 
-            var result = await _context.UserDeliveries
-                .Where(ud => ud.UserId == userId)
-                .GroupBy(ud => ud.Delivery.CustomerNeighborhood)
-                .Select(g => new
+            if (int.TryParse(userIdClaim, out int userId))
+            {
+                var result = await _context.UserDeliveries
+                    .Where(ud => ud.UserId == userId)
+                    .GroupBy(ud => ud.Delivery.CustomerNeighborhood)
+                    .Select(g => new
+                    {
+                        Neighborhood = g.Key,
+                        AvgTipPay = g.Average(ud => ud.Delivery.TipPay)
+                    })
+                    .OrderByDescending(x => x.AvgTipPay)
+                    .FirstOrDefaultAsync();
+
+                if (result == null)
                 {
-                    Neighborhood = g.Key,
-                    AvgTipPay = g.Average(ud => ud.Delivery.TipPay)
-                })
-                .OrderByDescending(x => x.AvgTipPay)
-                .FirstOrDefaultAsync();
+                    return NotFound("No deliveries found for user");
+                }
 
-            if (result == null)
-            {
-                return NotFound("No deliveries found for user");
+                return Ok(new
+                {
+                    neighborhood = result.Neighborhood,
+                    averageTipPay = result.AvgTipPay
+                });
             }
-
-            return Ok(new
+            else
             {
-                neighborhood = result.Neighborhood,
-                averageTipPay = result.AvgTipPay
-            });
+                return NotFound("User claim is invalid");
+            }
         }
 
         [HttpGet("deliveries/highest-paying-restaurant")]
         public async Task<IActionResult> GetHighestPayingRestaurant()
         {
-            var userId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier));
+            var userIdClaim = User.FindFirstValue(ClaimTypes.NameIdentifier);
 
-            var result = await _context.UserDeliveries
-                .Where(ud => ud.UserId == userId)
-                .GroupBy(ud => ud.Delivery.Restaurant)
-                .Select(g => new
+            if (int.TryParse(userIdClaim, out int userId))
+            {
+                var result = await _context.UserDeliveries
+                    .Where(ud => ud.UserId == userId)
+                    .GroupBy(ud => ud.Delivery.Restaurant)
+                    .Select(g => new
+                    {
+                        Restaurant = g.Key,
+                        AvgTotalPay = g.Average(ud => ud.Delivery.TotalPay)
+                    })
+                    .OrderByDescending(x => x.AvgTotalPay)
+                    .FirstOrDefaultAsync();
+
+                if (result == null)
                 {
-                    Restaurant = g.Key,
-                    AvgTotalPay = g.Average(ud => ud.Delivery.TotalPay)
-                })
-                .OrderByDescending(x => x.AvgTotalPay)
-                .FirstOrDefaultAsync();
+                    return NotFound("No deliveries found for user");
+                }
 
-            if (result == null)
-            {
-                return NotFound("No deliveries found for user");
+                return Ok(new
+                {
+                    restaurant = result.Restaurant,
+                    avgTotalPay = result.AvgTotalPay
+                });
             }
-
-            return Ok(new
+            else
             {
-                restaurant = result.Restaurant,
-                avgTotalPay = result.AvgTotalPay
-            });
+                return NotFound("User claim is invalid");
+            }
         }
 
         [HttpGet("deliveries/highest-paying-base-app")]
