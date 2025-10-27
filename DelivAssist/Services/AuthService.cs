@@ -15,7 +15,8 @@ namespace DelivAssist.Services
 
 		public string GenerateToken(User user)
 		{
-			var secretKey = Environment.GetEnvironmentVariable("JWT_SECRET_KEY");
+			var secretKey = Environment.GetEnvironmentVariable("JWT_SECRET_KEY")
+				?? throw new InvalidOperationException("JWT_SECRET_KEY environment variable is not set.");
 			var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(secretKey));
 			var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
 

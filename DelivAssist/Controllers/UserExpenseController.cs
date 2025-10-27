@@ -22,42 +22,51 @@ namespace DelivAssist.Controllers
         [HttpPost]
         public async Task<IActionResult> AddExpense([FromBody] Expense expense)
         {
-            var userId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier));
+            var userIdClaim = User.FindFirstValue(ClaimTypes.NameIdentifier);
 
-            _context.Expenses.Add(expense);
-            await _context.SaveChangesAsync();
-
-            var userExpense = new UserExpense
+            if (int.TryParse(userIdClaim, out int userId))
             {
-                UserId = userId,
-                ExpenseId = expense.Id,
-                DateAdded = DateTime.UtcNow
-            };
+                _context.Expenses.Add(expense);
+                await _context.SaveChangesAsync();
 
-            _context.UserExpenses.Add(userExpense);
-            await _context.SaveChangesAsync();
+                var userExpense = new UserExpense
+                {
+                    UserId = userId,
+                    ExpenseId = expense.Id,
+                    DateAdded = DateTime.UtcNow
+                };
 
-            return Ok(new ExpenseDto
+                _context.UserExpenses.Add(userExpense);
+                await _context.SaveChangesAsync();
+
+                return Ok(new ExpenseDto
+                {
+                    Id = expense.Id,
+                    Amount = expense.Amount,
+                    Date = expense.Date,
+                    Type = expense.Type,
+                    Notes = expense.Notes
+                });
+            }
+            else
             {
-                Id = expense.Id,
-                Amount = expense.Amount,
-                Date = expense.Date,
-                Type = expense.Type,
-                Notes = expense.Notes
-            });
+                return BadRequest("User claim is invalid");
+            }
         }
 
         [HttpGet("my-expenses")]
         public async Task<IActionResult> GetExpenses()
         {
-            var userId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier));
+            var userIdClaim = User.FindFirstValue(ClaimTypes.NameIdentifier);
 
-            var userExpenses = await _context.UserExpenses
-                .Where(ue => ue.UserId == userId)
+            if (int.TryParse(userIdClaim, out int userId))
+            {
+                var userExpenses = await _context.UserExpenses
+                .Where(ue => ue.UserId == userId && ue.Expense != null)
                 .Include(ue => ue.Expense)
                 .Select(ue => new ExpenseDto
                 {
-                    Id = ue.Expense.Id,
+                    Id = ue.Expense!.Id,
                     Amount = ue.Expense.Amount,
                     Date = ue.Expense.Date,
                     Type = ue.Expense.Type,
@@ -65,7 +74,12 @@ namespace DelivAssist.Controllers
                 })
                 .ToListAsync();
 
-            return Ok(userExpenses);
+                return Ok(userExpenses);
+            }
+            else
+            {
+                return BadRequest("User claim is invalid");
+            }
         }
 
         [HttpGet("filtered-expenses")]
@@ -73,125 +87,166 @@ namespace DelivAssist.Controllers
             [FromQuery] DateTime? date,
             [FromQuery] string? type) 
         {
-            var userId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier));
+            var userIdClaim = User.FindFirstValue(ClaimTypes.NameIdentifier);
 
-            var userExpensesQuery = _context.UserExpenses
-                .Where(ue => ue.UserId == userId)
+            if (int.TryParse(userIdClaim, out int userId))
+            {
+                var userExpensesQuery = _context.UserExpenses
+                .Where(ue => ue.UserId == userId && ue.Expense != null)
                 .Include(ue => ue.Expense)
                 .AsQueryable();
 
-            if (amount.HasValue) {
-                userExpensesQuery = userExpensesQuery.Where(ue => ue.Expense.Amount >= amount);
+                if (amount.HasValue)
+                {
+                    userExpensesQuery = userExpensesQuery.Where(ue => ue.Expense!.Amount >= amount);
+                }
+
+                if (date.HasValue)
+                {
+                    userExpensesQuery = userExpensesQuery.Where(ue => ue.Expense!.Date >= date);
+                }
+
+                if (!string.IsNullOrEmpty(type))
+                {
+                    userExpensesQuery = userExpensesQuery.Where(ue => ue.Expense!.Type == type);
+                }
+
+                var userExpenses = await userExpensesQuery
+                    .Select(ue => new ExpenseDto
+                    {
+                        Id = ue.Expense!.Id,
+                        Amount = ue.Expense.Amount,
+                        Date = ue.Expense.Date,
+                        Type = ue.Expense.Type
+                    })
+                    .ToListAsync();
+
+                return Ok(userExpenses);
             }
-
-            if (date.HasValue) {
-                userExpensesQuery = userExpensesQuery.Where(ue => ue.Expense.Date >= date);
+            else
+            {
+                return BadRequest("User claim is invalid");
             }
-
-            if (!string.IsNullOrEmpty(type)) {
-                userExpensesQuery = userExpensesQuery.Where(ue => ue.Expense.Type == type);
-            }
-
-            var userExpenses = await userExpensesQuery
-                .Select(ue => new ExpenseDto {
-                    Id = ue.Expense.Id,
-                    Amount = ue.Expense.Amount,
-                    Date = ue.Expense.Date,
-                    Type = ue.Expense.Type
-                })
-                .ToListAsync();
-
-            return Ok(userExpenses);
         }
 
         [HttpGet("types")]
         public async Task<IActionResult> GetExpenseTypes() {
-            var userId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier));
+            var userIdClaim = User.FindFirstValue(ClaimTypes.NameIdentifier);
 
-            var result = await _context.UserExpenses
-                .Where(ue => ue.UserId == userId)
-                .Select(ue => ue.Expense.Type)
+            if (int.TryParse(userIdClaim, out int userId))
+            {
+                var result = await _context.UserExpenses
+                .Where(ue => ue.UserId == userId && ue.Expense != null)
+                .Select(ue => ue.Expense!.Type)
                 .Distinct()
                 .ToListAsync();
-            
-            return Ok(result);
+
+                return Ok(result);
+            }
+            else
+            {
+                return BadRequest("User claim is invalid");
+            }
         }
 
         [HttpGet("{expenseId:int}")]
         public async Task<IActionResult> GetExpenseById(int expenseId)
         {
-            var userId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier));
+            var userIdClaim = User.FindFirstValue(ClaimTypes.NameIdentifier);
 
-            var userExpense = await _context.UserExpenses
+            if (int.TryParse(userIdClaim, out int userId))
+            {
+                var userExpense = await _context.UserExpenses
                 .FirstOrDefaultAsync(us => us.UserId == userId && us.ExpenseId == expenseId);
 
-            if (userExpense == null)
-            {
-                return NotFound("Expense not found");
-            }
+                if (userExpense == null)
+                {
+                    return NotFound("Expense not found");
+                }
 
-            return Ok(userExpense);
+                return Ok(userExpense);
+            }
+            else
+            {
+                return BadRequest("User claim is invalid");
+            }
         }
 
         [HttpDelete("{expenseId}")]
         public async Task<IActionResult> DeleteExpense(int expenseId)
         {
-            var userId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier));
+            var userIdClaim = User.FindFirstValue(ClaimTypes.NameIdentifier);
 
-            var userExpense = await _context.UserExpenses
+            if (int.TryParse(userIdClaim, out int userId))
+            {
+                var userExpense = await _context.UserExpenses
                 .FirstOrDefaultAsync(ue => ue.UserId == userId && ue.ExpenseId == expenseId);
 
-            if (userExpense == null)
-            {
-                return NotFound("Expense Not found");
-            }
+                if (userExpense == null)
+                {
+                    return NotFound("Expense Not found");
+                }
 
-            _context.UserExpenses.Remove(userExpense);
-            await _context.SaveChangesAsync();
-
-            var expense = await _context.Expenses.FindAsync(expenseId);
-            if (expense != null) 
-            {
-                _context.Expenses.Remove(expense);
+                _context.UserExpenses.Remove(userExpense);
                 await _context.SaveChangesAsync();
-            }
 
-            return Ok("Expense Deleted");
+                var expense = await _context.Expenses.FindAsync(expenseId);
+                if (expense != null)
+                {
+                    _context.Expenses.Remove(expense);
+                    await _context.SaveChangesAsync();
+                }
+
+                return Ok("Expense Deleted");
+            }
+            else
+            {
+                return BadRequest("User claim is invalid");
+            }
         }
 
         [HttpPut]
-        public async Task<IActionResult> UpdateExpense([FromBody] Expense expense) {
-            var userId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier));
+        public async Task<IActionResult> UpdateExpense([FromBody] Expense expense)
+        {
+            var userIdClaim = User.FindFirstValue(ClaimTypes.NameIdentifier);
 
-            var existingExpense = await _context.UserExpenses
-                .Where(ue => ue.UserId == userId && ue.ExpenseId == expense.Id)
+            if (int.TryParse(userIdClaim, out int userId))
+            {
+                var existingExpense = await _context.UserExpenses
+                .Where(ue => ue.UserId == userId && ue.ExpenseId == expense.Id && ue.Expense != null)
                 .Include(ue => ue.Expense)
                 .FirstOrDefaultAsync();
 
-            if (existingExpense == null) {
-                return BadRequest("Expense does not exist");
+                if (existingExpense == null)
+                {
+                    return BadRequest("Expense does not exist");
+                }
+
+                var targetExpense = existingExpense.Expense;
+
+                targetExpense!.Amount = expense.Amount;
+                targetExpense.Date = expense.Date;
+                targetExpense.Type = expense.Type;
+                targetExpense.Notes = expense.Notes;
+
+                _context.Expenses.Update(targetExpense);
+                await _context.SaveChangesAsync();
+
+                var responseExpense = new ExpenseDto
+                {
+                    Id = targetExpense.Id,
+                    Amount = targetExpense.Amount,
+                    Date = targetExpense.Date,
+                    Type = targetExpense.Type,
+                    Notes = targetExpense.Notes
+                };
+
+                return Ok(responseExpense);
             }
-
-            var targetExpense = existingExpense.Expense;
-
-            targetExpense.Amount = expense.Amount;
-            targetExpense.Date = expense.Date;
-            targetExpense.Type = expense.Type;
-            targetExpense.Notes = expense.Notes;
-
-            _context.Expenses.Update(targetExpense);
-            await _context.SaveChangesAsync();
-
-            var responseExpense = new ExpenseDto {
-                Id = targetExpense.Id,
-                Amount = targetExpense.Amount,
-                Date = targetExpense.Date,
-                Type = targetExpense.Type,
-                Notes = targetExpense.Notes
-            };
-
-            return Ok(responseExpense);
+            else
+            {
+                return BadRequest("User claim is invalid");
+            }
         }
     }
-
 }

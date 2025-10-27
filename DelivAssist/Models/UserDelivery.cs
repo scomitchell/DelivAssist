@@ -7,8 +7,8 @@ namespace DelivAssist.Models
 
         public DateTime DateAdded { get; set; }
 
-        public User User { get; set; }
+        public User? User { get; set; }
 
-        public Delivery Delivery { get; set; }
+        public Delivery? Delivery { get; set; }
     }
 }

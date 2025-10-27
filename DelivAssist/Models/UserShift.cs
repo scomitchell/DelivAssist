@@ -8,8 +8,8 @@ namespace DelivAssist.Models
 
         public DateTime DateAdded { get; set; }
 
-        public User User { get; set; }
+        public User? User { get; set; }
 
-        public Shift Shift { get; set; }
+        public Shift? Shift { get; set; }
     }
 }

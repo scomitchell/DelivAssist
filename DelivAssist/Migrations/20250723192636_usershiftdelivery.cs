@@ -5,7 +5,7 @@
 namespace DelivAssist.Migrations
 {
     /// <inheritdoc />
-    public partial class usershiftdelivery : Migration
+    public partial class UserShiftDelivery : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)

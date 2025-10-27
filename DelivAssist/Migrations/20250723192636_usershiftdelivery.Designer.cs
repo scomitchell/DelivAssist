@@ -12,7 +12,7 @@ namespace DelivAssist.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
     [Migration("20250723192636_usershiftdelivery")]
-    partial class usershiftdelivery
+    partial class UserShiftDelivery
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
