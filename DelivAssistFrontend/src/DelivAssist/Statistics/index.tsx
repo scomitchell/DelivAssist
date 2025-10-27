@@ -200,18 +200,37 @@ export default function Statistics() {
                             <Card.Body style={{ padding: '0.25rem' }}>
                                 <Card.Title className="fw-bold">Location Statistics</Card.Title>
                                 <Card.Text>
-                                    <strong>Best tip neighborhood:</strong> {neighborhood.neighborhood} <br />
-                                    <span style={{ marginLeft: "1rem" }}>
-                                        <strong>- Average Tip:</strong> ${neighborhood.averageTipPay.toFixed(2)}
-                                    </span> <br />
-                                    <strong>Best paying restaurant:</strong> {restaurant.restaurant} <br />
-                                    <span style={{ marginLeft: "1rem" }}>
-                                        <strong>- Average Total:</strong> ${restaurant.avgTotalPay.toFixed(2)} <br />
-                                    </span>
-                                    <strong>Restaurant with most orders:</strong> {restaurantWithMost.restaurant} <br />
-                                    <span style={{marginLeft:"1rem"}}>
-                                        <strong>- Number of Orders:</strong> {restaurantWithMost.orderCount}
-                                    </span>
+                                    {loading ?
+                                    <div>
+                                        <strong>Best tip neighborhood:</strong> Loading... <br />
+                                        <span style={{ marginLeft: "1rem" }}>
+                                            <strong>- Average Tip:</strong> Loading...
+                                        </span> <br />
+                                        <strong>Best paying restaurant:</strong> Loading... <br />
+                                        <span style={{ marginLeft: "1rem" }}>
+                                            <strong>- Average Total:</strong> Loading... <br />
+                                        </span>
+                                        <strong>Restaurant with most orders:</strong> Loading... <br />
+                                        <span style={{marginLeft:"1rem"}}>
+                                            <strong>- Number of Orders:</strong> Loading...
+                                        </span>
+                                    </div>
+                                    :
+                                    <div>
+                                        <strong>Best tip neighborhood:</strong> {neighborhood.neighborhood} <br />
+                                        <span style={{ marginLeft: "1rem" }}>
+                                            <strong>- Average Tip:</strong> ${neighborhood.averageTipPay.toFixed(2)}
+                                        </span> <br />
+                                        <strong>Best paying restaurant:</strong> {restaurant.restaurant} <br />
+                                        <span style={{ marginLeft: "1rem" }}>
+                                            <strong>- Average Total:</strong> ${restaurant.avgTotalPay.toFixed(2)} <br />
+                                        </span>
+                                        <strong>Restaurant with most orders:</strong> {restaurantWithMost.restaurant} <br />
+                                        <span style={{marginLeft:"1rem"}}>
+                                            <strong>- Number of Orders:</strong> {restaurantWithMost.orderCount}
+                                        </span>
+                                    </div>
+                                    }       
                                 </Card.Text>
                             </Card.Body>
                         </Card>
