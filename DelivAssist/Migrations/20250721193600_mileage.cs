@@ -5,7 +5,7 @@
 namespace DelivAssist.Migrations
 {
     /// <inheritdoc />
-    public partial class mileage : Migration
+    public partial class Mileage : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)

@@ -57,7 +57,7 @@ namespace DelivAssist.Controllers
             }
             else
             {
-                return NotFound("User claim is invalid");
+                return BadRequest("User claim is invalid");
             }
         }
 
@@ -86,7 +86,7 @@ namespace DelivAssist.Controllers
             }
             else
             {
-                return NotFound("User claim is invalid");
+                return BadRequest("User claim is invalid");
             }
         }
 
@@ -115,7 +115,7 @@ namespace DelivAssist.Controllers
             }
             else
             {
-                return NotFound("User claim is invalid");
+                return BadRequest("User claim is invalid");
             }
         }
 
@@ -127,12 +127,12 @@ namespace DelivAssist.Controllers
             if (int.TryParse(userIdClaim, out int userId))
             {
                 var result = await _context.UserDeliveries
-                    .Where(ud => ud.UserId == userId)
-                    .GroupBy(ud => ud.Delivery.CustomerNeighborhood)
+                    .Where(ud => ud.UserId == userId && ud.Delivery != null)
+                    .GroupBy(ud => ud.Delivery!.CustomerNeighborhood)
                     .Select(g => new
                     {
                         Neighborhood = g.Key,
-                        AvgTipPay = g.Average(ud => ud.Delivery.TipPay)
+                        AvgTipPay = g.Average(ud => ud.Delivery!.TipPay)
                     })
                     .OrderByDescending(x => x.AvgTipPay)
                     .FirstOrDefaultAsync();
@@ -150,7 +150,7 @@ namespace DelivAssist.Controllers
             }
             else
             {
-                return NotFound("User claim is invalid");
+                return BadRequest("User claim is invalid");
             }
         }
 
@@ -162,12 +162,12 @@ namespace DelivAssist.Controllers
             if (int.TryParse(userIdClaim, out int userId))
             {
                 var result = await _context.UserDeliveries
-                    .Where(ud => ud.UserId == userId)
-                    .GroupBy(ud => ud.Delivery.Restaurant)
+                    .Where(ud => ud.UserId == userId && ud.Delivery != null)
+                    .GroupBy(ud => ud.Delivery!.Restaurant)
                     .Select(g => new
                     {
                         Restaurant = g.Key,
-                        AvgTotalPay = g.Average(ud => ud.Delivery.TotalPay)
+                        AvgTotalPay = g.Average(ud => ud.Delivery!.TotalPay)
                     })
                     .OrderByDescending(x => x.AvgTotalPay)
                     .FirstOrDefaultAsync();
@@ -185,167 +185,213 @@ namespace DelivAssist.Controllers
             }
             else
             {
-                return NotFound("User claim is invalid");
+                return BadRequest("User claim is invalid");
             }
         }
 
         [HttpGet("deliveries/highest-paying-base-app")]
         public async Task<IActionResult> GetHighestPayingBaseApp()
         {
-            var userId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier));
+            var userIdClaim = User.FindFirstValue(ClaimTypes.NameIdentifier);
 
-            var result = await _context.UserDeliveries
-                .Where(ud => ud.UserId == userId)
-                .GroupBy(ud => ud.Delivery.App)
-                .Select(g => new
+            if (int.TryParse(userIdClaim, out int userId))
+            {
+                var result = await _context.UserDeliveries
+                    .Where(ud => ud.UserId == userId && ud.Delivery != null)
+                    .GroupBy(ud => ud.Delivery!.App)
+                    .Select(g => new
+                    {
+                        App = g.Key,
+                        AverageBase = g.Average(ud => ud.Delivery!.BasePay)
+                    })
+                    .OrderByDescending(x => x.AverageBase)
+                    .FirstOrDefaultAsync();
+
+                if (result == null)
                 {
-                    App = g.Key,
-                    AverageBase = g.Average(ud => ud.Delivery.BasePay)
-                })
-                .OrderByDescending(x => x.AverageBase)
-                .FirstOrDefaultAsync();
+                    return NotFound("No deliveries found");
+                }
 
-            if (result == null)
-            {
-                return NotFound("No deliveries found");
+                return Ok(new
+                {
+                    app = result.App,
+                    avgBase = result.AverageBase
+                });
             }
-
-            return Ok(new
+            else
             {
-                app = result.App,
-                avgBase = result.AverageBase
-            });
+                return BadRequest("User claim does not exist");
+            }
         }
 
         [HttpGet("deliveries/highest-paying-tip-app")]
         public async Task<IActionResult> GetHighestPayingTipApp()
         {
-            var userId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier));
+            var userIdClaim = User.FindFirstValue(ClaimTypes.NameIdentifier);
 
-            var result = await _context.UserDeliveries
-                .Where(ud => ud.UserId == userId)
-                .GroupBy(ud => ud.Delivery.App)
-                .Select(g => new
+            if (int.TryParse(userIdClaim, out int userId))
+            {
+                var result = await _context.UserDeliveries
+                    .Where(ud => ud.UserId == userId && ud.Delivery != null)
+                    .GroupBy(ud => ud.Delivery!.App)
+                    .Select(g => new
+                    {
+                        App = g.Key,
+                        AverageTip = g.Average(ud => ud.Delivery!.TipPay)
+                    })
+                    .OrderByDescending(x => x.AverageTip)
+                    .FirstOrDefaultAsync();
+
+                if (result == null)
                 {
-                    App = g.Key,
-                    AverageTip = g.Average(ud => ud.Delivery.TipPay)
-                })
-                .OrderByDescending(x => x.AverageTip)
-                .FirstOrDefaultAsync();
+                    return NotFound("No deliveries found");
+                }
 
-            if (result == null)
-            {
-                return NotFound("No deliveries found");
+                return Ok(new
+                {
+                    app = result.App,
+                    avgTip = result.AverageTip
+                });
             }
-
-            return Ok(new
+            else
             {
-                app = result.App,
-                avgTip = result.AverageTip
-            });
+                return BadRequest("User claim does not exist");
+            }
         }
 
         [HttpGet("deliveries/dollar-per-mile")]
         public async Task<IActionResult> GetDollarPerMile()
         {
-            var userId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier));
+            var userIdClaim = User.FindFirstValue(ClaimTypes.NameIdentifier);
 
-            var miles = await _context.UserDeliveries
-                .Where(ud => ud.UserId == userId)
-                .SumAsync(ud => ud.Delivery.Mileage);
-
-            var totalPay = await _context.UserDeliveries
-                .Where(ud => ud.UserId == userId)
-                .SumAsync(ud => ud.Delivery.TotalPay);
-
-            if (miles == 0 || totalPay == 0)
+            if (int.TryParse(userIdClaim, out int userId))
             {
-                return Ok(0);
+                var miles = await _context.UserDeliveries
+                    .Where(ud => ud.UserId == userId && ud.Delivery != null)
+                    .SumAsync(ud => ud.Delivery!.Mileage);
+
+                var totalPay = await _context.UserDeliveries
+                    .Where(ud => ud.UserId == userId)
+                    .SumAsync(ud => ud.Delivery!.TotalPay);
+
+                if (miles == 0 || totalPay == 0)
+                {
+                    return Ok(0);
+                }
+
+                var result = totalPay / miles;
+
+                return Ok(result);
             }
-
-            var result = totalPay / miles;
-
-            return Ok(result);
+            else
+            {
+                return BadRequest("User claim is invalid");
+            }
         }
 
         [HttpGet("expenses/average-monthly-spending")]
         public async Task<IActionResult> GetAverageMonthlySpending()
         {
-            var userId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier));
+            var userIdClaim = User.FindFirstValue(ClaimTypes.NameIdentifier);
 
-            var result = _context.UserExpenses
-                .Where(ue => ue.UserId == userId)
-                .GroupBy(ue => new { ue.Expense.Date.Year, ue.Expense.Date.Month })
-                .Select(g => g.Sum(ue => ue.Expense.Amount))
-                .Average();
-
-            if (result == null)
+            if (int.TryParse(userIdClaim, out int userId))
             {
-                return NotFound("No expenses found");
-            }
+                var monthlyTotals = await _context.UserExpenses
+                    .Where(ue => ue.UserId == userId && ue.Expense != null)
+                    .GroupBy(ue => new { ue.Expense!.Date.Year, ue.Expense.Date.Month })
+                    .Select(g => g.Sum(ue => ue.Expense!.Amount))
+                    .ToListAsync();
 
-            return Ok(result);
+                if (!monthlyTotals.Any())
+                {
+                    return NotFound("No expenses found");
+                }
+
+                var result = monthlyTotals.Average();
+                return Ok(result);
+            }
+            else
+            {
+                return BadRequest("User claim is invalid");
+            }
         }
 
         [HttpGet("expenses/average-spending-by-type")]
         public async Task<IActionResult> GetAverageSpendingByType()
         {
-            var userId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier));
+            var userIdClaim = User.FindFirstValue(ClaimTypes.NameIdentifier);
 
-            var userExpenses = await _context.UserExpenses
-                .Where(ue => ue.UserId == userId)
+            if (int.TryParse(userIdClaim, out int userId))
+            {
+                var userExpenses = await _context.UserExpenses
+                .Where(ue => ue.UserId == userId && ue.Expense != null)
                 .Select(ue => new
                 {
-                    ue.Expense.Type,
+                    ue.Expense!.Type,
                     ue.Expense.Amount,
-                    Month = ue.Expense.Date.Month,
-                    Year = ue.Expense.Date.Year
+                    ue.Expense.Date.Month,
+                    ue.Expense.Date.Year
                 })
                 .ToListAsync();
 
-            var totalMonths = userExpenses
-                .Select(e => new { e.Year, e.Month })
-                .Distinct()
-                .Count();
+                var totalMonths = userExpenses
+                    .Select(e => new { e.Year, e.Month })
+                    .Distinct()
+                    .Count();
 
-            var result = userExpenses
-                .GroupBy(e => e.Type)
-                .Select(g => new
-                {
-                    Type = g.Key,
-                    AvgExpense = totalMonths > 0 ? g.Sum(x => x.Amount) / totalMonths : 0
-                })
-                .ToList();
+                var result = userExpenses
+                    .GroupBy(e => e.Type)
+                    .Select(g => new
+                    {
+                        Type = g.Key,
+                        AvgExpense = totalMonths > 0 ? g.Sum(x => x.Amount) / totalMonths : 0
+                    })
+                    .ToList();
 
-            return Ok(result);
+                return Ok(result);
+            }
+            else
+            {
+                return BadRequest("User claim is invalid");
+            }
+            
         }
 
         [HttpGet("shifts/average-shift-length")]
         public async Task<IActionResult> getAverageShiftLength()
         {
-            var userId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier));
+            var userIdClaim = User.FindFirstValue(ClaimTypes.NameIdentifier);
 
-            var durations = await _context.UserShifts
-                .Where(us => us.UserId == userId)
-                .Select(us => us.Shift.EndTime - us.Shift.StartTime)
+            if (int.TryParse(userIdClaim, out int userId))
+            {
+                var durations = await _context.UserShifts
+                .Where(us => us.UserId == userId && us.Shift != null)
+                .Select(us => us.Shift!.EndTime - us.Shift.StartTime)
                 .ToListAsync();
 
-            if (durations.Count == 0)
-                return Ok(0);
+                if (durations.Count == 0)
+                    return Ok(0);
 
-            var averageMinutes = durations.Average(d => d.TotalMinutes);
+                var averageMinutes = durations.Average(d => d.TotalMinutes);
 
-            return Ok(averageMinutes);
+                return Ok(averageMinutes);
+            }
+            else
+            {
+                return BadRequest("User claim is invalid");
+            }
         }
 
         [HttpGet("shifts/app-with-most-shifts")]
         public async Task<IActionResult> getAppWithMostShifts()
         {
-            var userId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier));
+            var userIdClaim = User.FindFirstValue(ClaimTypes.NameIdentifier);
 
-            var result = await _context.UserShifts
-                .Where(us => us.UserId == userId)
-                .GroupBy(us => us.Shift.App)
+            if (int.TryParse(userIdClaim, out int userId))
+            {
+                var result = await _context.UserShifts
+                .Where(us => us.UserId == userId && us.Shift != null)
+                .GroupBy(us => us.Shift!.App)
                 .Select(g => new
                 {
                     App = g.Key,
@@ -354,22 +400,29 @@ namespace DelivAssist.Controllers
                 .OrderByDescending(g => g.ShiftCount)
                 .FirstOrDefaultAsync();
 
-            if (result == null)
-            {
-                return Ok(null);
-            }
+                if (result == null)
+                {
+                    return Ok(null);
+                }
 
-            return Ok(result.App);
+                return Ok(result.App);
+            }
+            else
+            {
+                return BadRequest("User claim is invalid");
+            }
         }
 
         [HttpGet("deliveries/restaurant-with-most-deliveries")]
         public async Task<IActionResult> GetRestaurantWithMostDeliveries()
         {
-            var userId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier));
+            var userIdClaim = User.FindFirstValue(ClaimTypes.NameIdentifier);
 
-            var result = await _context.UserDeliveries
-                .Where(ud => ud.UserId == userId)
-                .GroupBy(ud => ud.Delivery.Restaurant)
+            if (int.TryParse(userIdClaim, out int userId))
+            {
+                var result = await _context.UserDeliveries
+                .Where(ud => ud.UserId == userId && ud.Delivery != null)
+                .GroupBy(ud => ud.Delivery!.Restaurant)
                 .Select(g => new
                 {
                     Restaurant = g.Key,
@@ -378,68 +431,90 @@ namespace DelivAssist.Controllers
                 .OrderByDescending(g => g.OrderCount)
                 .FirstOrDefaultAsync();
 
-            if (result == null)
-            {
-                return NotFound("No deliveries found");
-            }
+                if (result == null)
+                {
+                    return NotFound("No deliveries found");
+                }
 
-            return Ok(new
+                return Ok(new
+                {
+                    restaurant = result.Restaurant,
+                    orderCount = result.OrderCount
+                });
+            }
+            else
             {
-                restaurant = result.Restaurant,
-                orderCount = result.OrderCount
-            });
+                return BadRequest("User claim is invalid");
+            }
         }
 
         [HttpGet("deliveries/tip-per-mile")]
         public async Task<IActionResult> GetTipPerMile()
         {
-            var userId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier));
+            var userIdClaim = User.FindFirstValue(ClaimTypes.NameIdentifier);
 
-            var miles = await _context.UserDeliveries
-                .Where(ud => ud.UserId == userId)
-                .SumAsync(ud => ud.Delivery.Mileage);
-
-            var tipPay = await _context.UserDeliveries
-                .Where(ud => ud.UserId == userId)
-                .SumAsync(ud => ud.Delivery.TipPay);
-
-            if (miles == 0 || tipPay == 0)
+            if (int.TryParse(userIdClaim, out int userId))
             {
-                return Ok(0);
+                var miles = await _context.UserDeliveries
+                .Where(ud => ud.UserId == userId && ud.Delivery != null)
+                .SumAsync(ud => ud.Delivery!.Mileage);
+
+                var tipPay = await _context.UserDeliveries
+                .Where(ud => ud.UserId == userId)
+                .SumAsync(ud => ud.Delivery!.TipPay);
+
+                if (miles == 0 || tipPay == 0)
+                {
+                    return Ok(0);
+                }
+
+                var result = tipPay / miles;
+
+                return Ok(result);
             }
-
-            var result = tipPay / miles;
-
-            return Ok(result);
+            else
+            {
+                return BadRequest("User claim is invalid");
+            }
+            
         }
 
         [HttpGet("shifts/average-num-deliveries")]
         public async Task<IActionResult> GetAverageDeliveriesPerShift()
         {
-            var userId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier));
+            var userIdClaim = User.FindFirstValue(ClaimTypes.NameIdentifier);
 
-            var shiftDeliveryCounts = await _context.ShiftDeliveries
+            if (int.TryParse(userIdClaim, out int userId))
+            {
+                var shiftDeliveryCounts = await _context.ShiftDeliveries
                 .Where(sd => sd.UserId == userId)
                 .GroupBy(sd => sd.ShiftId)
                 .Select(g => g.Count())
                 .ToListAsync();
 
-            if (!shiftDeliveryCounts.Any())
-            {
-                return Ok(0);
+                if (!shiftDeliveryCounts.Any())
+                {
+                    return Ok(0);
+                }
+
+                var average = shiftDeliveryCounts.Average();
+
+                return Ok(average);
             }
-
-            var average = shiftDeliveryCounts.Average();
-
-            return Ok(average);
+            else
+            {
+                return BadRequest("User claim is invalid");
+            }
         }
 
         [HttpGet("charts/earnings-over-time")]
         public async Task<IActionResult> GetEarningsChart()
         {
-            var userId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier));
+            var userIdClaim = User.FindFirstValue(ClaimTypes.NameIdentifier);
 
-            var deliveries = await (
+            if (int.TryParse(userIdClaim, out int userId))
+            {
+                var deliveries = await (
                 from ud in _context.UserDeliveries
                 join d in _context.Deliveries on ud.DeliveryId equals d.Id
                 where ud.UserId == userId
@@ -450,49 +525,56 @@ namespace DelivAssist.Controllers
                     Date = g.Key,
                     TotalEarnings = g.Sum(x => x.TotalPay)
                 }
-            ).ToListAsync();
+                ).ToListAsync();
 
-            if (deliveries.Count == 0)
-            {
-                return NotFound("No deliveries found for user");
+                if (deliveries.Count == 0)
+                {
+                    return NotFound("No deliveries found for user");
+                }
+
+                var dates = deliveries.Select(d => d.Date.ToString("yyyy-MM-dd")).ToList();
+                var earnings = deliveries.Select(d => (double)d.TotalEarnings).ToList();
+
+                var payload = new
+                {
+                    dates,
+                    earnings
+                };
+
+                var response = await _httpClient.PostAsJsonAsync($"{_pythonServiceUrl}/charts/earnings", payload);
+
+                if (!response.IsSuccessStatusCode)
+                {
+                    return StatusCode(500, "Error generating chart from Python API");
+                }
+
+                var result = await response.Content.ReadFromJsonAsync<Dictionary<string, string>>();
+                if (result == null || !result.ContainsKey("image"))
+                {
+                    return StatusCode(500, "Invalid response from Python API");
+                }
+
+                // Return base64 image string
+                return Ok(new { base64Image = result["image"] });
             }
-
-            var dates = deliveries.Select(d => d.Date.ToString("yyyy-MM-dd")).ToList();
-            var earnings = deliveries.Select(d => (double)d.TotalEarnings).ToList();
-
-            var payload = new
+            else
             {
-                dates = dates,
-                earnings = earnings
-            };
-
-            var response = await _httpClient.PostAsJsonAsync($"{_pythonServiceUrl}/charts/earnings", payload);
-
-            if (!response.IsSuccessStatusCode)
-            {
-                return StatusCode(500, "Error generating chart from Python API");
+                return BadRequest("User claim is invalid");
             }
-
-            var result = await response.Content.ReadFromJsonAsync<Dictionary<string, string>>();
-            if (result == null || !result.ContainsKey("image"))
-            {
-                return StatusCode(500, "Invalid response from Python API");
-            }
-
-            // Return base64 image string
-            return Ok(new { base64Image = result["image"] });
         }
 
         [HttpGet("charts/tip-neighborhoods")]
         public async Task<IActionResult> GetTipNeighborhoodsChart()
         {
-            var userId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier));
+            var userIdClaim = User.FindFirstValue(ClaimTypes.NameIdentifier);
 
-            var deliveries = await _context.UserDeliveries
-                .Where(ud => ud.UserId == userId)
+            if (int.TryParse(userIdClaim, out int userId))
+            {
+                var deliveries = await _context.UserDeliveries
+                .Where(ud => ud.UserId == userId && ud.Delivery != null)
                 .Select(ud => new
                 {
-                    Neighborhood = ud.Delivery.CustomerNeighborhood.Trim(),
+                    Neighborhood = ud.Delivery!.CustomerNeighborhood.Trim(),
                     ud.Delivery.TipPay
                 })
                 .GroupBy(x => x.Neighborhood)
@@ -504,55 +586,62 @@ namespace DelivAssist.Controllers
                 .OrderBy(x => x.CustomerNeighborhood)
                 .ToListAsync();
 
-            if (deliveries.Count == 0)
-            {
-                return NotFound("No deliveries found");
+                if (deliveries.Count == 0)
+                {
+                    return NotFound("No deliveries found");
+                }
+
+                Console.WriteLine($"Request started at {DateTime.Now:HH:mm:ss.fff}");
+                foreach (var d in deliveries)
+                {
+                    Console.WriteLine($"{d.CustomerNeighborhood}: {d.AverageTipPay}");
+                }
+
+                Console.WriteLine("Tip Neighborhoods:");
+                foreach (var d in deliveries)
+                {
+                    Console.WriteLine($"{d.CustomerNeighborhood}: {d.AverageTipPay}");
+                }
+
+                var neighborhoods = deliveries.Select(d => d.CustomerNeighborhood).ToList();
+                var tipPays = deliveries.Select(d => (double)d.AverageTipPay).ToList();
+
+                var payload = new
+                {
+                    neighborhoods,
+                    tipPays
+                };
+
+                var response = await _httpClient.PostAsJsonAsync($"{_pythonServiceUrl}/charts/tips-neighborhood", payload);
+
+                if (!response.IsSuccessStatusCode)
+                {
+                    return StatusCode(500, "Error retrieving tip by neighborhood chart");
+                }
+
+                var result = await response.Content.ReadFromJsonAsync<Dictionary<string, string>>();
+                if (result == null || !result.ContainsKey("image"))
+                {
+                    return StatusCode(500, "Invalid response from Python API");
+                }
+
+                // Return base64 image string
+                return Ok(new { base64Image = result["image"] });
             }
-
-            Console.WriteLine($"Request started at {DateTime.Now:HH:mm:ss.fff}");
-            foreach (var d in deliveries)
+            else
             {
-                Console.WriteLine($"{d.CustomerNeighborhood}: {d.AverageTipPay}");
+                return BadRequest("User claim is invalid");
             }
-
-            Console.WriteLine("Tip Neighborhoods:");
-            foreach (var d in deliveries)
-            {
-                Console.WriteLine($"{d.CustomerNeighborhood}: {d.AverageTipPay}");
-            }
-
-            var neighborhoods = deliveries.Select(d => d.CustomerNeighborhood).ToList();
-            var tipPays = deliveries.Select(d => (double)d.AverageTipPay).ToList();
-
-            var payload = new
-            {
-                neighborhoods = neighborhoods,
-                tipPays = tipPays
-            };
-
-            var response = await _httpClient.PostAsJsonAsync($"{_pythonServiceUrl}/charts/tips-neighborhood", payload);
-
-            if (!response.IsSuccessStatusCode)
-            {
-                return StatusCode(500, "Error retrieving tip by neighborhood chart");
-            }
-
-            var result = await response.Content.ReadFromJsonAsync<Dictionary<string, string>>();
-            if (result == null || !result.ContainsKey("image"))
-            {
-                return StatusCode(500, "Invalid response from Python API");
-            }
-
-            // Return base64 image string
-            return Ok(new { base64Image = result["image"] });
         }
 
         [HttpGet("charts/apps-by-base")]
         public async Task<IActionResult> GetAppsByBaseChart()
         {
-            var userId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier));
+            var userIdClaim = User.FindFirstValue(ClaimTypes.NameIdentifier);
 
-            var deliveries = await (
+            if (int.TryParse(userIdClaim, out int userId))
+            {
+                var deliveries = await (
                 from ud in _context.UserDeliveries
                 join d in _context.Deliveries on ud.DeliveryId equals d.Id
                 where ud.UserId == userId
@@ -565,141 +654,161 @@ namespace DelivAssist.Controllers
                 }
             ).ToListAsync();
 
-            if (deliveries.Count == 0)
-            {
-                return NotFound("No deliveries found");
+                if (deliveries.Count == 0)
+                {
+                    return NotFound("No deliveries found");
+                }
+
+                var apps = deliveries.Select(d => d.App.ToString()).ToList();
+                var basePays = deliveries.Select(d => (double)d.BasePay).ToList();
+
+                var payload = new
+                {
+                    apps,
+                    basePays
+                };
+
+                var response = await _httpClient.PostAsJsonAsync($"{_pythonServiceUrl}/charts/apps-by-base", payload);
+
+                if (!response.IsSuccessStatusCode)
+                {
+                    return StatusCode(500, "Error getting base by apps histogram");
+                }
+
+                var result = await response.Content.ReadFromJsonAsync<Dictionary<string, string>>();
+                if (result == null || !result.ContainsKey("image"))
+                {
+                    return StatusCode(500, "Invalid response from Python API");
+                }
+
+                // Return base64 image string
+                return Ok(new { base64Image = result["image"] });
             }
-
-            var apps = deliveries.Select(d => d.App.ToString()).ToList();
-            var basePays = deliveries.Select(d => (double)d.BasePay).ToList();
-
-            var payload = new
+            else
             {
-                apps = apps,
-                basePays = basePays
-            };
-
-            var response = await _httpClient.PostAsJsonAsync($"{_pythonServiceUrl}/charts/apps-by-base", payload);
-
-            if (!response.IsSuccessStatusCode)
-            {
-                return StatusCode(500, "Error getting base by apps histogram");
+                return BadRequest("User claim is invalid");
             }
-
-            var result = await response.Content.ReadFromJsonAsync<Dictionary<string, string>>();
-            if (result == null || !result.ContainsKey("image"))
-            {
-                return StatusCode(500, "Invalid response from Python API");
-            }
-
-            // Return base64 image string
-            return Ok(new { base64Image = result["image"] });
         }
 
         [HttpGet("charts/hourly-earnings")]
         public async Task<IActionResult> GetHourlyEarningsChart()
         {
-            var userId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier));
-            var oneWeekAgo = DateTime.UtcNow.AddDays(-7);
+            var userIdClaim = User.FindFirstValue(ClaimTypes.NameIdentifier);
 
-            var hourlyEarnings = await _context.UserDeliveries
-                .Where(ud => ud.UserId == userId && ud.Delivery.DeliveryTime >= oneWeekAgo)
-                .Select(ud => new
-                {
-                    Hour = ud.Delivery.DeliveryTime.Hour,
-                    Earnings = ud.Delivery.TotalPay
-                })
-                .GroupBy(x => x.Hour)
-                .Select(g => new
-                {
-                    Hour = g.Key,
-                    AverageEarnings = g.Average(x => x.Earnings)
-                })
-                .OrderBy(x => x.Hour)
-                .ToListAsync();
-
-            var allHours = Enumerable.Range(0, 24).ToList();
-            var earningsByHour = allHours
-                .Select(h => new
-                {
-                    Hour = h,
-                    AverageEarnings = hourlyEarnings.FirstOrDefault(x => x.Hour == h)?.AverageEarnings ?? 0
-                })
-                .ToList();
-
-            var hoursStrings = earningsByHour.Select(x => x.Hour.ToString("D2")).ToList();
-            var earnings = earningsByHour.Select(x => x.AverageEarnings).ToList();
-
-            var payload = new
+            if (int.TryParse(userIdClaim, out int userId))
             {
-                hours = hoursStrings,
-                earnings = earnings
-            };
+                var oneWeekAgo = DateTime.UtcNow.AddDays(-7);
 
-            var response = await _httpClient.PostAsJsonAsync($"{_pythonServiceUrl}/charts/hourly-earnings", payload);
+                var hourlyEarnings = await _context.UserDeliveries
+                    .Where(ud => ud.UserId == userId && ud.Delivery != null && ud.Delivery.DeliveryTime >= oneWeekAgo)
+                    .Select(ud => new
+                    {
+                        ud.Delivery!.DeliveryTime.Hour,
+                        Earnings = ud.Delivery.TotalPay
+                    })
+                    .GroupBy(x => x.Hour)
+                    .Select(g => new
+                    {
+                        Hour = g.Key,
+                        AverageEarnings = g.Average(x => x.Earnings)
+                    })
+                    .OrderBy(x => x.Hour)
+                    .ToListAsync();
 
-            if (!response.IsSuccessStatusCode)
-            {
-                return StatusCode(500, "Error retrieving hourly pay chart");
+                var allHours = Enumerable.Range(0, 24).ToList();
+                var earningsByHour = allHours
+                    .Select(h => new
+                    {
+                        Hour = h,
+                        AverageEarnings = hourlyEarnings.FirstOrDefault(x => x.Hour == h)?.AverageEarnings ?? 0
+                    })
+                    .ToList();
+
+                var hoursStrings = earningsByHour.Select(x => x.Hour.ToString("D2")).ToList();
+                var earnings = earningsByHour.Select(x => x.AverageEarnings).ToList();
+
+                var payload = new
+                {
+                    hours = hoursStrings,
+                    earnings
+                };
+
+                var response = await _httpClient.PostAsJsonAsync($"{_pythonServiceUrl}/charts/hourly-earnings", payload);
+
+                if (!response.IsSuccessStatusCode)
+                {
+                    return StatusCode(500, "Error retrieving hourly pay chart");
+                }
+
+                var result = await response.Content.ReadFromJsonAsync<Dictionary<string, string>>();
+                if (result == null || !result.ContainsKey("image"))
+                {
+                    return StatusCode(500, "Invalid response from Python API");
+                }
+
+                return Ok(new { base64Image = result["image"] });
             }
-
-            var result = await response.Content.ReadFromJsonAsync<Dictionary<string, string>>();
-            if (result == null || !result.ContainsKey("image"))
+            else
             {
-                return StatusCode(500, "Invalid response from Python API");
+                return BadRequest("User claim is invalid");
             }
-
-            return Ok(new { base64Image = result["image"] });
         }
 
         [HttpGet("train/shift-model")]
         public async Task<IActionResult> TrainShiftModel()
         {
-            var userId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier));
+            var userIdClaim = User.FindFirstValue(ClaimTypes.NameIdentifier);
 
-            var shiftData = _context.ShiftDeliveries
-                .Where(sd => sd.UserId == userId)
+            if (int.TryParse(userIdClaim, out int userId))
+            {
+                var shiftData = _context.ShiftDeliveries
+                .Where(sd => sd.UserId == userId && sd.Shift != null && sd.Delivery != null)
                 .Include(sd => sd.Shift)
                 .Include(sd => sd.Delivery)
                 .AsEnumerable()
                 .GroupBy(sd => new
                 {
-                    sd.Shift.Id,
+                    sd.Shift!.Id,
                     sd.Shift.StartTime,
                     sd.Shift.EndTime,
                     sd.Shift.App,
                 })
                 .Select(g => new
                 {
-                    StartTime = g.Key.StartTime,
-                    EndTime = g.Key.EndTime,
-                    App = g.Key.App,
-                    Neighborhoods = g.Select(x => x.Delivery.CustomerNeighborhood).Distinct().ToList(),
-                    TotalEarnings = g.Sum(x => x.Delivery.TotalPay),
+                    g.Key.StartTime,
+                    g.Key.EndTime,
+                    g.Key.App,
+                    Neighborhoods = g.Select(x => x.Delivery!.CustomerNeighborhood).Distinct().ToList(),
+                    TotalEarnings = g.Sum(x => x.Delivery!.TotalPay),
                 })
                 .ToList();
 
-            var samples = shiftData.Select(d => new
-            {
-                start_time = d.StartTime.ToString("HH:mm"),
-                end_time = d.EndTime.ToString("HH:mm"),
-                app = d.App.ToString(),
-                neighborhoods = d.Neighborhoods,
-                earnings = d.TotalEarnings
-            });
+                var samples = shiftData.Select(d => new
+                {
+                    start_time = d.StartTime.ToString("HH:mm"),
+                    end_time = d.EndTime.ToString("HH:mm"),
+                    app = d.App.ToString(),
+                    neighborhoods = d.Neighborhoods,
+                    earnings = d.TotalEarnings
+                });
 
-            var payload = new { samples };
+                var payload = new { samples };
 
-            var response = await _httpClient.PostAsJsonAsync($"{_pythonServiceUrl}/train/shift-model", payload);
+                var response = await _httpClient.PostAsJsonAsync($"{_pythonServiceUrl}/train/shift-model", payload);
 
-            if (!response.IsSuccessStatusCode)
-            {
-                return StatusCode(500, "Python Training API error");
+                if (!response.IsSuccessStatusCode)
+                {
+                    return StatusCode(500, "Python Training API error");
+                }
+
+                var result = await response.Content.ReadFromJsonAsync<Dictionary<string, string>>();
+
+                return Ok(result);
             }
-
-            var result = await response.Content.ReadFromJsonAsync<Dictionary<string, string>>();
-
-            return Ok(result);
+            else
+            {
+                return BadRequest("User claim is invalid");
+            }
         }
 
         [HttpPost("predict/shift-earnings")]

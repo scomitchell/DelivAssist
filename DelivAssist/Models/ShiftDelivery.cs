@@ -8,10 +8,10 @@ namespace DelivAssist.Models
 
         public int DeliveryId { get; set; }
 
-        public Shift Shift { get; set; }
+        public Shift? Shift { get; set; }
 
-        public User User {get; set;}
+        public User? User {get; set;}
 
-        public Delivery Delivery { get; set; }
+        public Delivery? Delivery { get; set; }
     }
 }

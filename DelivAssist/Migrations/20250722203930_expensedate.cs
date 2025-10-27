@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace DelivAssist.Migrations
 {
     /// <inheritdoc />
-    public partial class expensedate : Migration
+    public partial class ExpenseDate : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)

@@ -5,7 +5,7 @@
 namespace DelivAssist.Migrations
 {
     /// <inheritdoc />
-    public partial class expensetype : Migration
+    public partial class ExpenseType : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)

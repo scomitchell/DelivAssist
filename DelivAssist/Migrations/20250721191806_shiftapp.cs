@@ -5,7 +5,7 @@
 namespace DelivAssist.Migrations
 {
     /// <inheritdoc />
-    public partial class shiftapp : Migration
+    public partial class ShiftApp : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)

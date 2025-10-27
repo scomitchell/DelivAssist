@@ -12,7 +12,7 @@ namespace DelivAssist.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
     [Migration("20250723151601_expensetype")]
-    partial class expensetype
+    partial class ExpenseType
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)

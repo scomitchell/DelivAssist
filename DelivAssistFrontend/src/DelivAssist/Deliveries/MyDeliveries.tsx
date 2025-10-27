@@ -412,7 +412,7 @@ export default function MyDeliveries({ myDeliveries, setMyDeliveries }: {
                                             />
                                         </Col>
                                     </FormGroup>
-                                    <Button onClick={updateDelivery} className="btn btn-primary">
+                                    <Button onClick={updateDelivery} variant="contained" color="primary">
                                         Update Delivery
                                     </Button>
                                 </div>
