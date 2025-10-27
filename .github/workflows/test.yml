@@ -20,10 +20,10 @@ jobs:
           dotnet-version: '8.x'
 
       - name: Restore dependencies
-        run: dotnet restore ./DelivAssist/DelivAssist.sln
+        run: dotnet restore ./DelivAssist/DelivAssist.csproj
 
       - name: Build
-        run: dotnet build ./DelivAssist/DelivAssist.sln --no-restore
+        run: dotnet build ./DelivAssist/DelivAssist.csproj --no-restore
 
       - name: Run tests and generate report
         run: dotnet test DelivAssist.Tests/DelivAssist.Tests.csproj --logger "console;verbosity=detailed"
