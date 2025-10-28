@@ -250,7 +250,7 @@ export default function MyShifts({ myShifts, setMyShifts }: {
                                 </div>
 
                                 {/* Only this part is clickable */}
-                                <Link to={`/DelivAssist/Shifts/${shift.id}`} className="text-decoration-none text-dark">
+                                <Link to={`/GigBoard/Shifts/${shift.id}`} className="text-decoration-none text-dark">
                                     <Typography variant="h6" fontWeight="bold">
                                         {formatTime(shift.startTime)} {"  -"}
                                     </Typography>

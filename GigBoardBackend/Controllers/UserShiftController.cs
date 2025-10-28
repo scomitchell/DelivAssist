@@ -42,6 +42,7 @@ namespace GigBoardBackend.Controllers
 
                 return Ok(new
                 {
+                    id = shift.Id,
                     startTime = shift.StartTime,
                     endTime = shift.EndTime,
                     app = shift.App

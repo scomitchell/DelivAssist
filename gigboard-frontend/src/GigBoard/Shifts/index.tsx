@@ -29,7 +29,7 @@ export default function Shifts() {
             const newShift = await client.addShift(shift);
             setMyShifts(prev => [newShift, ...prev]);
             setShowForm(false);
-            navigate("/DelivAssist/Shifts");
+            navigate("/GigBoard/Shifts");
         } catch (err: any) {
             setError("Add shift failed");
         }

@@ -33,7 +33,7 @@ export default function Expenses() {
             const newExpense = await client.addExpense(parsedExpense);
             setMyExpenses(prev => [newExpense, ...prev]);
             setShowForm(false);
-            navigate("/DelivAssist/Expenses");
+            navigate("/GigBoard/Expenses");
         } catch (err: any) {
             setError(err);
         }
