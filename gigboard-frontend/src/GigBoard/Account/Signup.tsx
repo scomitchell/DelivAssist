@@ -20,7 +20,7 @@ export default function Signup() {
         setTimeout(() => {
             // Clear token and log out user
             localStorage.removeItem("token");
-            navigate("/DelivAssist/Account/Login");
+            navigate("/GigBoard/Account/Login");
         }, 60 * 60 * 1000);
     }
 

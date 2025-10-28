@@ -39,7 +39,7 @@ export default function Deliveries() {
             const newDelivery = await client.addUserDelivery(parsedDelivery);
             setMyDeliveries(prev => [newDelivery, ...prev]);
             setShowForm(false);
-            navigate("/DelivAssist/MyDeliveries");
+            navigate("/GigBoard/MyDeliveries");
         } catch (err: any) {
             setError("Add delivery failed");
         }

@@ -1,9 +1,9 @@
 import { Col, Card } from "react-bootstrap";
-export default function DelivAssist() {
+export default function GigBoard() {
     return (
         <div id="home-header" className="ms-1">
-            <h1>DelivAssist</h1>
-            <h2>A dashboard for gig workers</h2>
+            <h1>GigBoard</h1>
+            <h2>Your insight dashboard</h2>
             <Col sm={6}>
                 <Card className="mt-3 user-delivery-card">
                     <Card.Title>Instructions</Card.Title>
