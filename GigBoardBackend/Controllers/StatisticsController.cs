@@ -507,8 +507,8 @@ namespace GigBoardBackend.Controllers
             }
         }
 
-        [HttpGet("charts/earnings-over-time")]
-        public async Task<IActionResult> GetEarningsChart()
+        [HttpGet("plotly-charts/earnings-over-time")]
+        public async Task<IActionResult> PlotlyEarningsData()
         {
             var userIdClaim = User.FindFirstValue(ClaimTypes.NameIdentifier);
 
@@ -529,33 +529,17 @@ namespace GigBoardBackend.Controllers
 
                 if (deliveries.Count == 0)
                 {
-                    return NotFound("No deliveries found for user");
+                    return NotFound("No deliveries found for this user");
                 }
 
                 var dates = deliveries.Select(d => d.Date.ToString("yyyy-MM-dd")).ToList();
                 var earnings = deliveries.Select(d => (double)d.TotalEarnings).ToList();
 
-                var payload = new
+                return Ok(new
                 {
                     dates,
                     earnings
-                };
-
-                var response = await _httpClient.PostAsJsonAsync($"{_pythonServiceUrl}/charts/earnings", payload);
-
-                if (!response.IsSuccessStatusCode)
-                {
-                    return StatusCode(500, "Error generating chart from Python API");
-                }
-
-                var result = await response.Content.ReadFromJsonAsync<Dictionary<string, string>>();
-                if (result == null || !result.ContainsKey("image"))
-                {
-                    return StatusCode(500, "Invalid response from Python API");
-                }
-
-                // Return base64 image string
-                return Ok(new { base64Image = result["image"] });
+                });
             }
             else
             {
