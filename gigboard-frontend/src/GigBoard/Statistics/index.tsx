@@ -2,6 +2,8 @@ import * as client from "./client";
 import { useEffect, useState } from "react";
 import { Row, Col, Card } from "react-bootstrap";
 import PredictEarnings from "./PredictEarnings";
+import EarningsChart from "./EarningsChart";
+import type { EarningsChartProps } from "./EarningsChart";
 import "../../index.css";
 
 type MonthlySpendingType = {
@@ -40,7 +42,7 @@ export default function Statistics() {
     const [avgDeliveriesPerShift, setAvgDeliveriesPerShift] = useState(0);
 
     // Charts
-    const [earningsChart, setEarningsChart] = useState<EarningsChartResponse | null>(null);
+    const [plotlyEarningsData, setPlotlyEarningsData] = useState<EarningsChartProps["data"] | null>(null);
     const [tnHistogram, setTnHistogram] = useState<EarningsChartResponse | null>(null);
     const [baseByAppHist, setBaseByAppHist] = useState<EarningsChartResponse | null>(null);
     const [hourlyEarningsChart, setHourlyEarningsChart] = useState<EarningsChartResponse | null>(null);
@@ -126,14 +128,6 @@ export default function Statistics() {
         }
 
         try {
-            const userEarningsChart = await client.findEarningsChart();
-
-            setEarningsChart(userEarningsChart);
-        } catch {
-            setEarningsChart(null);
-        }
-
-        try {
             const userTnHistogram = await client.findTipNeighborhoodHist();
 
             setTnHistogram(userTnHistogram);
@@ -156,6 +150,14 @@ export default function Statistics() {
             setHourlyEarningsChart(userHourlyEarningsChart);
         } catch {
             setHourlyEarningsChart(null);
+        }
+
+        try {
+            const userPlotlyEarningsData = await client.findPlotlyEarningsData();
+
+            setPlotlyEarningsData(userPlotlyEarningsData);
+        } catch {
+            setPlotlyEarningsData(null);
         }
 
         setLoading(false);
@@ -294,13 +296,8 @@ export default function Statistics() {
         } else if (page === "earnings-over-time") {
             return (
                 <div id="charts">
-                    {earningsChart && (
-                        <img
-                            src={`data:image/png;base64,${earningsChart.base64Image}`} 
-                            alt="Earnings Chart"
-                            className="mb-2"
-                            style={{ maxWidth: "100%", height: "auto", display: "block"}}
-                        />
+                    {plotlyEarningsData && (
+                        <EarningsChart data={plotlyEarningsData} />
                     )}
                 </div>
             );

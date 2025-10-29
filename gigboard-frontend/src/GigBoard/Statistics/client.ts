@@ -184,10 +184,10 @@ export const findAverageDeliveriesPerShift = async () => {
     return response.data;
 }
 
-export const findEarningsChart = async () => {
+export const findPlotlyEarningsData = async () => {
     const token = localStorage.getItem("token");
 
-    const response = await axiosWithCredentials.get(`${STATISTICS_API}/charts/earnings-over-time`, {
+    const response = await axiosWithCredentials.get(`${STATISTICS_API}/plotly-charts/earnings-over-time`, {
         headers: {
             Authorization: `Bearer ${token}`
         }
