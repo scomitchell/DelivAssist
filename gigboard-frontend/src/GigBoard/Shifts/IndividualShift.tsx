@@ -39,8 +39,15 @@ export default function IndividualShift() {
     // Display time as date, time
     const formatTime = (date: string) => {
         const newDate = new Date(date);
-        const readable = newDate.toLocaleString();
-        return readable;
+        const options: Intl.DateTimeFormatOptions = {
+            year: 'numeric',
+            month: 'short',
+            day: 'numeric',
+            hour: '2-digit',
+            minute: '2-digit',
+            hour12: true
+        };
+        return newDate.toLocaleString(undefined, options);
     }
 
     useEffect(() => {
