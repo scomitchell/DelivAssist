@@ -196,10 +196,10 @@ export const findPlotlyEarningsData = async () => {
     return response.data;
 }
 
-export const findTipNeighborhoodHist = async () => {
+export const findPlotlyTipNeighborhoodData = async () => {
     const token = localStorage.getItem("token");
 
-    const response = await axiosWithCredentials.get(`${STATISTICS_API}/charts/tip-neighborhoods`, {
+    const response = await axiosWithCredentials.get(`${STATISTICS_API}/plotly-charts/tip-neighborhoods`, {
         headers: {
             Authorization: `Bearer ${token}`
         }

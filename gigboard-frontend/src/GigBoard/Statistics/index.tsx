@@ -3,7 +3,9 @@ import { useEffect, useState } from "react";
 import { Row, Col, Card } from "react-bootstrap";
 import PredictEarnings from "./PredictEarnings";
 import EarningsChart from "./EarningsChart";
+import TipsByNeighborhoodChart from "./TipsByNeighborhoodChart";
 import type { EarningsChartProps } from "./EarningsChart";
+import type { TipNeighborhoodsProps } from "./TipsByNeighborhoodChart";
 import "../../index.css";
 
 type MonthlySpendingType = {
@@ -43,7 +45,7 @@ export default function Statistics() {
 
     // Charts
     const [plotlyEarningsData, setPlotlyEarningsData] = useState<EarningsChartProps["data"] | null>(null);
-    const [tnHistogram, setTnHistogram] = useState<EarningsChartResponse | null>(null);
+    const [plotlyTipNeighborhoodsData, setPlotlyTipNeighborhoodsData] = useState<TipNeighborhoodsProps["data"] | null>(null);
     const [baseByAppHist, setBaseByAppHist] = useState<EarningsChartResponse | null>(null);
     const [hourlyEarningsChart, setHourlyEarningsChart] = useState<EarningsChartResponse | null>(null);
 
@@ -128,14 +130,6 @@ export default function Statistics() {
         }
 
         try {
-            const userTnHistogram = await client.findTipNeighborhoodHist();
-
-            setTnHistogram(userTnHistogram);
-        } catch {
-            setTnHistogram(null);
-        }
-
-        try {
             const userBaseHist = await client.findBaseByAppHist();
 
             setBaseByAppHist(userBaseHist);
@@ -154,10 +148,13 @@ export default function Statistics() {
 
         try {
             const userPlotlyEarningsData = await client.findPlotlyEarningsData();
+            const userTipNeighborhoodsData = await client.findPlotlyTipNeighborhoodData();
 
             setPlotlyEarningsData(userPlotlyEarningsData);
+            setPlotlyTipNeighborhoodsData(userTipNeighborhoodsData);
         } catch {
             setPlotlyEarningsData(null);
+            setPlotlyTipNeighborhoodsData(null);
         }
 
         setLoading(false);
@@ -304,13 +301,9 @@ export default function Statistics() {
         } else if (page === "tips-by-neighborhood") {
             return (
                 <div id="charts">
-                    {tnHistogram && (
-                        <img
-                            src={`data:image/png;base64,${tnHistogram.base64Image}`}
-                            alt="Tip by Neighborhood Chart"
-                            style={{ maxWidth: "100%", height: "auto", display: "block" }}
-                        />
-                    )}
+                    {plotlyTipNeighborhoodsData &&
+                        <TipsByNeighborhoodChart data={plotlyTipNeighborhoodsData} />
+                    }
                 </div>
             );
         } else if (page === "base-by-app") {
