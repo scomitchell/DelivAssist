@@ -547,8 +547,8 @@ namespace GigBoardBackend.Controllers
             }
         }
 
-        [HttpGet("charts/tip-neighborhoods")]
-        public async Task<IActionResult> GetTipNeighborhoodsChart()
+        [HttpGet("plotly-charts/tip-neighborhoods")]
+        public async Task<IActionResult> GetPlotlyNeighborhoodsData()
         {
             var userIdClaim = User.FindFirstValue(ClaimTypes.NameIdentifier);
 
@@ -572,45 +572,16 @@ namespace GigBoardBackend.Controllers
 
                 if (deliveries.Count == 0)
                 {
-                    return NotFound("No deliveries found");
-                }
-
-                Console.WriteLine($"Request started at {DateTime.Now:HH:mm:ss.fff}");
-                foreach (var d in deliveries)
-                {
-                    Console.WriteLine($"{d.CustomerNeighborhood}: {d.AverageTipPay}");
-                }
-
-                Console.WriteLine("Tip Neighborhoods:");
-                foreach (var d in deliveries)
-                {
-                    Console.WriteLine($"{d.CustomerNeighborhood}: {d.AverageTipPay}");
+                    return NotFound("No deliveries found for this user");
                 }
 
                 var neighborhoods = deliveries.Select(d => d.CustomerNeighborhood).ToList();
                 var tipPays = deliveries.Select(d => (double)d.AverageTipPay).ToList();
 
-                var payload = new
-                {
+                return Ok(new {
                     neighborhoods,
                     tipPays
-                };
-
-                var response = await _httpClient.PostAsJsonAsync($"{_pythonServiceUrl}/charts/tips-neighborhood", payload);
-
-                if (!response.IsSuccessStatusCode)
-                {
-                    return StatusCode(500, "Error retrieving tip by neighborhood chart");
-                }
-
-                var result = await response.Content.ReadFromJsonAsync<Dictionary<string, string>>();
-                if (result == null || !result.ContainsKey("image"))
-                {
-                    return StatusCode(500, "Invalid response from Python API");
-                }
-
-                // Return base64 image string
-                return Ok(new { base64Image = result["image"] });
+                });
             }
             else
             {
