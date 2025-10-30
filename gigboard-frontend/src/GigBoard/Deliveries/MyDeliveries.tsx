@@ -245,7 +245,7 @@ export default function MyDeliveries({ myDeliveries, setMyDeliveries }: {
                                 boxShadow: 3,
                                 position: "relative",
                                 transition: "0.3s",
-                                "&:hover": { boxShadow: 6, transform: "translateY(-3px)" },
+                                "&:hover": { boxShadow: 6 },
                         }}>
                             <CardContent sx={{ p: 2 }}>
                                 {/*Fix dropdown to top right corner of card*/}
