@@ -38,13 +38,13 @@ export default function TipsByNeighborhoodChart({data}: TipNeighborhoodsProps) {
                 plot_bgcolor: "white",
                 paper_bgcolor: "white",
                 margin: { t: 50, r: 40, b: 80, l: 60},
+                dragmode: false
             }}
             config={{
                 responsive: true,
                 displayModeBar: false,
                 displaylogo: false,
                 scrollZoom: false,
-                staticPlot: true
             }}
             style={{width: "100%", height: "100%"}}
         />
