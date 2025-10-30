@@ -3,7 +3,6 @@ import { Card, CardContent, Typography, Button } from "@mui/material";
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import * as client from "./client";
-import * as deliveryClient from "../Deliveries/client";
 import type { ShiftFilters } from "./client";
 
 export default function MyShifts({ myShifts, setMyShifts }: {
