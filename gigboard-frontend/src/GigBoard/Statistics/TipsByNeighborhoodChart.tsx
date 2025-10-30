@@ -43,7 +43,8 @@ export default function TipsByNeighborhoodChart({data}: TipNeighborhoodsProps) {
                 responsive: true,
                 displayModeBar: false,
                 displaylogo: false,
-                scrollzoom: false,
+                scrollZoom: false,
+                staticPlot: true
             }}
             style={{width: "100%", height: "100%"}}
         />

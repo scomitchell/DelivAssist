@@ -44,8 +44,9 @@ export default function EarningsChart({ data }: EarningsChartProps)
             config={{
                 responsive: true,
                 displaylogo: false,
-                scrollzoom: false,
-                displayModeBar: false
+                scrollZoom: false,
+                displayModeBar: false,
+                staticPlot: true
             }}
             style={{ width: "100%", height: "100%" }}
         />
