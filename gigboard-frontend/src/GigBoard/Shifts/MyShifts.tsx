@@ -11,7 +11,6 @@ export default function MyShifts({ myShifts, setMyShifts }: {
     setMyShifts: React.Dispatch<React.SetStateAction<any[]>>}) {
     // Modal control state
     const [showForm, setShowForm] = useState(false);
-    const [showSDModal, setShowSDModal] = useState(false);
 
     // User entered Filters
     const [startTime, setStartTime] = useState<string | null>(null);
@@ -23,11 +22,6 @@ export default function MyShifts({ myShifts, setMyShifts }: {
 
     // Control reset
     const [reset, setReset] = useState(false);
-    const [deliveries, setDeliveries] = useState<any[]>([]);
-
-    // Shift deliveries
-    const [deliveryToAdd, setDeliveryToAdd] = useState<number>(-1);
-    const [shiftForDelivery, setShiftForDelivery] = useState<number>(-1);
 
     // Delete
     const [shiftToDelete, setShiftToDelete] = useState(-1);
@@ -59,31 +53,6 @@ export default function MyShifts({ myShifts, setMyShifts }: {
         setShowForm(false);
         return;
     }
-
-    const fetchDeliveries = async () => {
-        const userDeliveries = await deliveryClient.findUnassignedUserDeliveries();
-        setDeliveries(userDeliveries);
-    }
-
-      // Single handler to open the modal for a given shift:
-    const openAddDelivery = (shiftId: number) => {
-        console.log(shiftId);
-        setShiftForDelivery(shiftId);
-        setDeliveryToAdd(-1);        // reset previous
-        setShowSDModal(true);
-    };
-
-    // Unified “add” handler, always logs the actual payload:
-    const handleAddDelivery = async () => {
-        if (shiftForDelivery > 0 && deliveryToAdd > 0) {
-            await client.AddShiftDelivery(shiftForDelivery, deliveryToAdd);
-            setShowSDModal(false);
-            fetchShifts();
-            fetchDeliveries();
-        } else {
-            alert("Please select a valid shift & delivery.");
-        }
-    };
 
     // Delete shift from db
     const deleteShift = async (shiftId: number) => {
@@ -130,7 +99,6 @@ export default function MyShifts({ myShifts, setMyShifts }: {
     useEffect(() => {
         fetchShifts();
         fetchApps();
-        fetchDeliveries();
     }, [])
 
     // useEffect for reset filters
@@ -240,13 +208,6 @@ export default function MyShifts({ myShifts, setMyShifts }: {
                                             </Dropdown.Item>
                                             <Dropdown.Item onClick={(e) => {
                                                 e.preventDefault();
-                                                openAddDelivery(shift.id);
-                                            }} 
-                                                className="text-primary">
-                                                Add Deliveries to Shift
-                                            </Dropdown.Item>
-                                            <Dropdown.Item onClick={(e) => {
-                                                e.preventDefault();
                                                 setShiftToUpdate(shift);
                                             }}
                                                 className="text-warning">
@@ -341,37 +302,6 @@ export default function MyShifts({ myShifts, setMyShifts }: {
                                                 </Button>
                                             </div>
                                             }
-                                        </Modal.Body>
-                                    </Modal>
-
-                                    <Modal show={showSDModal} onHide={() => setShowSDModal(false)} centered size="lg">
-                                        <Modal.Header closeButton>
-                                            <Modal.Title>Select deliveries to add to shift</Modal.Title>
-                                        </Modal.Header>
-                                        <Modal.Body>
-                                            <FormGroup as={Row} className="d-flex align-items-center mb-2">
-                                                <FormLabel column sm={4}>Delivery</FormLabel>
-                                                <Col sm={7}>
-                                                    <select onChange={(e) => setDeliveryToAdd(Number(e.target.value))}
-                                                        className="form-control mb-2" 
-                                                        id="da-delivery">
-                                                        <option value={-1}></option>
-                                                        {deliveries.map((delivery: any) =>
-                                                            <option value={delivery.id}>
-                                                                {formatTime(delivery.deliveryTime)}
-                                                            </option>
-                                                        )}
-                                                    </select>
-                                                </Col>
-                                                </FormGroup>
-                                            <Button onClick={(e) => {
-                                                    e.preventDefault();
-                                                    handleAddDelivery();
-                                                }} 
-                                                variant="contained"
-                                                color="primary">
-                                                Add Delivery to Shift
-                                            </Button>
                                         </Modal.Body>
                                     </Modal>
                                 </>
