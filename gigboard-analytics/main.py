@@ -66,27 +66,6 @@ def generate_chart(data: EarningsData):
     img_base64 = base64.b64encode(buf.read()).decode("utf-8")
     return {"image": img_base64}
 
-@app.post("/charts/apps-by-base")
-def generate_apps_by_base(data: BaseByAppData):
-    plt.figure(figsize=(8, 6))
-    plt.bar(data.apps, data.basePays, color="skyblue", edgecolor="black")
-    plt.title("Average base pays by app")
-    plt.xlabel("App")
-    plt.ylabel("Average Base Pay ($)")
-    plt.xticks(rotation=45, ha="right")
-
-    for i, base in enumerate(data.basePays):
-        plt.text(i, base + 0.05, f"${base:.2f}", ha='center')
-
-    buf = io.BytesIO()
-    plt.tight_layout()
-    plt.savefig(buf, format="png")
-    plt.close()
-    buf.seek(0)
-
-    img_base64 = base64.b64encode(buf.read()).decode("utf-8")
-    return {"image": img_base64}
-
 @app.post("/charts/hourly-earnings")
 def generate_hourly_chart(data: HourlyPayData):
     plt.figure(figsize=(8, 6))

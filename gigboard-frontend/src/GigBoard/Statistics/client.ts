@@ -208,10 +208,10 @@ export const findPlotlyTipNeighborhoodData = async () => {
     return response.data;
 }
 
-export const findBaseByAppHist = async () => {
+export const findPlotlyBaseByApp = async () => {
     const token = localStorage.getItem("token");
 
-    const response = await axiosWithCredentials.get(`${STATISTICS_API}/charts/apps-by-base`, {
+    const response = await axiosWithCredentials.get(`${STATISTICS_API}/plotly-charts/apps-by-base`, {
         headers: {
             Authorization: `Bearer ${token}`
         }

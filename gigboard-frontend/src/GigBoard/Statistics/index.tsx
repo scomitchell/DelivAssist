@@ -4,8 +4,10 @@ import { Row, Col, Card } from "react-bootstrap";
 import PredictEarnings from "./PredictEarnings";
 import EarningsChart from "./EarningsChart";
 import TipsByNeighborhoodChart from "./TipsByNeighborhoodChart";
+import BaseByAppsChart from "./BaseByAppsChart";
 import type { EarningsChartProps } from "./EarningsChart";
 import type { TipNeighborhoodsProps } from "./TipsByNeighborhoodChart";
+import type { BaseByAppProps } from  "./BaseByAppsChart";
 import "../../index.css";
 
 type MonthlySpendingType = {
@@ -46,7 +48,7 @@ export default function Statistics() {
     // Charts
     const [plotlyEarningsData, setPlotlyEarningsData] = useState<EarningsChartProps["data"] | null>(null);
     const [plotlyTipNeighborhoodsData, setPlotlyTipNeighborhoodsData] = useState<TipNeighborhoodsProps["data"] | null>(null);
-    const [baseByAppHist, setBaseByAppHist] = useState<EarningsChartResponse | null>(null);
+    const [plotlyBaseByAppData, setPlotlyBaseByAppData] = useState<BaseByAppProps["data"] | null>(null);
     const [hourlyEarningsChart, setHourlyEarningsChart] = useState<EarningsChartResponse | null>(null);
 
     // Loading
@@ -130,15 +132,6 @@ export default function Statistics() {
         }
 
         try {
-            const userBaseHist = await client.findBaseByAppHist();
-
-            setBaseByAppHist(userBaseHist);
-        }
-        catch {
-            setBaseByAppHist(null);
-        }
-
-        try {
             const userHourlyEarningsChart = await client.findHourlyPayChart();
 
             setHourlyEarningsChart(userHourlyEarningsChart);
@@ -149,12 +142,15 @@ export default function Statistics() {
         try {
             const userPlotlyEarningsData = await client.findPlotlyEarningsData();
             const userTipNeighborhoodsData = await client.findPlotlyTipNeighborhoodData();
+            const userBaseByAppData = await client.findPlotlyBaseByApp();
 
             setPlotlyEarningsData(userPlotlyEarningsData);
             setPlotlyTipNeighborhoodsData(userTipNeighborhoodsData);
+            setPlotlyBaseByAppData(userBaseByAppData);
         } catch {
             setPlotlyEarningsData(null);
             setPlotlyTipNeighborhoodsData(null);
+            setPlotlyBaseByAppData(null);
         }
 
         setLoading(false);
@@ -309,13 +305,9 @@ export default function Statistics() {
         } else if (page === "base-by-app") {
             return (
                 <div id="charts">
-                    {baseByAppHist && (
-                        <img
-                            src={`data:image/png;base64,${baseByAppHist.base64Image}`}
-                            alt="Average Base by App Chart"
-                            style={{ maxWidth: "100%", height: "auto", display: "block"}}
-                        />
-                    )}
+                    {plotlyBaseByAppData &&
+                        <BaseByAppsChart data={plotlyBaseByAppData} />
+                    }
                 </div>
             );
         } else if (page === "hourly-pay-chart") {

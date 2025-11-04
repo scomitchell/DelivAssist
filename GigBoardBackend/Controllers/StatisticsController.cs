@@ -578,7 +578,8 @@ namespace GigBoardBackend.Controllers
                 var neighborhoods = deliveries.Select(d => d.CustomerNeighborhood).ToList();
                 var tipPays = deliveries.Select(d => (double)d.AverageTipPay).ToList();
 
-                return Ok(new {
+                return Ok(new
+                {
                     neighborhoods,
                     tipPays
                 });
@@ -589,8 +590,8 @@ namespace GigBoardBackend.Controllers
             }
         }
 
-        [HttpGet("charts/apps-by-base")]
-        public async Task<IActionResult> GetAppsByBaseChart()
+        [HttpGet("plotly-charts/apps-by-base")]
+        public async Task<IActionResult> GetPlotlyAppsByBase()
         {
             var userIdClaim = User.FindFirstValue(ClaimTypes.NameIdentifier);
 
@@ -607,37 +608,21 @@ namespace GigBoardBackend.Controllers
                     App = g.Key,
                     BasePay = g.Average(x => x.BasePay)
                 }
-            ).ToListAsync();
+                ).ToListAsync();
 
                 if (deliveries.Count == 0)
                 {
-                    return NotFound("No deliveries found");
+                    return NotFound("No deliveries found for this user");
                 }
 
                 var apps = deliveries.Select(d => d.App.ToString()).ToList();
                 var basePays = deliveries.Select(d => (double)d.BasePay).ToList();
 
-                var payload = new
+                return Ok(new
                 {
                     apps,
                     basePays
-                };
-
-                var response = await _httpClient.PostAsJsonAsync($"{_pythonServiceUrl}/charts/apps-by-base", payload);
-
-                if (!response.IsSuccessStatusCode)
-                {
-                    return StatusCode(500, "Error getting base by apps histogram");
-                }
-
-                var result = await response.Content.ReadFromJsonAsync<Dictionary<string, string>>();
-                if (result == null || !result.ContainsKey("image"))
-                {
-                    return StatusCode(500, "Invalid response from Python API");
-                }
-
-                // Return base64 image string
-                return Ok(new { base64Image = result["image"] });
+                });
             }
             else
             {
@@ -717,7 +702,7 @@ namespace GigBoardBackend.Controllers
             if (int.TryParse(userIdClaim, out int userId))
             {
                 var shiftData = _context.ShiftDeliveries
-                .Where(sd => sd.UserId == userId && sd.Shift != null && sd.Delivery != null)
+                .Where(sd => sd.Shift != null && sd.Delivery != null)
                 .Include(sd => sd.Shift)
                 .Include(sd => sd.Delivery)
                 .AsEnumerable()
