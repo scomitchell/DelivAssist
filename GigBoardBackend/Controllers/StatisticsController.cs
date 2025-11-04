@@ -694,63 +694,6 @@ namespace GigBoardBackend.Controllers
             }
         }
 
-        [HttpGet("train/shift-model")]
-        public async Task<IActionResult> TrainShiftModel()
-        {
-            var userIdClaim = User.FindFirstValue(ClaimTypes.NameIdentifier);
-
-            if (int.TryParse(userIdClaim, out int userId))
-            {
-                var shiftData = _context.ShiftDeliveries
-                .Where(sd => sd.Shift != null && sd.Delivery != null)
-                .Include(sd => sd.Shift)
-                .Include(sd => sd.Delivery)
-                .AsEnumerable()
-                .GroupBy(sd => new
-                {
-                    sd.Shift!.Id,
-                    sd.Shift.StartTime,
-                    sd.Shift.EndTime,
-                    sd.Shift.App,
-                })
-                .Select(g => new
-                {
-                    g.Key.StartTime,
-                    g.Key.EndTime,
-                    g.Key.App,
-                    Neighborhoods = g.Select(x => x.Delivery!.CustomerNeighborhood).Distinct().ToList(),
-                    TotalEarnings = g.Sum(x => x.Delivery!.TotalPay),
-                })
-                .ToList();
-
-                var samples = shiftData.Select(d => new
-                {
-                    start_time = d.StartTime.ToString("HH:mm"),
-                    end_time = d.EndTime.ToString("HH:mm"),
-                    app = d.App.ToString(),
-                    neighborhoods = d.Neighborhoods,
-                    earnings = d.TotalEarnings
-                });
-
-                var payload = new { samples };
-
-                var response = await _httpClient.PostAsJsonAsync($"{_pythonServiceUrl}/train/shift-model", payload);
-
-                if (!response.IsSuccessStatusCode)
-                {
-                    return StatusCode(500, "Python Training API error");
-                }
-
-                var result = await response.Content.ReadFromJsonAsync<Dictionary<string, string>>();
-
-                return Ok(result);
-            }
-            else
-            {
-                return BadRequest("User claim is invalid");
-            }
-        }
-
         [HttpPost("predict/shift-earnings")]
         public async Task<IActionResult> PredictShiftEarnings([FromBody] ShiftPredictionRequest request)
         {
