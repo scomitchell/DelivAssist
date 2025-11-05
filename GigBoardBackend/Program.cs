@@ -70,7 +70,6 @@ builder.Services.AddHangfire(config =>
         .UseSQLiteStorage(hangfireConnection));
 
 builder.Services.AddHangfireServer();
-
 builder.Services.AddTransient<ShiftTrainingJob>();
 
 builder.Services.AddControllers();
