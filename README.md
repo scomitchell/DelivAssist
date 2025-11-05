@@ -1,4 +1,4 @@
-# GigBoard
+# GigBoard (Previously DelivAssist)
 
 **View Live App:** https://delivassist.netlify.app/
 
