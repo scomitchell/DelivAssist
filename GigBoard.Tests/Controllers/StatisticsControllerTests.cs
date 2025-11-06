@@ -520,7 +520,6 @@ namespace GigBoard.Tests.Controllers
         public async Task PlotlyNeighborhoodsData_ReturnsData()
         {
             // Add delivery
-            // Add test delivery
             var delivery3 = new Delivery
             {
                 Id = 3,
@@ -563,6 +562,54 @@ namespace GigBoard.Tests.Controllers
             Assert.Contains("Back Bay", neighborhoods);
             Assert.Contains(4.00, tipPays);
             Assert.Contains(2.50, tipPays);
+        }
+
+        [Fact]
+        public async Task PlotlyAppsByBase_ReturnsData()
+        {
+            // Add delivery
+            var delivery3 = new Delivery
+            {
+                Id = 3,
+                App = DeliveryApp.Grubhub,
+                DeliveryTime = new DateTime(2025, 1, 1, 12, 0, 0),
+                BasePay = 3.50,
+                TipPay = 4.00,
+                TotalPay = 7.50,
+                Mileage = 1.5,
+                Restaurant = "Back Bay Social",
+                CustomerNeighborhood = "Roxbury",
+                Notes = "test 3"
+            };
+            _context.Deliveries.Add(delivery3);
+
+            var userDelivery3 = new UserDelivery
+            {
+                UserId = 1,
+                DeliveryId = 3
+            };
+            _context.UserDeliveries.Add(userDelivery3);
+            await _context.SaveChangesAsync();
+
+            var result = await _controller.GetPlotlyAppsByBase();
+
+            var okResult = Assert.IsAssignableFrom<OkObjectResult>(result);
+            var value = okResult.Value;
+            Assert.NotNull(value);
+
+            var dict = value.GetType().GetProperties().ToDictionary(p => p.Name, p => p.GetValue(value));
+            Assert.True(dict.ContainsKey("apps"));
+            Assert.True(dict.ContainsKey("basePays"));
+
+            var apps = Assert.IsAssignableFrom<List<string>>(dict["apps"]);
+            var basePays = Assert.IsAssignableFrom<List<double>>(dict["basePays"]);
+            Assert.NotEmpty(apps);
+            Assert.NotEmpty(basePays);
+
+            Assert.Contains("Grubhub", apps);
+            Assert.Contains("UberEats", apps);
+            Assert.Contains(3.50, basePays);
+            Assert.Contains(3.00, basePays);
         }
     }
 }
