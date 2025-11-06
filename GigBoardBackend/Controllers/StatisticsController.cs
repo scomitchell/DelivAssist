@@ -68,6 +68,7 @@ namespace GigBoardBackend.Controllers
 
             if (int.TryParse(userIdClaim, out int userId))
             {
+                // Get total base pays as list
                 var totalBases = await (
                     from ud in _context.UserDeliveries
                     join d in _context.Deliveries on ud.DeliveryId equals d.Id
@@ -75,11 +76,13 @@ namespace GigBoardBackend.Controllers
                     select d.BasePay
                 ).ToListAsync();
 
+                // If none return 0
                 if (totalBases.Count == 0)
                 {
                     return Ok(0);
                 }
 
+                // Average base pays and return
                 var avgBase = totalBases.Average();
 
                 return Ok(avgBase);
