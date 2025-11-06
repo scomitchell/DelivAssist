@@ -3,7 +3,6 @@ from pydantic import BaseModel
 import matplotlib
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
-import plotly.express as px
 import pandas as pd
 import os
 import joblib
