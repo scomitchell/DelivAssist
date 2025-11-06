@@ -115,10 +115,11 @@ namespace GigBoard.Tests.Controllers
 
             var okResult = Assert.IsType<OkObjectResult>(result);
             var userExpense = Assert.IsAssignableFrom<UserExpense>(okResult.Value);
+            Assert.NotNull(userExpense.Expense);
             Assert.Equal(30, userExpense.Expense.Amount);
 
             var result2 = await _controller.GetExpenseById(2);
-            var notFoundResult = Assert.IsType<NotFoundObjectResult>(result2);
+            Assert.IsType<NotFoundObjectResult>(result2);
         }
 
         [Fact]

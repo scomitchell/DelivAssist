@@ -172,6 +172,7 @@ namespace GigBoard.Tests.Controllers
 
             var okResult = Assert.IsType<OkObjectResult>(result);
             var userDelivery = Assert.IsAssignableFrom<UserDelivery>(okResult.Value);
+            Assert.NotNull(userDelivery.Delivery);
             Assert.Equal("Love Art Sushi", userDelivery.Delivery.Restaurant);
 
             var result2 = await _controller.GetDeliveryById(4);
