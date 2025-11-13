@@ -3,6 +3,8 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using dotenv.net;
 using System.Text;
+using Hangfire;
+using Hangfire.Storage.SQLite;
 using GigBoardBackend.Data;
 using GigBoardBackend.Services;
 using System.Text.Json.Serialization;
@@ -58,6 +60,18 @@ builder.Services.AddAuthorization();
 builder.Services.AddScoped<AuthService>();
 builder.Services.AddHttpClient();
 
+// Hangfire
+
+var hangfireConnection = builder.Configuration.GetConnectionString("DefaultConnection");
+
+builder.Services.AddHangfire(config =>
+    config.UseSimpleAssemblyNameTypeSerializer()
+        .UseRecommendedSerializerSettings()
+        .UseSQLiteStorage(hangfireConnection));
+
+builder.Services.AddHangfireServer();
+builder.Services.AddTransient<ShiftTrainingJob>();
+
 builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
@@ -81,6 +95,20 @@ using (var scope = app.Services.CreateScope())
 
 app.UseAuthentication();
 app.UseAuthorization();
+app.UseHangfireDashboard("/hangfire");
 
 app.MapControllers();
+
+using (var scope = app.Services.CreateScope())
+{
+    var recurringJobManager = scope.ServiceProvider.GetRequiredService<IRecurringJobManager>();
+    var job = scope.ServiceProvider.GetRequiredService<ShiftTrainingJob>();
+
+    recurringJobManager.AddOrUpdate(
+        "train-shift-model",
+        () => job.TrainShiftModelJob(),
+        Cron.Daily
+    );
+}
+
 app.Run();

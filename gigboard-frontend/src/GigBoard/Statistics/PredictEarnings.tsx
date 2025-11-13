@@ -15,10 +15,6 @@ export default function PredictEarnings()
 
     const [predictedEarnings, setPredictedEarnings] = useState<number | null>(null);
 
-    const trainModel = async () => {
-        await client.trainShiftModel();
-    }
-
     const predictEarnings = async () => {
         if (startTime === "" || endTime === "" || app === "" || neighborhood === "") {
             alert("Please complete all fields before submitting");
@@ -50,7 +46,6 @@ export default function PredictEarnings()
     useEffect(() => {
         fetchNeighborhoods();
         fetchApps();
-        trainModel();
     }, [])
 
     return (

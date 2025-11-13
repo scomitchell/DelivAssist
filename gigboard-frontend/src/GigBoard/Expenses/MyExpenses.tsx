@@ -185,7 +185,7 @@ export default function MyExpenses({myExpenses, setMyExpenses} : {
                             boxShadow: 3,
                             position: "relative",
                             transition: "0.3s",
-                            "&:hover": {bowShadow: 6, transform: "translateY(-3px)"},
+                            "&:hover": {bowShadow: 6 },
                         }}>
                             <CardContent sx={{p: 2}}>
                                 {/*Fix dropdown menu to top right corner of card*/}

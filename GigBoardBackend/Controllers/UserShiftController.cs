@@ -27,8 +27,23 @@ namespace GigBoardBackend.Controllers
 
             if (int.TryParse(userIdClaim, out int userId))
             {
+                var userExists = await _context.Users.AnyAsync(u => u.Id == userId);
+
+                if (!userExists)
+                {
+                    return BadRequest("User does not exist");
+                }
+
                 _context.Shifts.Add(shift);
                 await _context.SaveChangesAsync();
+
+                var userDeliveries = await _context.UserDeliveries
+                    .Where(ud => ud.UserId == userId
+                        && ud.Delivery != null
+                        && ud.Delivery.DeliveryTime >= shift.StartTime
+                        && ud.Delivery.DeliveryTime <= shift.EndTime)
+                    .Include(ud => ud.Delivery)
+                    .ToListAsync();
 
                 var userShift = new UserShift
                 {
@@ -38,6 +53,26 @@ namespace GigBoardBackend.Controllers
                 };
 
                 _context.UserShifts.Add(userShift);
+
+                if (userDeliveries.Count != 0)
+                {
+                    var shiftDeliveries = new List<ShiftDelivery>();
+
+                    foreach (var ud in userDeliveries)
+                    {
+                        var shiftDelivery = new ShiftDelivery
+                        {
+                            UserId = userId,
+                            ShiftId = shift.Id,
+                            DeliveryId = ud.DeliveryId
+                        };
+
+                        shiftDeliveries.Add(shiftDelivery);
+                    }
+
+                    _context.ShiftDeliveries.AddRange(shiftDeliveries);
+                }
+
                 await _context.SaveChangesAsync();
 
                 return Ok(new

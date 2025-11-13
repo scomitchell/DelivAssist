@@ -89,7 +89,7 @@ namespace GigBoard.Tests.Controllers
                 {
                     Id = 1,
                     App = DeliveryApp.UberEats,
-                    DeliveryTime = DateTime.Now,
+                    DeliveryTime = DateTime.Today.AddHours(12),
                     BasePay = 3.0,
                     TipPay = 2.50,
                     TotalPay = 5.50,
@@ -103,7 +103,7 @@ namespace GigBoard.Tests.Controllers
                 {
                     Id = 2,
                     App = DeliveryApp.Doordash,
-                    DeliveryTime = DateTime.Now,
+                    DeliveryTime = DateTime.Today.AddHours(17),
                     BasePay = 4.50,
                     TipPay = 2.00,
                     TotalPay = 6.50,
@@ -280,9 +280,10 @@ namespace GigBoard.Tests.Controllers
             var okResult = Assert.IsType<OkObjectResult>(result);
 
             var value = okResult.Value;
+            Assert.NotNull(value);
             var dict = value.GetType().GetProperties().ToDictionary(p => p.Name, p => p.GetValue(value));
 
-            Assert.Equal("Back Bay", (string)dict["neighborhood"]);
+            Assert.Equal("Back Bay", dict["neighborhood"] as string);
             Assert.Equal(2.50, dict["averageTipPay"]);
         }
 
@@ -294,9 +295,10 @@ namespace GigBoard.Tests.Controllers
             var okResult = Assert.IsType<OkObjectResult>(result);
 
             var value = okResult.Value;
+            Assert.NotNull(value);
             var dict = value.GetType().GetProperties().ToDictionary(p => p.Name, p => p.GetValue(value));
 
-            Assert.Equal("Wendy's", (string)dict["restaurant"]);
+            Assert.Equal("Wendy's", dict["restaurant"] as string);
             Assert.Equal(6.50, dict["avgTotalPay"]);
         }
 
@@ -308,6 +310,7 @@ namespace GigBoard.Tests.Controllers
             var okResult = Assert.IsType<OkObjectResult>(result);
 
             var value = okResult.Value;
+            Assert.NotNull(value);
             var dict = value.GetType().GetProperties().ToDictionary(p => p.Name, p => p.GetValue(value));
 
             Assert.Equal(DeliveryApp.Doordash, dict["app"]);
@@ -322,6 +325,7 @@ namespace GigBoard.Tests.Controllers
             var okResult = Assert.IsType<OkObjectResult>(result);
 
             var value = okResult.Value;
+            Assert.NotNull(value);
             var dict = value.GetType().GetProperties().ToDictionary(p => p.Name, p => p.GetValue(value));
 
             Assert.Equal(DeliveryApp.UberEats, dict["app"]);
@@ -367,11 +371,11 @@ namespace GigBoard.Tests.Controllers
             var result = await _controller.GetRestaurantWithMostDeliveries();
 
             var okResult = Assert.IsType<OkObjectResult>(result);
-
             var value = okResult.Value;
+            Assert.NotNull(value);
             var dict = value.GetType().GetProperties().ToDictionary(p => p.Name, p => p.GetValue(value));
 
-            Assert.Equal("Love Art Sushi", (string)dict["restaurant"]);
+            Assert.Equal("Love Art Sushi", dict["restaurant"] as string);
             Assert.Equal(2, dict["orderCount"]);
         }
 
@@ -414,14 +418,22 @@ namespace GigBoard.Tests.Controllers
                 return props.ToDictionary(p => p.Name, p => p.GetValue(item));
             }).ToList();
 
-            var gas = dictList.FirstOrDefault(d => (string)d["Type"] == "Gas");
-            var maintenance = dictList.FirstOrDefault(d => (string)d["Type"] == "Car Maintenance");
+            var gas = dictList.FirstOrDefault(d => d["Type"] as string == "Gas");
+            var maintenance = dictList.FirstOrDefault(d => d["Type"] as string == "Car Maintenance");
 
             Assert.NotNull(gas);
             Assert.NotNull(maintenance);
 
-            Assert.Equal(100.00, (double)gas["AvgExpense"], precision: 2);
-            Assert.Equal(40.00, (double)maintenance["AvgExpense"], precision: 2);
+            if (gas["AvgExpense"] is double gasExpense &&
+                maintenance["AvgExpense"] is double maintenanceExpense)
+            {
+                Assert.Equal(100.00, gasExpense, precision: 2);
+                Assert.Equal(40.00, maintenanceExpense, precision: 2);
+            }
+            else
+            {
+                Assert.Fail("AvgExpense was null or not a double");
+            }
         }
 
         [Fact]
@@ -455,6 +467,179 @@ namespace GigBoard.Tests.Controllers
             var average = Assert.IsAssignableFrom<double>(okResult.Value);
 
             Assert.Equal(1, average, precision: 0);
+        }
+
+        [Fact]
+        public async Task PlotlyEarningsData_ReturnsData()
+        {
+            // Add test delivery
+            var delivery3 = new Delivery
+            {
+                Id = 3,
+                App = DeliveryApp.UberEats,
+                DeliveryTime = new DateTime(2025, 1, 1, 12, 0, 0),
+                BasePay = 3.50,
+                TipPay = 4.00,
+                TotalPay = 7.50,
+                Mileage = 1.2,
+                Restaurant = "Back Bay Social",
+                CustomerNeighborhood = "Fenway",
+                Notes = "test 3"
+            };
+            _context.Deliveries.Add(delivery3);
+
+            var userDelivery3 = new UserDelivery
+            {
+                UserId = 1,
+                DeliveryId = 3
+            };
+            _context.UserDeliveries.Add(userDelivery3);
+            await _context.SaveChangesAsync();
+
+            // Results
+            var result = await _controller.PlotlyEarningsData();
+
+            var okResult = Assert.IsType<OkObjectResult>(result);
+            var value = okResult.Value;
+            Assert.NotNull(value);
+
+            var dict = value.GetType().GetProperties().ToDictionary(p => p.Name, p => p.GetValue(value));
+            Assert.True(dict.ContainsKey("dates"));
+            Assert.True(dict.ContainsKey("earnings"));
+
+            var dates = Assert.IsAssignableFrom<IEnumerable<object>>(dict["dates"]);
+            var earnings = Assert.IsAssignableFrom<List<double>>(dict["earnings"]);
+            Assert.NotEmpty(dates);
+            Assert.NotEmpty(earnings);
+
+            Assert.Contains("2025-01-01", dates);
+            Assert.Contains(7.50, earnings);
+        }
+
+        [Fact]
+        public async Task PlotlyNeighborhoodsData_ReturnsData()
+        {
+            // Add delivery
+            var delivery3 = new Delivery
+            {
+                Id = 3,
+                App = DeliveryApp.UberEats,
+                DeliveryTime = new DateTime(2025, 1, 1, 12, 0, 0),
+                BasePay = 3.50,
+                TipPay = 4.00,
+                TotalPay = 7.50,
+                Mileage = 1.5,
+                Restaurant = "Back Bay Social",
+                CustomerNeighborhood = "Roxbury",
+                Notes = "test 3"
+            };
+            _context.Deliveries.Add(delivery3);
+
+            var userDelivery3 = new UserDelivery
+            {
+                UserId = 1,
+                DeliveryId = 3
+            };
+            _context.UserDeliveries.Add(userDelivery3);
+            await _context.SaveChangesAsync();
+
+            var result = await _controller.GetPlotlyNeighborhoodsData();
+
+            var okResult = Assert.IsAssignableFrom<OkObjectResult>(result);
+            var value = okResult.Value;
+            Assert.NotNull(value);
+
+            var dict = value.GetType().GetProperties().ToDictionary(p => p.Name, p => p.GetValue(value));
+            Assert.True(dict.ContainsKey("neighborhoods"));
+            Assert.True(dict.ContainsKey("tipPays"));
+
+            var neighborhoods = Assert.IsAssignableFrom<List<string>>(dict["neighborhoods"]);
+            var tipPays = Assert.IsAssignableFrom<List<double>>(dict["tipPays"]);
+            Assert.NotEmpty(neighborhoods);
+            Assert.NotEmpty(tipPays);
+
+            Assert.Contains("Roxbury", neighborhoods);
+            Assert.Contains("Back Bay", neighborhoods);
+            Assert.Contains(4.00, tipPays);
+            Assert.Contains(2.50, tipPays);
+        }
+
+        [Fact]
+        public async Task PlotlyAppsByBase_ReturnsData()
+        {
+            // Add delivery
+            var delivery3 = new Delivery
+            {
+                Id = 3,
+                App = DeliveryApp.Grubhub,
+                DeliveryTime = new DateTime(2025, 1, 1, 12, 0, 0),
+                BasePay = 3.50,
+                TipPay = 4.00,
+                TotalPay = 7.50,
+                Mileage = 1.5,
+                Restaurant = "Back Bay Social",
+                CustomerNeighborhood = "Roxbury",
+                Notes = "test 3"
+            };
+            _context.Deliveries.Add(delivery3);
+
+            var userDelivery3 = new UserDelivery
+            {
+                UserId = 1,
+                DeliveryId = 3
+            };
+            _context.UserDeliveries.Add(userDelivery3);
+            await _context.SaveChangesAsync();
+
+            var result = await _controller.GetPlotlyAppsByBase();
+
+            var okResult = Assert.IsAssignableFrom<OkObjectResult>(result);
+            var value = okResult.Value;
+            Assert.NotNull(value);
+
+            var dict = value.GetType().GetProperties().ToDictionary(p => p.Name, p => p.GetValue(value));
+            Assert.True(dict.ContainsKey("apps"));
+            Assert.True(dict.ContainsKey("basePays"));
+
+            var apps = Assert.IsAssignableFrom<List<string>>(dict["apps"]);
+            var basePays = Assert.IsAssignableFrom<List<double>>(dict["basePays"]);
+            Assert.NotEmpty(apps);
+            Assert.NotEmpty(basePays);
+
+            Assert.Contains("Grubhub", apps);
+            Assert.Contains("UberEats", apps);
+            Assert.Contains(3.50, basePays);
+            Assert.Contains(3.00, basePays);
+        }
+
+        [Fact]
+        public async Task PlotlyHourlyEarnings_ReturnsHourlyEarnings()
+        {
+            var result = await _controller.GetPlotlyHourlyEarnings();
+
+            var okResult = Assert.IsAssignableFrom<OkObjectResult>(result);
+            var value = okResult.Value;
+            Assert.NotNull(value);
+
+            var dict = value.GetType().GetProperties().ToDictionary(p => p.Name, p => p.GetValue(value));
+            Assert.True(dict.ContainsKey("hours"));
+            Assert.True(dict.ContainsKey("earnings"));
+
+            var hoursEnumerable = dict["hours"] as IEnumerable<string>;
+            Assert.NotNull(hoursEnumerable);
+            var hoursList = hoursEnumerable.ToList();
+
+            var earningsEnumerable = dict["earnings"] as IEnumerable<double>;
+            Assert.NotNull(earningsEnumerable);
+            var earningsList = earningsEnumerable.ToList();
+
+            int indexTwelve = hoursList.IndexOf("12");
+            Assert.True(indexTwelve >= 0, "Hour '12' is not present in hours");
+            Assert.Equal(5.50, earningsList[indexTwelve], 2);
+
+            int indexSeventeen = hoursList.IndexOf("17");
+            Assert.True(indexSeventeen >= 0, "Hour '17' is not present in hours");
+            Assert.Equal(6.50, earningsList[indexSeventeen], 2);
         }
     }
 }

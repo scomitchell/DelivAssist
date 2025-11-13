@@ -184,10 +184,10 @@ export const findAverageDeliveriesPerShift = async () => {
     return response.data;
 }
 
-export const findEarningsChart = async () => {
+export const findPlotlyEarningsData = async () => {
     const token = localStorage.getItem("token");
 
-    const response = await axiosWithCredentials.get(`${STATISTICS_API}/charts/earnings-over-time`, {
+    const response = await axiosWithCredentials.get(`${STATISTICS_API}/plotly-charts/earnings-over-time`, {
         headers: {
             Authorization: `Bearer ${token}`
         }
@@ -196,10 +196,10 @@ export const findEarningsChart = async () => {
     return response.data;
 }
 
-export const findTipNeighborhoodHist = async () => {
+export const findPlotlyTipNeighborhoodData = async () => {
     const token = localStorage.getItem("token");
 
-    const response = await axiosWithCredentials.get(`${STATISTICS_API}/charts/tip-neighborhoods`, {
+    const response = await axiosWithCredentials.get(`${STATISTICS_API}/plotly-charts/tip-neighborhoods`, {
         headers: {
             Authorization: `Bearer ${token}`
         }
@@ -208,10 +208,10 @@ export const findTipNeighborhoodHist = async () => {
     return response.data;
 }
 
-export const findBaseByAppHist = async () => {
+export const findPlotlyBaseByApp = async () => {
     const token = localStorage.getItem("token");
 
-    const response = await axiosWithCredentials.get(`${STATISTICS_API}/charts/apps-by-base`, {
+    const response = await axiosWithCredentials.get(`${STATISTICS_API}/plotly-charts/apps-by-base`, {
         headers: {
             Authorization: `Bearer ${token}`
         }
@@ -220,10 +220,10 @@ export const findBaseByAppHist = async () => {
     return response.data;
 }
 
-export const findHourlyPayChart = async () => {
+export const findHourlyPayData = async () => {
     const token = localStorage.getItem("token");
 
-    const response = await axiosWithCredentials.get(`${STATISTICS_API}/charts/hourly-earnings`, {
+    const response = await axiosWithCredentials.get(`${STATISTICS_API}/plotly-charts/hourly-earnings`, {
         headers: {
             Authorization: `Bearer ${token}`
         }

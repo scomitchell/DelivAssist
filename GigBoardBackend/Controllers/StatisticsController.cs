@@ -68,6 +68,7 @@ namespace GigBoardBackend.Controllers
 
             if (int.TryParse(userIdClaim, out int userId))
             {
+                // Get total base pays as list
                 var totalBases = await (
                     from ud in _context.UserDeliveries
                     join d in _context.Deliveries on ud.DeliveryId equals d.Id
@@ -75,11 +76,13 @@ namespace GigBoardBackend.Controllers
                     select d.BasePay
                 ).ToListAsync();
 
+                // If none return 0
                 if (totalBases.Count == 0)
                 {
                     return Ok(0);
                 }
 
+                // Average base pays and return
                 var avgBase = totalBases.Average();
 
                 return Ok(avgBase);
@@ -507,8 +510,8 @@ namespace GigBoardBackend.Controllers
             }
         }
 
-        [HttpGet("charts/earnings-over-time")]
-        public async Task<IActionResult> GetEarningsChart()
+        [HttpGet("plotly-charts/earnings-over-time")]
+        public async Task<IActionResult> PlotlyEarningsData()
         {
             var userIdClaim = User.FindFirstValue(ClaimTypes.NameIdentifier);
 
@@ -529,33 +532,17 @@ namespace GigBoardBackend.Controllers
 
                 if (deliveries.Count == 0)
                 {
-                    return NotFound("No deliveries found for user");
+                    return NotFound("No deliveries found for this user");
                 }
 
                 var dates = deliveries.Select(d => d.Date.ToString("yyyy-MM-dd")).ToList();
                 var earnings = deliveries.Select(d => (double)d.TotalEarnings).ToList();
 
-                var payload = new
+                return Ok(new
                 {
                     dates,
                     earnings
-                };
-
-                var response = await _httpClient.PostAsJsonAsync($"{_pythonServiceUrl}/charts/earnings", payload);
-
-                if (!response.IsSuccessStatusCode)
-                {
-                    return StatusCode(500, "Error generating chart from Python API");
-                }
-
-                var result = await response.Content.ReadFromJsonAsync<Dictionary<string, string>>();
-                if (result == null || !result.ContainsKey("image"))
-                {
-                    return StatusCode(500, "Invalid response from Python API");
-                }
-
-                // Return base64 image string
-                return Ok(new { base64Image = result["image"] });
+                });
             }
             else
             {
@@ -563,8 +550,8 @@ namespace GigBoardBackend.Controllers
             }
         }
 
-        [HttpGet("charts/tip-neighborhoods")]
-        public async Task<IActionResult> GetTipNeighborhoodsChart()
+        [HttpGet("plotly-charts/tip-neighborhoods")]
+        public async Task<IActionResult> GetPlotlyNeighborhoodsData()
         {
             var userIdClaim = User.FindFirstValue(ClaimTypes.NameIdentifier);
 
@@ -588,45 +575,17 @@ namespace GigBoardBackend.Controllers
 
                 if (deliveries.Count == 0)
                 {
-                    return NotFound("No deliveries found");
-                }
-
-                Console.WriteLine($"Request started at {DateTime.Now:HH:mm:ss.fff}");
-                foreach (var d in deliveries)
-                {
-                    Console.WriteLine($"{d.CustomerNeighborhood}: {d.AverageTipPay}");
-                }
-
-                Console.WriteLine("Tip Neighborhoods:");
-                foreach (var d in deliveries)
-                {
-                    Console.WriteLine($"{d.CustomerNeighborhood}: {d.AverageTipPay}");
+                    return NotFound("No deliveries found for this user");
                 }
 
                 var neighborhoods = deliveries.Select(d => d.CustomerNeighborhood).ToList();
                 var tipPays = deliveries.Select(d => (double)d.AverageTipPay).ToList();
 
-                var payload = new
+                return Ok(new
                 {
                     neighborhoods,
                     tipPays
-                };
-
-                var response = await _httpClient.PostAsJsonAsync($"{_pythonServiceUrl}/charts/tips-neighborhood", payload);
-
-                if (!response.IsSuccessStatusCode)
-                {
-                    return StatusCode(500, "Error retrieving tip by neighborhood chart");
-                }
-
-                var result = await response.Content.ReadFromJsonAsync<Dictionary<string, string>>();
-                if (result == null || !result.ContainsKey("image"))
-                {
-                    return StatusCode(500, "Invalid response from Python API");
-                }
-
-                // Return base64 image string
-                return Ok(new { base64Image = result["image"] });
+                });
             }
             else
             {
@@ -634,8 +593,8 @@ namespace GigBoardBackend.Controllers
             }
         }
 
-        [HttpGet("charts/apps-by-base")]
-        public async Task<IActionResult> GetAppsByBaseChart()
+        [HttpGet("plotly-charts/apps-by-base")]
+        public async Task<IActionResult> GetPlotlyAppsByBase()
         {
             var userIdClaim = User.FindFirstValue(ClaimTypes.NameIdentifier);
 
@@ -652,37 +611,21 @@ namespace GigBoardBackend.Controllers
                     App = g.Key,
                     BasePay = g.Average(x => x.BasePay)
                 }
-            ).ToListAsync();
+                ).ToListAsync();
 
                 if (deliveries.Count == 0)
                 {
-                    return NotFound("No deliveries found");
+                    return NotFound("No deliveries found for this user");
                 }
 
                 var apps = deliveries.Select(d => d.App.ToString()).ToList();
                 var basePays = deliveries.Select(d => (double)d.BasePay).ToList();
 
-                var payload = new
+                return Ok(new
                 {
                     apps,
                     basePays
-                };
-
-                var response = await _httpClient.PostAsJsonAsync($"{_pythonServiceUrl}/charts/apps-by-base", payload);
-
-                if (!response.IsSuccessStatusCode)
-                {
-                    return StatusCode(500, "Error getting base by apps histogram");
-                }
-
-                var result = await response.Content.ReadFromJsonAsync<Dictionary<string, string>>();
-                if (result == null || !result.ContainsKey("image"))
-                {
-                    return StatusCode(500, "Invalid response from Python API");
-                }
-
-                // Return base64 image string
-                return Ok(new { base64Image = result["image"] });
+                });
             }
             else
             {
@@ -690,8 +633,8 @@ namespace GigBoardBackend.Controllers
             }
         }
 
-        [HttpGet("charts/hourly-earnings")]
-        public async Task<IActionResult> GetHourlyEarningsChart()
+        [HttpGet("plotly-charts/hourly-earnings")]
+        public async Task<IActionResult> GetPlotlyHourlyEarnings()
         {
             var userIdClaim = User.FindFirstValue(ClaimTypes.NameIdentifier);
 
@@ -700,114 +643,43 @@ namespace GigBoardBackend.Controllers
                 var oneWeekAgo = DateTime.UtcNow.AddDays(-7);
 
                 var hourlyEarnings = await _context.UserDeliveries
-                    .Where(ud => ud.UserId == userId && ud.Delivery != null && ud.Delivery.DeliveryTime >= oneWeekAgo)
-                    .Select(ud => new
-                    {
-                        ud.Delivery!.DeliveryTime.Hour,
-                        Earnings = ud.Delivery.TotalPay
-                    })
-                    .GroupBy(x => x.Hour)
-                    .Select(g => new
-                    {
-                        Hour = g.Key,
-                        AverageEarnings = g.Average(x => x.Earnings)
-                    })
-                    .OrderBy(x => x.Hour)
-                    .ToListAsync();
+                .Where(ud => ud.UserId == userId && ud.Delivery != null && ud.Delivery.DeliveryTime >= oneWeekAgo)
+                .Select(ud => new
+                {
+                    ud.Delivery!.DeliveryTime.Hour,
+                    Earnings = ud.Delivery.TotalPay
+                })
+                .GroupBy(x => x.Hour)
+                .Select(g => new
+                {
+                    Hour = g.Key,
+                    AverageEarnings = g.Average(x => x.Earnings)
+                })
+                .OrderBy(x => x.Hour)
+                .ToListAsync();
 
                 var allHours = Enumerable.Range(0, 24).ToList();
+
                 var earningsByHour = allHours
-                    .Select(h => new
-                    {
-                        Hour = h,
-                        AverageEarnings = hourlyEarnings.FirstOrDefault(x => x.Hour == h)?.AverageEarnings ?? 0
-                    })
-                    .ToList();
+                .Select(h => new
+                {
+                    Hour = h,
+                    AverageEarnings = hourlyEarnings.FirstOrDefault(x => x.Hour == h)?.AverageEarnings ?? 0
+                })
+                .ToList();
 
                 var hoursStrings = earningsByHour.Select(x => x.Hour.ToString("D2")).ToList();
                 var earnings = earningsByHour.Select(x => x.AverageEarnings).ToList();
 
-                var payload = new
+                return Ok(new
                 {
                     hours = hoursStrings,
                     earnings
-                };
-
-                var response = await _httpClient.PostAsJsonAsync($"{_pythonServiceUrl}/charts/hourly-earnings", payload);
-
-                if (!response.IsSuccessStatusCode)
-                {
-                    return StatusCode(500, "Error retrieving hourly pay chart");
-                }
-
-                var result = await response.Content.ReadFromJsonAsync<Dictionary<string, string>>();
-                if (result == null || !result.ContainsKey("image"))
-                {
-                    return StatusCode(500, "Invalid response from Python API");
-                }
-
-                return Ok(new { base64Image = result["image"] });
-            }
-            else
-            {
-                return BadRequest("User claim is invalid");
-            }
-        }
-
-        [HttpGet("train/shift-model")]
-        public async Task<IActionResult> TrainShiftModel()
-        {
-            var userIdClaim = User.FindFirstValue(ClaimTypes.NameIdentifier);
-
-            if (int.TryParse(userIdClaim, out int userId))
-            {
-                var shiftData = _context.ShiftDeliveries
-                .Where(sd => sd.UserId == userId && sd.Shift != null && sd.Delivery != null)
-                .Include(sd => sd.Shift)
-                .Include(sd => sd.Delivery)
-                .AsEnumerable()
-                .GroupBy(sd => new
-                {
-                    sd.Shift!.Id,
-                    sd.Shift.StartTime,
-                    sd.Shift.EndTime,
-                    sd.Shift.App,
-                })
-                .Select(g => new
-                {
-                    g.Key.StartTime,
-                    g.Key.EndTime,
-                    g.Key.App,
-                    Neighborhoods = g.Select(x => x.Delivery!.CustomerNeighborhood).Distinct().ToList(),
-                    TotalEarnings = g.Sum(x => x.Delivery!.TotalPay),
-                })
-                .ToList();
-
-                var samples = shiftData.Select(d => new
-                {
-                    start_time = d.StartTime.ToString("HH:mm"),
-                    end_time = d.EndTime.ToString("HH:mm"),
-                    app = d.App.ToString(),
-                    neighborhoods = d.Neighborhoods,
-                    earnings = d.TotalEarnings
                 });
-
-                var payload = new { samples };
-
-                var response = await _httpClient.PostAsJsonAsync($"{_pythonServiceUrl}/train/shift-model", payload);
-
-                if (!response.IsSuccessStatusCode)
-                {
-                    return StatusCode(500, "Python Training API error");
-                }
-
-                var result = await response.Content.ReadFromJsonAsync<Dictionary<string, string>>();
-
-                return Ok(result);
             }
             else
             {
-                return BadRequest("User claim is invalid");
+                return BadRequest("User Claim is invalid");
             }
         }
 
