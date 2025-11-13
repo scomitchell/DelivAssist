@@ -26,10 +26,11 @@ export default function EarningsChart({ data }: EarningsChartProps)
             layout={{
                 title: {text: "Earnings Over Time", font: { size: 20 }},
                 xaxis: {
-                    title: {text: "Date", font: { size: 16 }},
-                    tickangle: -45,
+                    title: {text: "Date", font: { size: 16 }, standoff: 30},
+                    tickangle: -30,
                     showgrid: true,
-                    zeroline: false
+                    zeroline: false,
+                    tickformat: "%b %d, %Y"
                 },
                 yaxis: {
                     title: {text: "Earnings ($)", font: { size: 16 }},
@@ -39,7 +40,7 @@ export default function EarningsChart({ data }: EarningsChartProps)
                 },
                 plot_bgcolor: "white",
                 paper_bgcolor: "white",
-                margin: { t: 50, r: 40, b: 50, l: 60 },
+                margin: { t: 50, r: 40, b: 70, l: 60 },
                 dragmode: false
             }}
             config={{
