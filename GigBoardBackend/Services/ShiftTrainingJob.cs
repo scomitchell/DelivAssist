@@ -64,7 +64,7 @@ namespace GigBoardBackend.Services
                 var payload = new { samples };
 
                 // Python service URL
-                var pythonServiceUrl = _config["PythonServiceUrl"] ?? "http://localhost:8001";
+                var pythonServiceUrl = _config["PYTHON_SERVICE_URL"] ?? "http://localhost:8001";
                 var response = await _httpClient.PostAsJsonAsync($"{pythonServiceUrl}/train/shift-model", payload);
 
                 if (!response.IsSuccessStatusCode)
