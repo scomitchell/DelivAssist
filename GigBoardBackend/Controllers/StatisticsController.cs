@@ -633,8 +633,8 @@ namespace GigBoardBackend.Controllers
             }
         }
 
-        [HttpGet("charts/hourly-earnings")]
-        public async Task<IActionResult> GetHourlyEarningsChart()
+        [HttpGet("plotly-charts/hourly-earnings")]
+        public async Task<IActionResult> GetPlotlyHourlyEarnings()
         {
             var userIdClaim = User.FindFirstValue(ClaimTypes.NameIdentifier);
 
@@ -643,57 +643,43 @@ namespace GigBoardBackend.Controllers
                 var oneWeekAgo = DateTime.UtcNow.AddDays(-7);
 
                 var hourlyEarnings = await _context.UserDeliveries
-                    .Where(ud => ud.UserId == userId && ud.Delivery != null && ud.Delivery.DeliveryTime >= oneWeekAgo)
-                    .Select(ud => new
-                    {
-                        ud.Delivery!.DeliveryTime.Hour,
-                        Earnings = ud.Delivery.TotalPay
-                    })
-                    .GroupBy(x => x.Hour)
-                    .Select(g => new
-                    {
-                        Hour = g.Key,
-                        AverageEarnings = g.Average(x => x.Earnings)
-                    })
-                    .OrderBy(x => x.Hour)
-                    .ToListAsync();
+                .Where(ud => ud.UserId == userId && ud.Delivery != null && ud.Delivery.DeliveryTime >= oneWeekAgo)
+                .Select(ud => new
+                {
+                    ud.Delivery!.DeliveryTime.Hour,
+                    Earnings = ud.Delivery.TotalPay
+                })
+                .GroupBy(x => x.Hour)
+                .Select(g => new
+                {
+                    Hour = g.Key,
+                    AverageEarnings = g.Average(x => x.Earnings)
+                })
+                .OrderBy(x => x.Hour)
+                .ToListAsync();
 
                 var allHours = Enumerable.Range(0, 24).ToList();
+
                 var earningsByHour = allHours
-                    .Select(h => new
-                    {
-                        Hour = h,
-                        AverageEarnings = hourlyEarnings.FirstOrDefault(x => x.Hour == h)?.AverageEarnings ?? 0
-                    })
-                    .ToList();
+                .Select(h => new
+                {
+                    Hour = h,
+                    AverageEarnings = hourlyEarnings.FirstOrDefault(x => x.Hour == h)?.AverageEarnings ?? 0
+                })
+                .ToList();
 
                 var hoursStrings = earningsByHour.Select(x => x.Hour.ToString("D2")).ToList();
                 var earnings = earningsByHour.Select(x => x.AverageEarnings).ToList();
 
-                var payload = new
+                return Ok(new
                 {
                     hours = hoursStrings,
                     earnings
-                };
-
-                var response = await _httpClient.PostAsJsonAsync($"{_pythonServiceUrl}/charts/hourly-earnings", payload);
-
-                if (!response.IsSuccessStatusCode)
-                {
-                    return StatusCode(500, "Error retrieving hourly pay chart");
-                }
-
-                var result = await response.Content.ReadFromJsonAsync<Dictionary<string, string>>();
-                if (result == null || !result.ContainsKey("image"))
-                {
-                    return StatusCode(500, "Invalid response from Python API");
-                }
-
-                return Ok(new { base64Image = result["image"] });
+                });
             }
             else
             {
-                return BadRequest("User claim is invalid");
+                return BadRequest("User Claim is invalid");
             }
         }
 

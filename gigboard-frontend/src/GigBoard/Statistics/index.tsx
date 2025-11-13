@@ -5,6 +5,8 @@ import PredictEarnings from "./PredictEarnings";
 import EarningsChart from "./EarningsChart";
 import TipsByNeighborhoodChart from "./TipsByNeighborhoodChart";
 import BaseByAppsChart from "./BaseByAppsChart";
+import HourlyEarningsChart from "./HourlyEarningsChart";
+import type { HourlyEarningsProps } from "./HourlyEarningsChart";
 import type { EarningsChartProps } from "./EarningsChart";
 import type { TipNeighborhoodsProps } from "./TipsByNeighborhoodChart";
 import type { BaseByAppProps } from  "./BaseByAppsChart";
@@ -14,10 +16,6 @@ type MonthlySpendingType = {
   type: string;
   avgExpense: number;
 };
-
-interface EarningsChartResponse {
-    base64Image: string;
-}
 
 export default function Statistics() {
     // Pay statistics
@@ -49,7 +47,7 @@ export default function Statistics() {
     const [plotlyEarningsData, setPlotlyEarningsData] = useState<EarningsChartProps["data"] | null>(null);
     const [plotlyTipNeighborhoodsData, setPlotlyTipNeighborhoodsData] = useState<TipNeighborhoodsProps["data"] | null>(null);
     const [plotlyBaseByAppData, setPlotlyBaseByAppData] = useState<BaseByAppProps["data"] | null>(null);
-    const [hourlyEarningsChart, setHourlyEarningsChart] = useState<EarningsChartResponse | null>(null);
+    const [hourlyEarningsData, setHourlyEarningsData] = useState<HourlyEarningsProps["data"] | null>(null);
 
     // Loading
     const [loading, setLoading] = useState(true);
@@ -132,11 +130,11 @@ export default function Statistics() {
         }
 
         try {
-            const userHourlyEarningsChart = await client.findHourlyPayChart();
+            const userHourlyEarningsData = await client.findHourlyPayData();
 
-            setHourlyEarningsChart(userHourlyEarningsChart);
+            setHourlyEarningsData(userHourlyEarningsData);
         } catch {
-            setHourlyEarningsChart(null);
+            setHourlyEarningsData(null);
         }
 
         try {
@@ -313,12 +311,8 @@ export default function Statistics() {
         } else if (page === "hourly-pay-chart") {
             return (
                 <div id="charts">
-                    {hourlyEarningsChart && (
-                        <img
-                            src={`data:image/png;base64,${hourlyEarningsChart.base64Image}`}
-                            alt="Average Hourly Earnings for the Past Week"
-                            style={{maxWidth: "100%", height: "auto", display: "block"}}
-                        />
+                    {hourlyEarningsData && (
+                        <HourlyEarningsChart data={hourlyEarningsData} />
                     )}
                 </div>
             )

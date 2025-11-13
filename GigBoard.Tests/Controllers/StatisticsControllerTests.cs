@@ -89,7 +89,7 @@ namespace GigBoard.Tests.Controllers
                 {
                     Id = 1,
                     App = DeliveryApp.UberEats,
-                    DeliveryTime = DateTime.Now,
+                    DeliveryTime = DateTime.Today.AddHours(12),
                     BasePay = 3.0,
                     TipPay = 2.50,
                     TotalPay = 5.50,
@@ -103,7 +103,7 @@ namespace GigBoard.Tests.Controllers
                 {
                     Id = 2,
                     App = DeliveryApp.Doordash,
-                    DeliveryTime = DateTime.Now,
+                    DeliveryTime = DateTime.Today.AddHours(17),
                     BasePay = 4.50,
                     TipPay = 2.00,
                     TotalPay = 6.50,
@@ -610,6 +610,36 @@ namespace GigBoard.Tests.Controllers
             Assert.Contains("UberEats", apps);
             Assert.Contains(3.50, basePays);
             Assert.Contains(3.00, basePays);
+        }
+
+        [Fact]
+        public async Task PlotlyHourlyEarnings_ReturnsHourlyEarnings()
+        {
+            var result = await _controller.GetPlotlyHourlyEarnings();
+
+            var okResult = Assert.IsAssignableFrom<OkObjectResult>(result);
+            var value = okResult.Value;
+            Assert.NotNull(value);
+
+            var dict = value.GetType().GetProperties().ToDictionary(p => p.Name, p => p.GetValue(value));
+            Assert.True(dict.ContainsKey("hours"));
+            Assert.True(dict.ContainsKey("earnings"));
+
+            var hoursEnumerable = dict["hours"] as IEnumerable<string>;
+            Assert.NotNull(hoursEnumerable);
+            var hoursList = hoursEnumerable.ToList();
+
+            var earningsEnumerable = dict["earnings"] as IEnumerable<double>;
+            Assert.NotNull(earningsEnumerable);
+            var earningsList = earningsEnumerable.ToList();
+
+            int indexTwelve = hoursList.IndexOf("12");
+            Assert.True(indexTwelve >= 0, "Hour '12' is not present in hours");
+            Assert.Equal(5.50, earningsList[indexTwelve], 2);
+
+            int indexSeventeen = hoursList.IndexOf("17");
+            Assert.True(indexSeventeen >= 0, "Hour '17' is not present in hours");
+            Assert.Equal(6.50, earningsList[indexSeventeen], 2);
         }
     }
 }

@@ -220,10 +220,10 @@ export const findPlotlyBaseByApp = async () => {
     return response.data;
 }
 
-export const findHourlyPayChart = async () => {
+export const findHourlyPayData = async () => {
     const token = localStorage.getItem("token");
 
-    const response = await axiosWithCredentials.get(`${STATISTICS_API}/charts/hourly-earnings`, {
+    const response = await axiosWithCredentials.get(`${STATISTICS_API}/plotly-charts/hourly-earnings`, {
         headers: {
             Authorization: `Bearer ${token}`
         }
