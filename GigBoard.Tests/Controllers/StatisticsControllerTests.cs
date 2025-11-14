@@ -635,5 +635,28 @@ namespace GigBoard.Tests.Controllers
             Assert.True(indexSeventeen >= 0, "Hour '17' is not present in hours");
             Assert.Equal(6.50, earningsList[indexSeventeen], 2);
         }
+
+        [Fact]
+        public async Task GetDonutChartData_ReturnsData()
+        {
+            var result = await _controller.GetDataForDonutChart();
+
+            var okResult = Assert.IsAssignableFrom<OkObjectResult>(result);
+            var value = okResult.Value;
+            Assert.NotNull(value);
+
+            var dict = value.GetType().GetProperties().ToDictionary(p => p.Name, p => p.GetValue(value));
+            Assert.True(dict.ContainsKey("totalPay"));
+            Assert.True(dict.ContainsKey("totalBasePay"));
+            Assert.True(dict.ContainsKey("totalTipPay"));
+
+            var totalPay = Assert.IsAssignableFrom<double>(dict["totalPay"]);
+            var totalBasePay = Assert.IsAssignableFrom<double>(dict["totalBasePay"]);
+            var totalTipPay = Assert.IsAssignableFrom<double>(dict["totalTipPay"]);
+
+            Assert.Equal(12, totalPay, 2);
+            Assert.Equal(7.50, totalBasePay, 2);
+            Assert.Equal(4.50, totalTipPay, 2);
+        }
     }
 }

@@ -710,6 +710,41 @@ namespace GigBoardBackend.Controllers
             }
         }
 
+        [HttpGet("donut-chart-data")]
+        public async Task<IActionResult> GetDataForDonutChart()
+        {
+            var userIdClaim = User.FindFirstValue(ClaimTypes.NameIdentifier);
+
+            if (int.TryParse(userIdClaim, out int userId))
+            {
+                var totalPay = await _context.UserDeliveries
+                .Where(ud => ud.UserId == userId && ud.Delivery != null)
+                .Select(ud => ud.Delivery!.TotalPay)
+                .SumAsync();
+
+                var totalBasePay = await _context.UserDeliveries
+                .Where(ud => ud.UserId == userId && ud.Delivery != null)
+                .Select(ud => ud.Delivery!.BasePay)
+                .SumAsync();
+
+                var totalTipPay = await _context.UserDeliveries
+                .Where(ud => ud.UserId == userId && ud.Delivery != null)
+                .Select(ud => ud.Delivery!.TipPay)
+                .SumAsync();
+
+                return Ok (new
+                {
+                    totalPay,
+                    totalBasePay,
+                    totalTipPay
+                });
+            } 
+            else
+            {
+                return BadRequest("User claim is invalid");
+            }
+        }
+
         [HttpPost("predict/shift-earnings")]
         public async Task<IActionResult> PredictShiftEarnings([FromBody] ShiftPredictionRequest request)
         {

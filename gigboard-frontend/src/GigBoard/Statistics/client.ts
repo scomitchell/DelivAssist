@@ -232,10 +232,10 @@ export const findHourlyPayData = async () => {
     return response.data;
 }
 
-export const trainShiftModel = async () => {
+export const findDonutChartData = async () => {
     const token = localStorage.getItem("token");
 
-    const response = await axiosWithCredentials.get(`${STATISTICS_API}/train/shift-model`, {
+    const response = await axiosWithCredentials.get(`${STATISTICS_API}/donut-chart-data`, {
         headers: {
             Authorization: `Bearer ${token}`
         }

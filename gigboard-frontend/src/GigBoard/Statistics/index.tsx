@@ -7,10 +7,12 @@ import EarningsChart from "./EarningsChart";
 import TipsByNeighborhoodChart from "./TipsByNeighborhoodChart";
 import BaseByAppsChart from "./BaseByAppsChart";
 import HourlyEarningsChart from "./HourlyEarningsChart";
+import EarningsDonutChart from "./EarningsDonutChart";
 import type { HourlyEarningsProps } from "./HourlyEarningsChart";
 import type { EarningsChartProps } from "./EarningsChart";
 import type { TipNeighborhoodsProps } from "./TipsByNeighborhoodChart";
 import type { BaseByAppProps } from  "./BaseByAppsChart";
+import type { EarningsDonutProps } from "./EarningsDonutChart";
 import "../../index.css";
 
 type MonthlySpendingType = {
@@ -49,6 +51,7 @@ export default function Statistics() {
     const [plotlyTipNeighborhoodsData, setPlotlyTipNeighborhoodsData] = useState<TipNeighborhoodsProps["data"] | null>(null);
     const [plotlyBaseByAppData, setPlotlyBaseByAppData] = useState<BaseByAppProps["data"] | null>(null);
     const [hourlyEarningsData, setHourlyEarningsData] = useState<HourlyEarningsProps["data"] | null>(null);
+    const [donutChartData, setDonutChartData] = useState<EarningsDonutProps["data"] | null>(null);
 
     // Loading
     const [loading, setLoading] = useState(true);
@@ -59,7 +62,6 @@ export default function Statistics() {
 
     const fetchStatistics = async () => {
         // Fetch statistics
-
         try {
             const avgPay = await client.findAvgDeliveryPay();
             const avgBase = await client.findAvgBasePay();
@@ -142,14 +144,17 @@ export default function Statistics() {
             const userPlotlyEarningsData = await client.findPlotlyEarningsData();
             const userTipNeighborhoodsData = await client.findPlotlyTipNeighborhoodData();
             const userBaseByAppData = await client.findPlotlyBaseByApp();
+            const userEarningsDonutData = await client.findDonutChartData();
 
             setPlotlyEarningsData(userPlotlyEarningsData);
             setPlotlyTipNeighborhoodsData(userTipNeighborhoodsData);
             setPlotlyBaseByAppData(userBaseByAppData);
+            setDonutChartData(userEarningsDonutData);
         } catch {
             setPlotlyEarningsData(null);
             setPlotlyTipNeighborhoodsData(null);
             setPlotlyBaseByAppData(null);
+            setDonutChartData(null);
         }
 
         setLoading(false);
@@ -352,6 +357,14 @@ export default function Statistics() {
                     )}
                 </div>
             )
+        } else if (page === "earnings-donut") {
+            return (
+                <div id="charts">
+                    {donutChartData && (
+                        <EarningsDonutChart data={donutChartData} />
+                    )}
+                </div>
+            );
         } else if (page === "predict-earnings") {
             return (
                 <div id="predict-earnings">
@@ -371,6 +384,7 @@ export default function Statistics() {
             <Col sm={6}>
                 <select onChange={(e) => setPage(e.target.value)} className="form-control mb-3">
                     <option value="stats">Overall Statistics</option>
+                    <option value="earnings-donut">Overall Earnings Chart</option>
                     <option value="earnings-over-time">Earnings Over Time Chart</option>
                     <option value="tips-by-neighborhood">Average Tip by Neighborhood Chart</option>
                     <option value="base-by-app">Average Base Pay by App Chart</option>
