@@ -73,9 +73,9 @@ export default function PredictEarnings()
                 <Col sm={4}>
                     <select onChange={(e) => setApp(e.target.value)}
                         className="form-control mb-2" id="da-app">
-                        <option value=""></option>
+                        <option value="" key=""></option>
                         {apps.map((app: any) => 
-                            <option value={app}>{app}</option>
+                            <option value={app} key={app}>{app}</option>
                         )}
                     </select>
                 </Col>
@@ -85,9 +85,9 @@ export default function PredictEarnings()
                 <Col sm={4}>
                     <select onChange={(e) => setNeighborhood(e.target.value)}
                         className="form-control mb-2" id="da-neighborhood">
-                        <option value=""></option>
+                        <option value="" key=""></option>
                         {neighborhoods.map((neighborhood: any) => 
-                            <option value={neighborhood}>{neighborhood}</option>
+                            <option value={neighborhood} key={neighborhood}>{neighborhood}</option>
                         )}
                     </select>
                 </Col>

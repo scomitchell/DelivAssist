@@ -177,7 +177,7 @@ export default function Statistics() {
                         }}>
                             <CardContent sx={{ p: 2}}>
                                 <Typography variant="h6" fontWeight="bold">Pay Statistics</Typography>
-                                <Typography variant="body1" sx={{ mt: 1}}>
+                                <Typography variant="body1" component="div" sx={{ mt: 1}}>
                                     {loading ? 
                                         <div>
                                             <strong>Average total pay:</strong> Loading... <br />
@@ -212,7 +212,7 @@ export default function Statistics() {
                             }}>
                             <CardContent sx={{ p: 2}}>
                                 <Typography variant="h6" fontWeight="bold">Location Statistics</Typography>
-                                <Typography sx={{ mt: 1 }}>
+                                <Typography variant="body1" component="div" sx={{ mt: 1 }}>
                                     {loading ?
                                     <div>
                                         <strong>Best tip neighborhood:</strong> Loading... <br />
@@ -261,7 +261,7 @@ export default function Statistics() {
                             }}>
                             <CardContent sx={{ p: 2}}>
                                 <Typography variant="h6" fontWeight="bold">App Statistics</Typography>
-                                <Typography sx={{ mt: 1 }}>
+                                <Typography variant="body1" component="div" sx={{ mt: 1 }}>
                                     <strong>App with highest base pay:</strong> {baseApp.app} <br />
                                     <span style={{ marginLeft: "1rem" }}>
                                         <strong>- Average:</strong> ${baseApp.avgBase.toFixed(2)}
@@ -287,7 +287,7 @@ export default function Statistics() {
                             }}>
                             <CardContent sx={{ p: 2 }}>
                                 <Typography variant="h6" fontWeight="bold">Expense Statistics</Typography>
-                                <Typography sx={{mt: 1}}>
+                                <Typography variant="body1" component="div" sx={{mt: 1}}>
                                     <strong>Average monthly spending:</strong> ${monthlySpending.toFixed(2)} <br />
                                     <strong>Monthly spending by type:</strong>
                                     <div style={{ marginLeft: "1rem" }}>
@@ -314,7 +314,7 @@ export default function Statistics() {
                             }}>
                             <CardContent sx={{ p: 2 }}>
                                 <Typography variant="h6" fontWeight="bold">Shift Statistics</Typography>
-                                <Typography sx={{ mt: 1}}>
+                                <Typography variant="body1" component="div" sx={{ mt: 1}}>
                                     <strong>Average shift length:</strong> {averageShiftLength?.toFixed(0)} minutes <br />
                                     <strong>Average number of deliveries per shift:</strong> {Math.floor(avgDeliveriesPerShift)} <br />
                                     <strong>App with most shifts:</strong> {appWithMostShifts} <br />

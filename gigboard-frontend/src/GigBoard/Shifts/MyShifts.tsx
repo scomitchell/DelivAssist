@@ -177,7 +177,7 @@ export default function MyShifts({ myShifts, setMyShifts }: {
             {/*Display Shift details on cards*/}
             <Row>
                 {myShifts.map((shift: any) =>
-                    <Col sm={6}>
+                    <Col sm={6} key={shift.id}>
                         <Card sx={{
                             mb: 3,
                             textAlign: "start",
