@@ -30,6 +30,7 @@ namespace GigBoardBackend.Controllers {
                     return BadRequest("User does not exist");
                 }
 
+                // Check existing shift to associate with delivery
                 var shift = await _context.Shifts.FindAsync(shiftId);
 
                 if (shift == null)
@@ -37,6 +38,7 @@ namespace GigBoardBackend.Controllers {
                     return BadRequest("Shift does not exist");
                 }
 
+                // Check existing delivery to associate with shift
                 var delivery = await _context.Deliveries.FindAsync(deliveryId);
 
                 if (delivery == null)
@@ -44,6 +46,8 @@ namespace GigBoardBackend.Controllers {
                     return BadRequest("Delivery does not exist");
                 }
 
+
+                // Ensure delivery time and app matches shift
                 if (delivery.DeliveryTime < shift.StartTime || delivery.DeliveryTime > shift.EndTime)
                 {
                     return BadRequest("Delivery does not fit within shift time");
@@ -54,6 +58,7 @@ namespace GigBoardBackend.Controllers {
                     return BadRequest("Delivery app does not match shift app");
                 }
 
+                // Add shift delivery to db
                 var shiftDelivery = new ShiftDelivery
                 {
                     ShiftId = shiftId,
@@ -78,6 +83,7 @@ namespace GigBoardBackend.Controllers {
 
             if (int.TryParse(userIdClaim, out int userId))
             {
+                // Get list of all deliveries associated with this shift by ID
                 var shiftDeliveries = await _context.ShiftDeliveries
                 .Where(sd => sd.UserId == userId && sd.ShiftId == shiftId && sd.Delivery != null)
                 .Include(sd => sd.Delivery)
