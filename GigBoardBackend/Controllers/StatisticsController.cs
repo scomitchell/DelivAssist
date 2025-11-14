@@ -1,13 +1,9 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.EntityFrameworkCore;
-using System.Net.Http;
-using System.Net.Http.Json;
 using System.Security.Claims;
 using GigBoardBackend.Data;
 using GigBoardBackend.Models;
-using System.Net.Sockets;
-using Microsoft.AspNetCore.Builder.Extensions;
 
 namespace GigBoardBackend.Controllers
 {
@@ -173,7 +169,7 @@ namespace GigBoardBackend.Controllers
                 var result = await _context.UserDeliveries
                     .Where(ud => ud.UserId == userId && ud.Delivery != null)
                     .GroupBy(ud => ud.Delivery!.Restaurant)
-                    // Get restaurant and it's average total pay across all associated deliveries
+                    // Get restaurant and its average total pay across all associated deliveries
                     .Select(g => new
                     {
                         Restaurant = g.Key,

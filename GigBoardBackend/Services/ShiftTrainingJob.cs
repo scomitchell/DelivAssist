@@ -1,6 +1,5 @@
 using GigBoardBackend.Data;
 using Microsoft.EntityFrameworkCore;
-using System.Net.Http.Json;
 
 namespace GigBoardBackend.Services
 {

@@ -4,7 +4,6 @@ using System.Security.Claims;
 using Microsoft.EntityFrameworkCore;
 using GigBoardBackend.Data;
 using GigBoardBackend.Models;
-using System.Data.SqlTypes;
 
 namespace GigBoardBackend.Controllers
 {
