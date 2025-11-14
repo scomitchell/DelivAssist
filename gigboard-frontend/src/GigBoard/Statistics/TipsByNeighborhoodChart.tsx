@@ -22,7 +22,7 @@ export default function TipsByNeighborhoodChart({data}: TipNeighborhoodsProps) {
             ]}
             layout={{
                 height: 450,
-                width: 1000,
+                width: 1050,
                 title: {text: "Average Tip By Neighborhood", font: { size: 20, weight: "bold"}},
                 xaxis: {
                     title: {text: "Neighborhood", font: { size: 16 }, standoff: 10},
@@ -39,7 +39,7 @@ export default function TipsByNeighborhoodChart({data}: TipNeighborhoodsProps) {
                 },
                 plot_bgcolor: "white",
                 paper_bgcolor: "white",
-                margin: { t: 50, r: 50, b: 80, l: 70},
+                margin: { t: 50, r: 50, b: 80, l: 85},
                 dragmode: false
             }}
             config={{
