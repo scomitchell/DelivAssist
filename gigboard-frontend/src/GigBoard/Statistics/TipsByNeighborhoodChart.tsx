@@ -21,15 +21,17 @@ export default function TipsByNeighborhoodChart({data}: TipNeighborhoodsProps) {
                 },
             ]}
             layout={{
-                title: {text: "Average Tip By Neighborhood", font: { size: 20 }},
+                height: 450,
+                width: 1000,
+                title: {text: "Average Tip By Neighborhood", font: { size: 20, weight: "bold"}},
                 xaxis: {
-                    title: {text: "Neighborhood", font: { size: 16 }},
+                    title: {text: "Neighborhood", font: { size: 16 }, standoff: 10},
                     tickangle: -45,
                     showgrid: true,
                     zeroline: false,
                 },
                 yaxis: {
-                    title: {text: "Average Tip", font: { size: 16 }},
+                    title: {text: "Average Tip", font: { size: 16 }, standoff: 10},
                     showgrid: true,
                     zeroline: false,
                     tickprefix: "$",
@@ -37,7 +39,7 @@ export default function TipsByNeighborhoodChart({data}: TipNeighborhoodsProps) {
                 },
                 plot_bgcolor: "white",
                 paper_bgcolor: "white",
-                margin: { t: 50, r: 40, b: 80, l: 60},
+                margin: { t: 50, r: 50, b: 80, l: 70},
                 dragmode: false
             }}
             config={{

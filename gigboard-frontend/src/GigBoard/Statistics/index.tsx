@@ -29,7 +29,6 @@ export default function Statistics() {
     const [avgTipPerMile, setAvgTipPerMile] = useState(0);
 
     // Location Statistics
-    const [neighborhood, setNeighborhood] = useState({ neighborhood: "", averageTipPay: 0 });
     const [restaurant, setRestaurant] = useState({ restaurant: "", avgTotalPay: 0 });
     const [restaurantWithMost, setRestaurantWithMost] = useState({restaurant: "", orderCount: 0});
 
@@ -83,15 +82,12 @@ export default function Statistics() {
         }
 
         try {
-            const bestNeighborhood = await client.findHighestPayingNeighborhood();
             const bestRestaurant = await client.findHighestPayingRestaurant();
             const restaurantWithMostOrders = await client.findRestaurantWithMostDeliveries();
 
-            setNeighborhood(bestNeighborhood ?? {neighborhood: "N/A", averageTipPay: 0});
             setRestaurant(bestRestaurant ?? {restaurant: "N/A", avgTotalPay: 0});
             setRestaurantWithMost(restaurantWithMostOrders ?? {restaurant: "N/A", orderCount: 0});
         } catch {
-            setNeighborhood({neighborhood: "N/A", averageTipPay: 0});
             setRestaurant({restaurant: "N/A", avgTotalPay: 0});
             setRestaurantWithMost({restaurant: "N/A", orderCount: 0});
         }
@@ -164,19 +160,27 @@ export default function Statistics() {
         if (page === "stats") {
             return (
                 <div id="stats" className="d-flex">
-                <Row>
+                <Row className="aign-items-center">
+                    <Col sm={5}>
+                        {donutChartData &&
+                            <EarningsDonutChart data={donutChartData} />
+                        }
+                    </Col>
                     {/*Pay Statistics*/}
                     <Col sm={5}>
                         <Card sx={{
-                            mb: 3,
+                            mb: 8,
                             textAlign: "start",
                             borderRadius: 3,
                             boxShadow: 3,
                             position: "relative",
                             transition: "0.3s",
+                            minHeight: 200
                         }}>
                             <CardContent sx={{ p: 2}}>
-                                <Typography variant="h6" fontWeight="bold">Pay Statistics</Typography>
+                                <Typography variant="h6" fontWeight="bold">
+                                    Pay Statistics (Per Delivery)
+                                </Typography>
                                 <Typography variant="body1" component="div" sx={{ mt: 1}}>
                                     {loading ? 
                                         <div>
@@ -200,25 +204,31 @@ export default function Statistics() {
                         </Card>
                     </Col>
 
+                    {/*Tips By Neighborhood Chart*/}
+                    <Col sm={12}>
+                        <div className="mb-5">
+                            {plotlyTipNeighborhoodsData &&
+                                <TipsByNeighborhoodChart data={plotlyTipNeighborhoodsData} />
+                            }
+                        </div>
+                    </Col>
+
                     {/*Location Statistics*/}
                     <Col sm={5}>
                             <Card sx={{
-                                mb: 3,
+                                mb: 5,
                                 textAlign: "start",
                                 borderRadius: 3,
                                 boxShadow: 3,
                                 position: "relative",
                                 transition: "0.3s",
+                                minHeight: 200,
                             }}>
                             <CardContent sx={{ p: 2}}>
                                 <Typography variant="h6" fontWeight="bold">Location Statistics</Typography>
                                 <Typography variant="body1" component="div" sx={{ mt: 1 }}>
                                     {loading ?
                                     <div>
-                                        <strong>Best tip neighborhood:</strong> Loading... <br />
-                                        <span style={{ marginLeft: "1rem" }}>
-                                            <strong>- Average Tip:</strong> Loading...
-                                        </span> <br />
                                         <strong>Best paying restaurant:</strong> Loading... <br />
                                         <span style={{ marginLeft: "1rem" }}>
                                             <strong>- Average Total:</strong> Loading... <br />
@@ -230,10 +240,6 @@ export default function Statistics() {
                                     </div>
                                     :
                                     <div>
-                                        <strong>Best tip neighborhood:</strong> {neighborhood.neighborhood} <br />
-                                        <span style={{ marginLeft: "1rem" }}>
-                                            <strong>- Average Tip:</strong> ${neighborhood.averageTipPay.toFixed(2)}
-                                        </span> <br />
                                         <strong>Best paying restaurant:</strong> {restaurant.restaurant} <br />
                                         <span style={{ marginLeft: "1rem" }}>
                                             <strong>- Average Total:</strong> ${restaurant.avgTotalPay.toFixed(2)} <br />
@@ -258,6 +264,7 @@ export default function Statistics() {
                                 boxShadow: 3,
                                 position: "relative",
                                 transition: "0.3s",
+                                minHeight: 200,
                             }}>
                             <CardContent sx={{ p: 2}}>
                                 <Typography variant="h6" fontWeight="bold">App Statistics</Typography>
@@ -284,6 +291,7 @@ export default function Statistics() {
                                 boxShadow: 3,
                                 position: "relative",
                                 transition: "0.3s",
+                                minHeight: 200
                             }}>
                             <CardContent sx={{ p: 2 }}>
                                 <Typography variant="h6" fontWeight="bold">Expense Statistics</Typography>
@@ -311,6 +319,7 @@ export default function Statistics() {
                                 boxShadow: 3,
                                 position: "relative",
                                 transition: "0.3s",
+                                minHeight: 200
                             }}>
                             <CardContent sx={{ p: 2 }}>
                                 <Typography variant="h6" fontWeight="bold">Shift Statistics</Typography>
@@ -333,14 +342,6 @@ export default function Statistics() {
                     )}
                 </div>
             );
-        } else if (page === "tips-by-neighborhood") {
-            return (
-                <div id="charts">
-                    {plotlyTipNeighborhoodsData &&
-                        <TipsByNeighborhoodChart data={plotlyTipNeighborhoodsData} />
-                    }
-                </div>
-            );
         } else if (page === "base-by-app") {
             return (
                 <div id="charts">
@@ -357,14 +358,6 @@ export default function Statistics() {
                     )}
                 </div>
             )
-        } else if (page === "earnings-donut") {
-            return (
-                <div id="charts">
-                    {donutChartData && (
-                        <EarningsDonutChart data={donutChartData} />
-                    )}
-                </div>
-            );
         } else if (page === "predict-earnings") {
             return (
                 <div id="predict-earnings">
@@ -382,11 +375,9 @@ export default function Statistics() {
         <div id="da-statistics">
             <h1 className="mb-3">Your Statistics</h1>
             <Col sm={6}>
-                <select onChange={(e) => setPage(e.target.value)} className="form-control mb-3">
+                <select onChange={(e) => setPage(e.target.value)} className="form-control mb-4">
                     <option value="stats">Overall Statistics</option>
-                    <option value="earnings-donut">Overall Earnings Chart</option>
                     <option value="earnings-over-time">Earnings Over Time Chart</option>
-                    <option value="tips-by-neighborhood">Average Tip by Neighborhood Chart</option>
                     <option value="base-by-app">Average Base Pay by App Chart</option>
                     <option value="hourly-pay-chart">Average Hourly Pay Chart</option>
                     <option value="predict-earnings">Predict Earnings</option>

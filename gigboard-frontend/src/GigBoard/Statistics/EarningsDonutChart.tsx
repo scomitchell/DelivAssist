@@ -19,6 +19,9 @@ export default function EarningsDonutChart({data}: EarningsDonutProps) {
             hole: 0.8,
             texttemplate: `%{label}<br />%{percent}<br />$%{value:.2f}`,
             textposition: "outside",
+            textfont: {
+                size: 14
+            },
             marker: {
                 colors: ["#1484d4ff", "#22b900ff"]
             },
@@ -27,11 +30,10 @@ export default function EarningsDonutChart({data}: EarningsDonutProps) {
     ];
 
     const layout = {
-        height: 400,
-        width: 400,
+        height: 215,
+        width: 450,
         showlegend: false,
-        margin: { t: 0, b: 0, l: 80, r: 100 },
-
+        margin: { t: 0, b: 0, l: 0, r: 0 },
         annotations: [
             {
                 text: `$${totalPay.toFixed(2)}`,
@@ -42,16 +44,16 @@ export default function EarningsDonutChart({data}: EarningsDonutProps) {
                     color: "black",
                     weight: "bold"
                 },
-                showarrow: false
+                showarrow: false,
             },
         ],
     };
 
     return (
-        <Plot 
+         <Plot
             data={chartData}
             layout={layout}
-            config={{displayModeBar: false}}
+            config={{ displayModeBar: false }}
         />
     );
 }
