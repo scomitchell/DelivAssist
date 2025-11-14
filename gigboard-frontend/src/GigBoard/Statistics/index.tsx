@@ -1,6 +1,7 @@
 import * as client from "./client";
 import { useEffect, useState } from "react";
-import { Row, Col, Card } from "react-bootstrap";
+import { Row, Col } from "react-bootstrap";
+import { Card, CardContent, Typography } from "@mui/material";
 import PredictEarnings from "./PredictEarnings";
 import EarningsChart from "./EarningsChart";
 import TipsByNeighborhoodChart from "./TipsByNeighborhoodChart";
@@ -161,10 +162,17 @@ export default function Statistics() {
                 <Row>
                     {/*Pay Statistics*/}
                     <Col sm={5}>
-                        <Card className="me-1 mb-3 user-statistics-card">
-                            <Card.Body style={{ padding: '0.25rem' }}>
-                                <Card.Title className="fw-bold">Pay Statistics</Card.Title>
-                                <Card.Text>
+                        <Card sx={{
+                            mb: 3,
+                            textAlign: "start",
+                            borderRadius: 3,
+                            boxShadow: 3,
+                            position: "relative",
+                            transition: "0.3s",
+                        }}>
+                            <CardContent sx={{ p: 2}}>
+                                <Typography variant="h6" fontWeight="bold">Pay Statistics</Typography>
+                                <Typography variant="body1" sx={{ mt: 1}}>
                                     {loading ? 
                                         <div>
                                             <strong>Average total pay:</strong> Loading... <br />
@@ -182,17 +190,24 @@ export default function Statistics() {
                                             <strong>Average tip/mile</strong> ${avgTipPerMile.toFixed(2)} <br />
                                         </div>
                                     }
-                                </Card.Text>
-                            </Card.Body>
+                                </Typography>
+                            </CardContent>
                         </Card>
                     </Col>
 
                     {/*Location Statistics*/}
                     <Col sm={5}>
-                        <Card className="me-1 mb-3 user-statistics-card">
-                            <Card.Body style={{ padding: '0.25rem' }}>
-                                <Card.Title className="fw-bold">Location Statistics</Card.Title>
-                                <Card.Text>
+                            <Card sx={{
+                                mb: 3,
+                                textAlign: "start",
+                                borderRadius: 3,
+                                boxShadow: 3,
+                                position: "relative",
+                                transition: "0.3s",
+                            }}>
+                            <CardContent sx={{ p: 2}}>
+                                <Typography variant="h6" fontWeight="bold">Location Statistics</Typography>
+                                <Typography sx={{ mt: 1 }}>
                                     {loading ?
                                     <div>
                                         <strong>Best tip neighborhood:</strong> Loading... <br />
@@ -224,17 +239,24 @@ export default function Statistics() {
                                         </span>
                                     </div>
                                     }       
-                                </Card.Text>
-                            </Card.Body>
+                                </Typography>
+                            </CardContent>
                         </Card>
                     </Col>
 
                     {/*App Statistics*/}
                     <Col sm={5}>
-                        <Card className="me-1 mb-3 user-statistics-card">
-                            <Card.Body style={{ padding: '0.25rem' }}>
-                                <Card.Title className="fw-bold">App Statistics</Card.Title>
-                                <Card.Text>
+                        <Card sx={{
+                                mb: 3,
+                                textAlign: "start",
+                                borderRadius: 3,
+                                boxShadow: 3,
+                                position: "relative",
+                                transition: "0.3s",
+                            }}>
+                            <CardContent sx={{ p: 2}}>
+                                <Typography variant="h6" fontWeight="bold">App Statistics</Typography>
+                                <Typography sx={{ mt: 1 }}>
                                     <strong>App with highest base pay:</strong> {baseApp.app} <br />
                                     <span style={{ marginLeft: "1rem" }}>
                                         <strong>- Average:</strong> ${baseApp.avgBase.toFixed(2)}
@@ -243,17 +265,24 @@ export default function Statistics() {
                                     <span style={{ marginLeft: "1rem" }}>
                                         <strong>- Average:</strong> ${tipApp.avgTip.toFixed(2)}
                                     </span>
-                                </Card.Text>
-                            </Card.Body>
+                                </Typography>
+                            </CardContent>
                         </Card>
                     </Col>
 
                     {/*Expense Statistics*/}
                     <Col sm={5}>
-                        <Card className="me-1 mb-3 user-statistics-card">
-                            <Card.Body style={{padding: "0.25rem"}}>
-                                <Card.Title className="fw-bold">Expense Statistics</Card.Title>
-                                <Card.Text>
+                        <Card sx={{
+                                mb: 3,
+                                textAlign: "start",
+                                borderRadius: 3,
+                                boxShadow: 3,
+                                position: "relative",
+                                transition: "0.3s",
+                            }}>
+                            <CardContent sx={{ p: 2 }}>
+                                <Typography variant="h6" fontWeight="bold">Expense Statistics</Typography>
+                                <Typography sx={{mt: 1}}>
                                     <strong>Average monthly spending:</strong> ${monthlySpending.toFixed(2)} <br />
                                     <strong>Monthly spending by type:</strong>
                                     <div style={{ marginLeft: "1rem" }}>
@@ -263,22 +292,29 @@ export default function Statistics() {
                                             </div>
                                         ))}
                                     </div>
-                                </Card.Text>
-                            </Card.Body>
+                                </Typography>
+                            </CardContent>
                         </Card>
                     </Col>
 
                     {/*Shift Statistics*/}
                     <Col sm={5}>
-                        <Card className="me-1 mb-3 user-statistics-card">
-                            <Card.Body style={{padding: "0.25rem"}}>
-                                <Card.Title className="fw-bold">Shift Statistics</Card.Title>
-                                <Card.Text>
+                        <Card sx={{
+                                mb: 3,
+                                textAlign: "start",
+                                borderRadius: 3,
+                                boxShadow: 3,
+                                position: "relative",
+                                transition: "0.3s",
+                            }}>
+                            <CardContent sx={{ p: 2 }}>
+                                <Typography variant="h6" fontWeight="bold">Shift Statistics</Typography>
+                                <Typography sx={{ mt: 1}}>
                                     <strong>Average shift length:</strong> {averageShiftLength?.toFixed(0)} minutes <br />
                                     <strong>Average number of deliveries per shift:</strong> {Math.floor(avgDeliveriesPerShift)} <br />
                                     <strong>App with most shifts:</strong> {appWithMostShifts} <br />
-                                </Card.Text>
-                            </Card.Body>
+                                </Typography>
+                            </CardContent>
                         </Card>
                     </Col>
                 </Row>

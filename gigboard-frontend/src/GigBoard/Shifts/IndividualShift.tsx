@@ -1,5 +1,6 @@
 import { useEffect, useState} from "react";
-import {Row, Col, Card, Button, Modal, FormGroup, FormControl, FormLabel} from "react-bootstrap";
+import {Row, Col, Modal, FormGroup, FormControl, FormLabel} from "react-bootstrap";
+import { Card, CardContent, Typography, Button } from "@mui/material";
 import { useParams } from "react-router-dom";
 import * as client from "./client";
 import * as deliveryClient from "../Deliveries/client";
@@ -76,7 +77,8 @@ export default function IndividualShift() {
                         });
                         setShowForm(true);
                     }}
-                    className="btn btn-primary"
+                    variant="contained"
+                    color="primary"
                 >
                     Add Delivery
                 </Button>
@@ -102,6 +104,7 @@ export default function IndividualShift() {
                                 <Col sm={7}>
                                     <FormControl type="datetime-local"
                                         onChange={(e) => setDelivery({ ...delivery, deliveryTime: e.target.value })}
+                                        defaultValue={shift.startTime}
                                     />
                                 </Col>
                             </FormGroup>
@@ -171,7 +174,7 @@ export default function IndividualShift() {
                                     />
                                 </Col>
                             </FormGroup>
-                            <Button onClick={addDeliveryToShift} className="btn btn-primary">
+                            <Button variant="contained" color="primary" onClick={addDeliveryToShift}>
                                 Add Delivery
                             </Button>
                         </div>
@@ -181,10 +184,17 @@ export default function IndividualShift() {
 
             {shiftDeliveries.map((delivery: any) => 
                 <Col sm={6}>
-                    <Card className="mb-3 text-start user-delivery-card">
-                        <Card.Body>
-                            <Card.Title className="fw-bold">Total Pay: ${delivery.totalPay.toFixed(2)}</Card.Title>
-                            <Card.Text>
+                    <Card sx={{
+                        mb: 3,
+                        textAlign: "start",
+                        borderRadius: 3,
+                        boxShadow: 3,
+                        position: "relative",
+                        transition: "0.3s",
+                    }}>
+                        <CardContent sx={{ p: 2 }}>
+                            <Typography variant="h6" fontWeight="bold">Total Pay: ${delivery.totalPay.toFixed(2)}</Typography>
+                            <Typography sx={{ mt: 1 }}>
                                 <strong>Date Completed:</strong> {formatTime(delivery.deliveryTime)} {" "} <br />
                                 <strong>Base Pay:</strong> ${delivery.basePay.toFixed(2)} {" "} <br />
                                 <strong>Tip Pay:</strong> ${delivery.tipPay.toFixed(2)} {" "} <br />
@@ -193,8 +203,8 @@ export default function IndividualShift() {
                                 <strong>Restaurant:</strong> {delivery.restaurant} {" "} <br />
                                 <strong>Customer Neighborhood:</strong> {delivery.customerNeighborhood} {" "} <br />
                                 <strong>Notes:</strong> {delivery.notes} {" "}
-                            </Card.Text>
-                        </Card.Body>
+                            </Typography>
+                        </CardContent>
                     </Card> 
                 </Col>
             )}
