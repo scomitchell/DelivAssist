@@ -32,7 +32,7 @@ export default function TipsByNeighborhoodChart({data}: TipNeighborhoodsProps) {
                     title: { text: "Average Tip By Neighborhood", font: { size: 20, weight: "bold" } },
                     xaxis: {
                         title: { text: "Neighborhood", font: { size: 16 }, standoff: 10 },
-                        tickangle: -45,
+                        tickangle: -30,
                         showgrid: true,
                         zeroline: false
                     },

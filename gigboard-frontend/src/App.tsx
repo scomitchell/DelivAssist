@@ -8,13 +8,36 @@ import Statistics from "./GigBoard/Statistics";
 import IndividualShift from "./GigBoard/Shifts/IndividualShift";
 import store from "./GigBoard/store";
 import { Provider } from "react-redux";
-import { HashRouter, Route, Routes, Navigate } from "react-router-dom";
+import { useEffect } from "react";
+import { HashRouter, Route, Routes, Navigate, useNavigate } from "react-router-dom";
 import './App.css'
+
+function AuthTokenListener() {
+    const navigate = useNavigate();
+
+    useEffect(() => {
+        const onStorageChange = (event: StorageEvent) => {
+            if (event.key === "token") {
+                window.location.reload();
+                navigate("/");
+            }
+        };
+
+        window.addEventListener("storage", onStorageChange);
+
+        return () => {
+            window.removeEventListener("storage", onStorageChange);
+        };
+    }, [navigate]);
+
+    return null;
+}
 
 export default function App() {
     return (
         <HashRouter>
             <Provider store={store}>
+                <AuthTokenListener />
                 <div id="da-main-app">
                     <Navigation />
                     <Routes>
