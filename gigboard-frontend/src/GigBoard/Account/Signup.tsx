@@ -44,32 +44,37 @@ export default function Signup() {
     }
 
     return (
-        <div id="da-signup-form">
-            <h1>Sign up</h1>
-            <FormControl defaultValue={firstName}
-                type="text" style={{ maxWidth: "300px" }}
-                onChange={(e: any) => setFirstName(e.target.value)}
-                className="mb-2 mt-4" placeholder="First Name" id="da-firstname" />
-            <FormControl defaultValue={lastName}
-                type="text" style={{ maxWidth: "300px" }}
-                onChange={(e: any) => setLastName(e.target.value)}
-                className="mb-2" placeholder="Last Name" id="da-lastname" />
-            <FormControl defaultValue={email}
-                type="email" style={{ maxWidth: "300px" }}
-                onChange={(e: any) => setEmail(e.target.value)}
-                className="mb-2" placeholder="Email" id="da-email" />
-            <FormControl defaultValue={username}
-                type="text" style={{ maxWidth: "300px" }}
-                onChange={(e: any) => setUsername(e.target.value)}
-                className="mb-2" placeholder="Username" id="da-username" />
-            <FormControl defaultValue={password}
-                type="password" style={{maxWidth: "300px"}}
-                onChange={(e: any) => setPassword(e.target.value)}
-                className="mb-2" placeholder="Password" id="da-password" />
-            <Button onClick={signup} id="da-signin-button"
-                className="btn btn-primary w-100" style={{ maxWidth: "300px" }}>
-                Sign Up
-            </Button>
+        <div id="da-signup-form" style={{
+            display: "flex",
+            justifyContent: "center",
+            alignItems: "center",
+            height: "100vh",
+            paddingLeft: "100px",
+            boxSizing: "border-box",
+            backgroundColor: "white"
+        }}>
+            <div style={{width: "50%", height: "100%"}}>
+                <h1 style={{textAlign: "center"}}>Sign up</h1>
+                <FormControl defaultValue={firstName} type="text"
+                    onChange={(e: any) => setFirstName(e.target.value)}
+                    className="mb-2 mt-4" placeholder="First Name" id="da-firstname" />
+                <FormControl defaultValue={lastName} type="text"
+                    onChange={(e: any) => setLastName(e.target.value)}
+                    className="mb-2" placeholder="Last Name" id="da-lastname" />
+                <FormControl defaultValue={email} type="email"
+                    onChange={(e: any) => setEmail(e.target.value)}
+                    className="mb-2" placeholder="Email" id="da-email" />
+                <FormControl defaultValue={username} type="text"
+                    onChange={(e: any) => setUsername(e.target.value)}
+                    className="mb-2" placeholder="Username" id="da-username" />
+                <FormControl defaultValue={password} type="password"
+                    onChange={(e: any) => setPassword(e.target.value)}
+                    className="mb-2" placeholder="Password" id="da-password" />
+                <Button onClick={signup} id="da-signin-button"
+                    className="btn btn-primary w-100">
+                    Sign Up
+                </Button>
+            </div>
         </div>
     );
 }

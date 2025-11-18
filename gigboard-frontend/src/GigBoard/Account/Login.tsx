@@ -43,20 +43,28 @@ export default function Login() {
     }
 
     return (
-        <div id="da-signin-screen">
-            <h1>Sign in</h1>
-            <FormControl defaultValue={username}
-                style={{maxWidth: "300px"}}
-                onChange={(e) => setUsername(e.target.value)}
-                className="mb-2 mt-4" placeholder="Username" id="wd-username" />
-            <FormControl defaultValue={password} type="password"
-                style={{ maxWidth: "300px" }}
-                onChange={(e) => setPassword(e.target.value)}
-                className="mb-2" placeholder="Password" id="wd-password" />
-            <Button onClick={handleLogin} id="da-signin-button"
-                className="btn btn-primary w-100" style={{ maxWidth: "300px" }}>
-                Sign in
-            </Button>
+        <div style={{
+            display: "flex",
+            justifyContent: "center", 
+            alignItems: "center",     
+            height: "100vh",          
+            paddingLeft: "100px", 
+            boxSizing: "border-box",
+            backgroundColor: "white"
+        }}>
+            <div id="da-signin-screen" style={{width: "50%", height: "100%"}}>
+                <h1 style={{textAlign: "center"}}>Sign in</h1>
+                <FormControl defaultValue={username}
+                    onChange={(e) => setUsername(e.target.value)}
+                    className="mb-2 mt-4" placeholder="Username" id="wd-username" />
+                <FormControl defaultValue={password} type="password"
+                    onChange={(e) => setPassword(e.target.value)}
+                    className="mb-2" placeholder="Password" id="wd-password" />
+                <Button onClick={handleLogin} id="da-signin-button"
+                    className="btn btn-primary w-100">
+                    Sign in
+                </Button>
+            </div>
         </div>
     );
 }
