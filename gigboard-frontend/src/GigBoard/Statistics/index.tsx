@@ -11,13 +11,13 @@ import EarningsDonutChart from "./EarningsDonutChart";
 import type { HourlyEarningsProps } from "./HourlyEarningsChart";
 import type { EarningsChartProps } from "./EarningsChart";
 import type { TipNeighborhoodsProps } from "./TipsByNeighborhoodChart";
-import type { BaseByAppProps } from  "./BaseByAppsChart";
+import type { BaseByAppProps } from "./BaseByAppsChart";
 import type { EarningsDonutProps } from "./EarningsDonutChart";
 import "../../index.css";
 
 type MonthlySpendingType = {
-  type: string;
-  avgExpense: number;
+    type: string;
+    avgExpense: number;
 };
 
 export default function Statistics() {
@@ -30,7 +30,7 @@ export default function Statistics() {
 
     // Location Statistics
     const [restaurant, setRestaurant] = useState({ restaurant: "", avgTotalPay: 0 });
-    const [restaurantWithMost, setRestaurantWithMost] = useState({restaurant: "", orderCount: 0});
+    const [restaurantWithMost, setRestaurantWithMost] = useState({ restaurant: "", orderCount: 0 });
 
     // App statistics
     const [baseApp, setBaseApp] = useState({ app: "", avgBase: 0 });
@@ -85,22 +85,22 @@ export default function Statistics() {
             const bestRestaurant = await client.findHighestPayingRestaurant();
             const restaurantWithMostOrders = await client.findRestaurantWithMostDeliveries();
 
-            setRestaurant(bestRestaurant ?? {restaurant: "N/A", avgTotalPay: 0});
-            setRestaurantWithMost(restaurantWithMostOrders ?? {restaurant: "N/A", orderCount: 0});
+            setRestaurant(bestRestaurant ?? { restaurant: "N/A", avgTotalPay: 0 });
+            setRestaurantWithMost(restaurantWithMostOrders ?? { restaurant: "N/A", orderCount: 0 });
         } catch {
-            setRestaurant({restaurant: "N/A", avgTotalPay: 0});
-            setRestaurantWithMost({restaurant: "N/A", orderCount: 0});
+            setRestaurant({ restaurant: "N/A", avgTotalPay: 0 });
+            setRestaurantWithMost({ restaurant: "N/A", orderCount: 0 });
         }
 
         try {
             const bestBaseApp = await client.findHighestPayingBaseApp();
             const bestTipApp = await client.findHighestPayingTipApp();
 
-            setBaseApp(bestBaseApp ?? {app: "N/A", avgBase: 0});
-            setTipApp(bestTipApp ?? {app: "", avgTip: 0});
+            setBaseApp(bestBaseApp ?? { app: "N/A", avgBase: 0 });
+            setTipApp(bestTipApp ?? { app: "", avgTip: 0 });
         } catch {
-            setBaseApp({app: "N/A", avgBase: 0});
-            setTipApp({app: "N/A", avgTip: 0});
+            setBaseApp({ app: "N/A", avgBase: 0 });
+            setTipApp({ app: "N/A", avgTip: 0 });
         }
 
         try {
@@ -160,93 +160,170 @@ export default function Statistics() {
         if (page === "stats") {
             return (
                 <div id="stats" className="container-fluid">
-                <Row className="aign-items-center">
-                    <Col xs={12} sm={12} md={6} lg={5} style={{display: "flex"}}>
-                        <Card sx={{
-                            mb: 3,
-                            borderRadius: 3,
-                            position: "relative",
-                            transition: "0.3s",
-                            minHeight: 200,
-                            flex: 1,        
-                            display: "flex",
-                            flexDirection: "column"
-                        }}>
-                            <CardContent sx={{p: 2, flex: 1}}>
-                                {donutChartData &&
-                                    <EarningsDonutChart data={donutChartData} />
-                                }
-                            </CardContent>
-                        </Card>
-                    </Col>
-                    {/*Pay Statistics*/}
-                    <Col xs={12} sm={12} md={6} lg={5} style={{display: "flex"}}>
-                        <Card sx={{
-                            mb: 3,
-                            textAlign: "start",
-                            borderRadius: 3,
-                            boxShadow: 3,
-                            position: "relative",
-                            transition: "0.3s",
-                            minHeight: 200,
-                            flex: 1,
-                            display: "flex",
-                            flexDirection: "column"
-                        }}>
-                            <CardContent sx={{ p: 2, flex: 1}}>
-                                <Typography variant="h6" fontWeight="bold">
-                                    Pay Statistics (Per Delivery)
-                                </Typography>
-                                <Typography variant="body1" component="div" sx={{ mt: 1}}>
-                                    {loading ? 
-                                        <div>
-                                            <strong>Average total pay:</strong> Loading... <br />
-                                            <strong>Average base pay:</strong> Loading... <br/>
-                                            <strong>Average tip pay:</strong> Loading...<br /> <br />
-                                            <strong>Average dollar/mile:</strong> Loading...<br />
-                                            <strong>Average tip/mile:</strong> Loading...<br />
-                                        </div>
-                                        :
-                                        <div>
-                                            <strong>Average total pay:</strong> ${averagePay.toFixed(2)} <br />
-                                            <strong>Average base pay:</strong> ${averageBase.toFixed(2)} <br/>
-                                            <strong>Average tip pay:</strong> ${averageTip.toFixed(2)} <br /> <br />
-                                            <strong>Average dollar/mile:</strong> ${avgDollarPerMile.toFixed(2)} <br />
-                                            <strong>Average tip/mile</strong> ${avgTipPerMile.toFixed(2)} <br />
-                                        </div>
-                                    }
-                                </Typography>
-                            </CardContent>
-                        </Card>
-                    </Col>
-
-                    {/*Tips By Neighborhood Chart*/}
-                    <Col xs={12} sm={12} md={12} lg={10} style={{display: "flex", minWidth: 0}}>
-                        <div className="mb-5" style={{minWidth: 0, width: "100%"}}>
+                    <Row>
+                        <Col xs={12} sm={12} md={6} lg={5} style={{ display: "flex" }}>
                             <Card sx={{
-                                mb: 2,
+                                mb: 3,
                                 borderRadius: 3,
+                                boxShadow: 3,
                                 position: "relative",
-                                transition: "0.3s",
                                 minHeight: 200,
                                 flex: 1,
+                                display: "flex",
+                                flexDirection: "column"
+                            }}>
+                                <CardContent sx={{ p: 2, flex: 1 }}>
+                                    {donutChartData &&
+                                        <EarningsDonutChart data={donutChartData} />
+                                    }
+                                </CardContent>
+                            </Card>
+                        </Col>
+                        {/*Pay Statistics*/}
+                        <Col xs={12} sm={12} md={6} lg={5} style={{ display: "flex" }}>
+                            <Card sx={{
+                                mb: 3,
+                                textAlign: "start",
+                                borderRadius: 3,
+                                boxShadow: 3,
+                                position: "relative",
+                                minHeight: 200,
+                                flex: 1,
+                                display: "flex",
+                                flexDirection: "column"
+                            }}>
+                                <CardContent sx={{ p: 2, flex: 1 }}>
+                                    <Typography variant="h6" fontWeight="bold">
+                                        Pay Statistics (Per Delivery)
+                                    </Typography>
+                                    <Typography variant="body1" component="div" sx={{ mt: 1 }}>
+                                        {loading ?
+                                            <div>
+                                                <strong>Average total pay:</strong> Loading... <br />
+                                                <strong>Average base pay:</strong> Loading... <br />
+                                                <strong>Average tip pay:</strong> Loading...<br /> <br />
+                                                <strong>Average dollar/mile:</strong> Loading...<br />
+                                                <strong>Average tip/mile:</strong> Loading...<br />
+                                            </div>
+                                            :
+                                            <div>
+                                                <strong>Average total pay:</strong> ${averagePay.toFixed(2)} <br />
+                                                <strong>Average base pay:</strong> ${averageBase.toFixed(2)} <br />
+                                                <strong>Average tip pay:</strong> ${averageTip.toFixed(2)} <br /> <br />
+                                                <strong>Average dollar/mile:</strong> ${avgDollarPerMile.toFixed(2)} <br />
+                                                <strong>Average tip/mile</strong> ${avgTipPerMile.toFixed(2)} <br />
+                                            </div>
+                                        }
+                                    </Typography>
+                                </CardContent>
+                            </Card>
+                        </Col>
+
+                        <Col xs={12} lg={10} style={{ display: "false", minWidth: 0 }}>
+                            <div style={{ minWidth: 0, width: "100%" }}>
+                                <Card sx={{
+                                    mb: 3,
+                                    borderRadius: 3,
+                                    boxShadow: 3,
+                                    position: "relative",
+                                    minHeight: 200,
+                                    flex: 1,
+                                    display: "flex",
+                                    flexDirection: "column",
+                                    minWidth: 0
+                                }}>
+                                    <CardContent sx={{ p: 2, flex: 1 }}>
+                                        {plotlyEarningsData &&
+                                            <EarningsChart data={plotlyEarningsData} />
+                                        }
+                                    </CardContent>
+                                </Card>
+                            </div>
+                        </Col>
+
+                        <Col xs={12} lg={10} style={{display: "flex", minWidth: 0}}>
+                            <div style={{minWidth: 0, width: "100%"}}>
+                                <Card sx={{
+                                    mb: 3,
+                                    borderRadius: 3,
+                                    boxShadow: 3,
+                                    position: "relative",
+                                    minHeight: 200,
+                                    flex: 1,
+                                    display: "flex",
+                                    flexDirection: "column",
+                                    minWidth: 0
+                                }}>
+                                    <CardContent sx={{p: 2, flex: 1}}>
+                                        {hourlyEarningsData &&
+                                            <HourlyEarningsChart data={hourlyEarningsData} />
+                                        }
+                                    </CardContent>
+                                </Card>
+                            </div>
+                        </Col>
+
+                        {/*Tips By Neighborhood Chart*/}
+                        <Col xs={12} sm={12} md={12} lg={10} style={{ display: "flex", minWidth: 0 }}>
+                            <div style={{ minWidth: 0, width: "100%" }}>
+                                <Card sx={{
+                                    mb: 3,
+                                    borderRadius: 3,
+                                    boxShadow: 3,
+                                    position: "relative",
+                                    minHeight: 200,
+                                    flex: 1,
+                                    display: "flex",
+                                    flexDirection: "column",
+                                    minWidth: 0
+                                }}>
+                                    <CardContent sx={{ p: 2, flex: 1 }}>
+                                        {plotlyTipNeighborhoodsData &&
+                                            <TipsByNeighborhoodChart data={plotlyTipNeighborhoodsData} />
+                                        }
+                                    </CardContent>
+                                </Card>
+                            </div>
+                        </Col>
+
+                        {/*App Statistics*/}
+                        <Col xs={12} sm={12} md={6} lg={5}>
+                            <Card sx={{
+                                mb: 3,
+                                textAlign: "start",
+                                borderRadius: 3,
+                                boxShadow: 3,
+                                position: "relative",
+                                minHeight: 200,
                                 display: "flex",
                                 flexDirection: "column",
                                 minWidth: 0
                             }}>
                                 <CardContent sx={{ p: 2, flex: 1 }}>
-                                    {plotlyTipNeighborhoodsData &&
-                                        <TipsByNeighborhoodChart data={plotlyTipNeighborhoodsData} />
-                                     }
+                                    <Typography variant="h6" fontWeight="bold">App Statistics</Typography>
+                                    {plotlyBaseByAppData &&
+                                        <BaseByAppsChart data={plotlyBaseByAppData} />
+                                    }
+                                </CardContent>
+                                <CardContent sx={{ p: 2 }}>
+                                    <Typography variant="body1" component="div" sx={{ mt: 1 }}>
+                                        <strong>App with highest base pay:</strong> {baseApp.app} <br />
+                                        <span style={{ marginLeft: "1rem" }}>
+                                            <strong>- Average:</strong> ${baseApp.avgBase.toFixed(2)}
+                                        </span> <br />
+                                        <strong>App with highest tip pay:</strong> {tipApp.app} <br />
+                                        <span style={{ marginLeft: "1rem" }}>
+                                            <strong>- Average:</strong> ${tipApp.avgTip.toFixed(2)}
+                                        </span>
+                                    </Typography>
                                 </CardContent>
                             </Card>
-                        </div>
-                    </Col>
+                        </Col>
 
-                    {/*Location Statistics*/}
-                    <Col xs={12} sm={12} md={6} lg={5}>
+                        {/*Location Statistics*/}
+                        <Col xs={12} sm={12} md={6} lg={5}>
                             <Card sx={{
-                                mb: 5,
+                                mb: 4,
                                 textAlign: "start",
                                 borderRadius: 3,
                                 boxShadow: 3,
@@ -254,95 +331,37 @@ export default function Statistics() {
                                 transition: "0.3s",
                                 minHeight: 200,
                             }}>
-                            <CardContent sx={{ p: 2}}>
-                                <Typography variant="h6" fontWeight="bold">Location Statistics</Typography>
-                                <Typography variant="body1" component="div" sx={{ mt: 1 }}>
-                                    {loading ?
-                                    <div>
-                                        <strong>Best paying restaurant:</strong> Loading... <br />
-                                        <span style={{ marginLeft: "1rem" }}>
-                                            <strong>- Average Total:</strong> Loading... <br />
-                                        </span>
-                                        <strong>Restaurant with most orders:</strong> Loading... <br />
-                                        <span style={{marginLeft:"1rem"}}>
-                                            <strong>- Number of Orders:</strong> Loading...
-                                        </span>
-                                    </div>
-                                    :
-                                    <div>
-                                        <strong>Best paying restaurant:</strong> {restaurant.restaurant} <br />
-                                        <span style={{ marginLeft: "1rem" }}>
-                                            <strong>- Average Total:</strong> ${restaurant.avgTotalPay.toFixed(2)} <br />
-                                        </span>
-                                        <strong>Restaurant with most orders:</strong> {restaurantWithMost.restaurant} <br />
-                                        <span style={{marginLeft:"1rem"}}>
-                                            <strong>- Number of Orders:</strong> {restaurantWithMost.orderCount}
-                                        </span>
-                                    </div>
-                                    }       
-                                </Typography>
-                            </CardContent>
-                        </Card>
-                    </Col>
-
-                    {/*App Statistics*/}
-                    <Col xs={12} sm={12} md={6} lg={5}>
-                        <Card sx={{
-                                mb: 3,
-                                textAlign: "start",
-                                borderRadius: 3,
-                                boxShadow: 3,
-                                position: "relative",
-                                transition: "0.3s",
-                                minHeight: 200,
-                            }}>
-                            <CardContent sx={{ p: 2}}>
-                                <Typography variant="h6" fontWeight="bold">App Statistics</Typography>
-                                <Typography variant="body1" component="div" sx={{ mt: 1 }}>
-                                    <strong>App with highest base pay:</strong> {baseApp.app} <br />
-                                    <span style={{ marginLeft: "1rem" }}>
-                                        <strong>- Average:</strong> ${baseApp.avgBase.toFixed(2)}
-                                    </span> <br />
-                                    <strong>App with highest tip pay:</strong> {tipApp.app} <br />
-                                    <span style={{ marginLeft: "1rem" }}>
-                                        <strong>- Average:</strong> ${tipApp.avgTip.toFixed(2)}
-                                    </span>
-                                </Typography>
-                            </CardContent>
-                        </Card>
-                    </Col>
-
-                    {/*Expense Statistics*/}
-                    <Col xs={12} sm={12} md={6} lg={5}>
-                        <Card sx={{
-                                mb: 3,
-                                textAlign: "start",
-                                borderRadius: 3,
-                                boxShadow: 3,
-                                position: "relative",
-                                transition: "0.3s",
-                                minHeight: 200
-                            }}>
-                            <CardContent sx={{ p: 2 }}>
-                                <Typography variant="h6" fontWeight="bold">Expense Statistics</Typography>
-                                <Typography variant="body1" component="div" sx={{mt: 1}}>
-                                    <strong>Average monthly spending:</strong> ${monthlySpending.toFixed(2)} <br />
-                                    <strong>Monthly spending by type:</strong>
-                                    <div style={{ marginLeft: "1rem" }}>
-                                        {monthlySpendingByType.map((average, idx) => (
-                                            <div key={idx}>
-                                                <strong>- {average.type}:</strong> ${average.avgExpense.toFixed(2)}
+                                <CardContent sx={{ p: 2 }}>
+                                    <Typography variant="h6" fontWeight="bold">Location Statistics</Typography>
+                                    <Typography variant="body1" component="div" sx={{ mt: 1 }}>
+                                        {loading ?
+                                            <div>
+                                                <strong>Best paying restaurant:</strong> Loading... <br />
+                                                <span style={{ marginLeft: "1rem" }}>
+                                                    <strong>- Average Total:</strong> Loading... <br />
+                                                </span>
+                                                <strong>Restaurant with most orders:</strong> Loading... <br />
+                                                <span style={{ marginLeft: "1rem" }}>
+                                                    <strong>- Number of Orders:</strong> Loading...
+                                                </span>
                                             </div>
-                                        ))}
-                                    </div>
-                                </Typography>
-                            </CardContent>
-                        </Card>
-                    </Col>
+                                            :
+                                            <div>
+                                                <strong>Best paying restaurant:</strong> {restaurant.restaurant} <br />
+                                                <span style={{ marginLeft: "1rem" }}>
+                                                    <strong>- Average Total:</strong> ${restaurant.avgTotalPay.toFixed(2)} <br />
+                                                </span>
+                                                <strong>Restaurant with most orders:</strong> {restaurantWithMost.restaurant} <br />
+                                                <span style={{ marginLeft: "1rem" }}>
+                                                    <strong>- Number of Orders:</strong> {restaurantWithMost.orderCount}
+                                                </span>
+                                            </div>
+                                        }
+                                    </Typography>
+                                </CardContent>
+                            </Card>
 
-                    {/*Shift Statistics*/}
-                    <Col xs={12} sm={12} md={6} lg={5}>
-                        <Card sx={{
+                            <Card sx={{
                                 mb: 3,
                                 textAlign: "start",
                                 borderRadius: 3,
@@ -351,43 +370,44 @@ export default function Statistics() {
                                 transition: "0.3s",
                                 minHeight: 200
                             }}>
-                            <CardContent sx={{ p: 2 }}>
-                                <Typography variant="h6" fontWeight="bold">Shift Statistics</Typography>
-                                <Typography variant="body1" component="div" sx={{ mt: 1}}>
-                                    <strong>Average shift length:</strong> {averageShiftLength?.toFixed(0)} minutes <br />
-                                    <strong>Average number of deliveries per shift:</strong> {Math.floor(avgDeliveriesPerShift)} <br />
-                                    <strong>App with most shifts:</strong> {appWithMostShifts} <br />
-                                </Typography>
-                            </CardContent>
-                        </Card>
-                    </Col>
-                </Row>
-            </div>
-            );
-        } else if (page === "earnings-over-time") {
-            return (
-                <div id="charts">
-                    {plotlyEarningsData && (
-                        <EarningsChart data={plotlyEarningsData} />
-                    )}
+                                <CardContent sx={{ p: 2 }}>
+                                    <Typography variant="h6" fontWeight="bold">Expense Statistics</Typography>
+                                    <Typography variant="body1" component="div" sx={{ mt: 1 }}>
+                                        <strong>Average monthly spending:</strong> ${monthlySpending.toFixed(2)} <br />
+                                        <strong>Monthly spending by type:</strong>
+                                        <div style={{ marginLeft: "1rem" }}>
+                                            {monthlySpendingByType.map((average, idx) => (
+                                                <div key={idx}>
+                                                    <strong>- {average.type}:</strong> ${average.avgExpense.toFixed(2)}
+                                                </div>
+                                            ))}
+                                        </div>
+                                    </Typography>
+                                </CardContent>
+                            </Card>
+
+                            <Card sx={{
+                                mb: 3,
+                                textAlign: "start",
+                                borderRadius: 3,
+                                boxShadow: 3,
+                                position: "relative",
+                                transition: "0.3s",
+                                minHeight: 200
+                            }}>
+                                <CardContent sx={{ p: 2 }}>
+                                    <Typography variant="h6" fontWeight="bold">Shift Statistics</Typography>
+                                    <Typography variant="body1" component="div" sx={{ mt: 1 }}>
+                                        <strong>Average shift length:</strong> {averageShiftLength?.toFixed(0)} minutes <br />
+                                        <strong>Average number of deliveries per shift:</strong> {Math.floor(avgDeliveriesPerShift)} <br />
+                                        <strong>App with most shifts:</strong> {appWithMostShifts} <br />
+                                    </Typography>
+                                </CardContent>
+                            </Card>
+                        </Col>
+                    </Row>
                 </div>
             );
-        } else if (page === "base-by-app") {
-            return (
-                <div id="charts">
-                    {plotlyBaseByAppData &&
-                        <BaseByAppsChart data={plotlyBaseByAppData} />
-                    }
-                </div>
-            );
-        } else if (page === "hourly-pay-chart") {
-            return (
-                <div id="charts">
-                    {hourlyEarningsData && (
-                        <HourlyEarningsChart data={hourlyEarningsData} />
-                    )}
-                </div>
-            )
         } else if (page === "predict-earnings") {
             return (
                 <div id="predict-earnings">
@@ -407,13 +427,10 @@ export default function Statistics() {
             <Col sm={6}>
                 <select onChange={(e) => setPage(e.target.value)} className="form-control mb-4">
                     <option value="stats">Overall Statistics</option>
-                    <option value="earnings-over-time">Earnings Over Time Chart</option>
-                    <option value="base-by-app">Average Base Pay by App Chart</option>
-                    <option value="hourly-pay-chart">Average Hourly Pay Chart</option>
                     <option value="predict-earnings">Predict Earnings</option>
                 </select>
             </Col>
-            
+
             {getContent()}
         </div>
     );
