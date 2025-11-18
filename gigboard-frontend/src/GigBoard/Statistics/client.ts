@@ -220,6 +220,18 @@ export const findPlotlyBaseByApp = async () => {
     return response.data;
 }
 
+export const findTipsByAppData = async () => {
+    const token = localStorage.getItem("token");
+
+    const response = await axiosWithCredentials.get(`${STATISTICS_API}/tips-by-app`, {
+        headers: {
+            Authorization: `Bearer ${token}`
+        }
+    });
+
+    return response.data;
+}
+
 export const findHourlyPayData = async () => {
     const token = localStorage.getItem("token");
 

@@ -269,9 +269,11 @@ export default function MyDeliveries({ myDeliveries, setMyDeliveries }: {
                                     </Dropdown>
                                 </div>
 
-                                <Typography variant="h6" fontWeight="bold">Total Pay: ${delivery.totalPay.toFixed(2)}</Typography>
+                                <Typography variant="h6" fontWeight="bold">
+                                    {formatTime(delivery.deliveryTime)} {" "} <br />
+                                    Total Pay: ${delivery.totalPay.toFixed(2)}
+                                </Typography>
                                 <Typography variant="body1" sx={{ mt: 1 }}>
-                                    <strong>Date Completed:</strong> {formatTime(delivery.deliveryTime)} {" "} <br />
                                     <strong>Base Pay:</strong> ${delivery.basePay.toFixed(2)} {" "} <br />
                                     <strong>Tip Pay:</strong> ${delivery.tipPay.toFixed(2)} {" "} <br />
                                     <strong>Mileage:</strong> {delivery.mileage.toFixed(2)} {" miles"} <br />

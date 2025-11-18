@@ -33,15 +33,9 @@ export default function Signup() {
             dispatch(setCurrentUser(response.user));
             navigate("/");
         } catch (err: any) {
-            setError("Signin Failed");
+            setError(err.response.data);
         }
     };
-
-    if (error.length > 0) {
-        return (
-            <p> {error} </p>
-        );
-    }
 
     return (
         <div id="da-signup-form" style={{
@@ -71,9 +65,10 @@ export default function Signup() {
                     onChange={(e: any) => setPassword(e.target.value)}
                     className="mb-2" placeholder="Password" id="da-password" />
                 <Button onClick={signup} id="da-signin-button"
-                    className="btn btn-primary w-100">
+                    className="btn btn-primary w-100 mb-2">
                     Sign Up
                 </Button>
+                {error.length > 0 ? <p>{error}</p> : null}
             </div>
         </div>
     );

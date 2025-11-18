@@ -10,7 +10,7 @@ export type BaseByAppProps = {
 export default function BaseByAppsChart({data}: BaseByAppProps) {
     return (
         <div style={{
-            minHeight: 200,
+            minHeight: 450,
             minWidth: 0,
             width: "100%",
             position: "relative",

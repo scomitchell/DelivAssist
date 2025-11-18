@@ -660,6 +660,45 @@ namespace GigBoardBackend.Controllers
             }
         }
 
+        [HttpGet("tips-by-app")]
+        public async Task<IActionResult> GetTipsByAppData()
+        {
+            var userIdClaim = User.FindFirstValue(ClaimTypes.NameIdentifier);
+
+            if (int.TryParse(userIdClaim, out int userId))
+            {
+                var deliveries = await (
+                    from ud in _context.UserDeliveries
+                    join d in _context.Deliveries on ud.DeliveryId equals d.Id
+                    where ud.UserId == userId
+                    group d by d.App into g
+                    select new
+                    {
+                        App = g.Key,
+                        TipPay = g.Average(x => x.TipPay)
+                    }
+                ).ToListAsync();
+
+                if (deliveries.Count == 0)
+                {
+                    return NotFound("No deliveries found for this user");
+                }
+
+                var apps = deliveries.Select(d => d.App.ToString()).ToList();
+                var tipPays = deliveries.Select(d => (double)d.TipPay).ToList();
+
+                return Ok(new
+                {
+                    apps,
+                    tipPays
+                });
+            } 
+            else
+            {
+                return BadRequest("User claim is invalid");
+            }
+        }
+
         [HttpGet("plotly-charts/hourly-earnings")]
         public async Task<IActionResult> GetPlotlyHourlyEarnings()
         {

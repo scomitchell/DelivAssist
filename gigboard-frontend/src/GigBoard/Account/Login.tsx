@@ -32,15 +32,9 @@ export default function Login() {
             console.log(response.user);
             navigate("/");
         } catch (err: any) {
-            setError("Login failed");
+            setError(err.response.data);
         }
     };
-
-    if (error.length > 0) {
-        return (
-            <p> {error} </p>
-        );
-    }
 
     return (
         <div style={{
@@ -61,9 +55,10 @@ export default function Login() {
                     onChange={(e) => setPassword(e.target.value)}
                     className="mb-2" placeholder="Password" id="wd-password" />
                 <Button onClick={handleLogin} id="da-signin-button"
-                    className="btn btn-primary w-100">
+                    className="btn btn-primary w-100 mb-2">
                     Sign in
                 </Button>
+                {error.length > 0 ? <p>{error}</p> : null}
             </div>
         </div>
     );

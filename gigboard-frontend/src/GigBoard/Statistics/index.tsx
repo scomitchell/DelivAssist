@@ -8,11 +8,13 @@ import TipsByNeighborhoodChart from "./TipsByNeighborhoodChart";
 import BaseByAppsChart from "./BaseByAppsChart";
 import HourlyEarningsChart from "./HourlyEarningsChart";
 import EarningsDonutChart from "./EarningsDonutChart";
+import TipsByAppChart from "./TipsByAppChart";
 import type { HourlyEarningsProps } from "./HourlyEarningsChart";
 import type { EarningsChartProps } from "./EarningsChart";
 import type { TipNeighborhoodsProps } from "./TipsByNeighborhoodChart";
 import type { BaseByAppProps } from "./BaseByAppsChart";
 import type { EarningsDonutProps } from "./EarningsDonutChart";
+import type { TipsByAppProps } from "./TipsByAppChart";
 import "../../index.css";
 
 type MonthlySpendingType = {
@@ -32,10 +34,6 @@ export default function Statistics() {
     const [restaurant, setRestaurant] = useState({ restaurant: "", avgTotalPay: 0 });
     const [restaurantWithMost, setRestaurantWithMost] = useState({ restaurant: "", orderCount: 0 });
 
-    // App statistics
-    const [baseApp, setBaseApp] = useState({ app: "", avgBase: 0 });
-    const [tipApp, setTipApp] = useState({ app: "", avgTip: 0 });
-
     // Expense statistics
     const [monthlySpending, setMonthlySpending] = useState(0);
     const [monthlySpendingByType, setMonthlySpendingByType] = useState<MonthlySpendingType[]>([]);
@@ -51,6 +49,7 @@ export default function Statistics() {
     const [plotlyBaseByAppData, setPlotlyBaseByAppData] = useState<BaseByAppProps["data"] | null>(null);
     const [hourlyEarningsData, setHourlyEarningsData] = useState<HourlyEarningsProps["data"] | null>(null);
     const [donutChartData, setDonutChartData] = useState<EarningsDonutProps["data"] | null>(null);
+    const [tipsByAppData, setTipsByAppData] = useState<TipsByAppProps["data"] | null>(null);
 
     // Loading
     const [loading, setLoading] = useState(true);
@@ -93,17 +92,6 @@ export default function Statistics() {
         }
 
         try {
-            const bestBaseApp = await client.findHighestPayingBaseApp();
-            const bestTipApp = await client.findHighestPayingTipApp();
-
-            setBaseApp(bestBaseApp ?? { app: "N/A", avgBase: 0 });
-            setTipApp(bestTipApp ?? { app: "", avgTip: 0 });
-        } catch {
-            setBaseApp({ app: "N/A", avgBase: 0 });
-            setTipApp({ app: "N/A", avgTip: 0 });
-        }
-
-        try {
             const averageMonthlyExpenses = await client.findAverageMonthlySpending();
             const avgMonthlySpendingByType = await client.findMonthlySpendingByType();
 
@@ -141,16 +129,19 @@ export default function Statistics() {
             const userTipNeighborhoodsData = await client.findPlotlyTipNeighborhoodData();
             const userBaseByAppData = await client.findPlotlyBaseByApp();
             const userEarningsDonutData = await client.findDonutChartData();
+            const userTipsByAppData = await client.findTipsByAppData();
 
             setPlotlyEarningsData(userPlotlyEarningsData);
             setPlotlyTipNeighborhoodsData(userTipNeighborhoodsData);
             setPlotlyBaseByAppData(userBaseByAppData);
             setDonutChartData(userEarningsDonutData);
+            setTipsByAppData(userTipsByAppData);
         } catch {
             setPlotlyEarningsData(null);
             setPlotlyTipNeighborhoodsData(null);
             setPlotlyBaseByAppData(null);
             setDonutChartData(null);
+            setTipsByAppData(null);
         }
 
         setLoading(false);
@@ -263,63 +254,6 @@ export default function Statistics() {
                             </div>
                         </Col>
 
-                        {/*Tips By Neighborhood Chart*/}
-                        <Col xs={12} sm={12} md={12} lg={10} style={{ display: "flex", minWidth: 0 }}>
-                            <div style={{ minWidth: 0, width: "100%" }}>
-                                <Card sx={{
-                                    mb: 3,
-                                    borderRadius: 3,
-                                    boxShadow: 3,
-                                    position: "relative",
-                                    minHeight: 200,
-                                    flex: 1,
-                                    display: "flex",
-                                    flexDirection: "column",
-                                    minWidth: 0
-                                }}>
-                                    <CardContent sx={{ p: 2, flex: 1 }}>
-                                        {plotlyTipNeighborhoodsData &&
-                                            <TipsByNeighborhoodChart data={plotlyTipNeighborhoodsData} />
-                                        }
-                                    </CardContent>
-                                </Card>
-                            </div>
-                        </Col>
-
-                        {/*App Statistics*/}
-                        <Col xs={12} sm={12} md={6} lg={5}>
-                            <Card sx={{
-                                mb: 3,
-                                textAlign: "start",
-                                borderRadius: 3,
-                                boxShadow: 3,
-                                position: "relative",
-                                minHeight: 655,
-                                display: "flex",
-                                flexDirection: "column",
-                                minWidth: 0
-                            }}>
-                                <CardContent sx={{ p: 2, flex: 1 }}>
-                                    <Typography variant="h6" fontWeight="bold">App Statistics</Typography>
-                                    {plotlyBaseByAppData &&
-                                        <BaseByAppsChart data={plotlyBaseByAppData} />
-                                    }
-                                </CardContent>
-                                <CardContent sx={{ p: 2 }}>
-                                    <Typography variant="body1" component="div" sx={{ mt: 1 }}>
-                                        <strong>App with highest base pay:</strong> {baseApp.app} <br />
-                                        <span style={{ marginLeft: "1rem" }}>
-                                            <strong>- Average:</strong> ${baseApp.avgBase.toFixed(2)}
-                                        </span> <br />
-                                        <strong>App with highest tip pay:</strong> {tipApp.app} <br />
-                                        <span style={{ marginLeft: "1rem" }}>
-                                            <strong>- Average:</strong> ${tipApp.avgTip.toFixed(2)}
-                                        </span>
-                                    </Typography>
-                                </CardContent>
-                            </Card>
-                        </Col>
-
                         {/*Location Statistics*/}
                         <Col xs={12} sm={12} md={6} lg={5}>
                             <Card sx={{
@@ -360,7 +294,94 @@ export default function Statistics() {
                                     </Typography>
                                 </CardContent>
                             </Card>
+                        </Col>
 
+                        <Col xs={12} sm={12} md={6} lg={5}>
+                            <Card sx={{
+                                mb: 3,
+                                textAlign: "start",
+                                borderRadius: 3,
+                                boxShadow: 3,
+                                position: "relative",
+                                transition: "0.3s",
+                                minHeight: 200
+                            }}>
+                                <CardContent sx={{ p: 2 }}>
+                                    <Typography variant="h6" fontWeight="bold">Shift Statistics</Typography>
+                                    <Typography variant="body1" component="div" sx={{ mt: 1 }}>
+                                        <strong>Average shift length:</strong> {averageShiftLength?.toFixed(0)} minutes <br />
+                                        <strong>Average number of deliveries per shift:</strong> {Math.floor(avgDeliveriesPerShift)} <br />
+                                        <strong>App with most shifts:</strong> {appWithMostShifts} <br />
+                                    </Typography>
+                                </CardContent>
+                            </Card>
+                        </Col>
+
+                        {/*Tips By Neighborhood Chart*/}
+                        <Col xs={12} sm={12} md={12} lg={10} style={{ display: "flex", minWidth: 0 }}>
+                            <div style={{ minWidth: 0, width: "100%" }}>
+                                <Card sx={{
+                                    mb: 3,
+                                    borderRadius: 3,
+                                    boxShadow: 3,
+                                    position: "relative",
+                                    minHeight: 200,
+                                    flex: 1,
+                                    display: "flex",
+                                    flexDirection: "column",
+                                    minWidth: 0
+                                }}>
+                                    <CardContent sx={{ p: 2, flex: 1 }}>
+                                        {plotlyTipNeighborhoodsData &&
+                                            <TipsByNeighborhoodChart data={plotlyTipNeighborhoodsData} />
+                                        }
+                                    </CardContent>
+                                </Card>
+                            </div>
+                        </Col>
+
+                        {/*App Statistics*/}
+                        <Col xs={12} sm={12} md={6} lg={5}>
+                            <Card sx={{
+                                mb: 3,
+                                textAlign: "start",
+                                borderRadius: 3,
+                                boxShadow: 3,
+                                position: "relative",
+                                minHeight: 450,
+                                display: "flex",
+                                flexDirection: "column",
+                                minWidth: 0
+                            }}>
+                                <CardContent sx={{ p: 2, flex: 1 }}>
+                                    {plotlyBaseByAppData &&
+                                        <BaseByAppsChart data={plotlyBaseByAppData} />
+                                    }
+                                </CardContent>
+                            </Card>
+                        </Col>
+
+                        <Col xs={12} sm={12} md={6} lg={5}>
+                            <Card sx={{
+                                mb: 3,
+                                textAlign: "start",
+                                borderRadius: 3,
+                                boxShadow: 3,
+                                position: "relative",
+                                minHeight: 450,
+                                display: "flex",
+                                flexDirection: "column",
+                                minWidth: 0
+                            }}>
+                                <CardContent sx={{ p: 2, flex: 1 }}>
+                                    {tipsByAppData &&
+                                        <TipsByAppChart data={tipsByAppData} />
+                                    }
+                                </CardContent>
+                            </Card>
+                        </Col>
+
+                        <Col xs={12} sm={12} md={6} lg={5}>
                             <Card sx={{
                                 mb: 3,
                                 textAlign: "start",
@@ -382,25 +403,6 @@ export default function Statistics() {
                                                 </div>
                                             ))}
                                         </div>
-                                    </Typography>
-                                </CardContent>
-                            </Card>
-
-                            <Card sx={{
-                                mb: 3,
-                                textAlign: "start",
-                                borderRadius: 3,
-                                boxShadow: 3,
-                                position: "relative",
-                                transition: "0.3s",
-                                minHeight: 200
-                            }}>
-                                <CardContent sx={{ p: 2 }}>
-                                    <Typography variant="h6" fontWeight="bold">Shift Statistics</Typography>
-                                    <Typography variant="body1" component="div" sx={{ mt: 1 }}>
-                                        <strong>Average shift length:</strong> {averageShiftLength?.toFixed(0)} minutes <br />
-                                        <strong>Average number of deliveries per shift:</strong> {Math.floor(avgDeliveriesPerShift)} <br />
-                                        <strong>App with most shifts:</strong> {appWithMostShifts} <br />
                                     </Typography>
                                 </CardContent>
                             </Card>
