@@ -159,25 +159,41 @@ export default function Statistics() {
     const getContent = () => {
         if (page === "stats") {
             return (
-                <div id="stats" className="d-flex">
+                <div id="stats" className="container-fluid">
                 <Row className="aign-items-center">
-                    <Col sm={5}>
-                        {donutChartData &&
-                            <EarningsDonutChart data={donutChartData} />
-                        }
+                    <Col xs={12} sm={12} md={6} lg={5} style={{display: "flex"}}>
+                        <Card sx={{
+                            mb: 3,
+                            borderRadius: 3,
+                            position: "relative",
+                            transition: "0.3s",
+                            minHeight: 200,
+                            flex: 1,        
+                            display: "flex",
+                            flexDirection: "column"
+                        }}>
+                            <CardContent sx={{p: 2, flex: 1}}>
+                                {donutChartData &&
+                                    <EarningsDonutChart data={donutChartData} />
+                                }
+                            </CardContent>
+                        </Card>
                     </Col>
                     {/*Pay Statistics*/}
-                    <Col sm={5}>
+                    <Col xs={12} sm={12} md={6} lg={5} style={{display: "flex"}}>
                         <Card sx={{
-                            mb: 8,
+                            mb: 3,
                             textAlign: "start",
                             borderRadius: 3,
                             boxShadow: 3,
                             position: "relative",
                             transition: "0.3s",
-                            minHeight: 200
+                            minHeight: 200,
+                            flex: 1,
+                            display: "flex",
+                            flexDirection: "column"
                         }}>
-                            <CardContent sx={{ p: 2}}>
+                            <CardContent sx={{ p: 2, flex: 1}}>
                                 <Typography variant="h6" fontWeight="bold">
                                     Pay Statistics (Per Delivery)
                                 </Typography>
@@ -205,16 +221,30 @@ export default function Statistics() {
                     </Col>
 
                     {/*Tips By Neighborhood Chart*/}
-                    <Col sm={12}>
-                        <div className="mb-5">
-                            {plotlyTipNeighborhoodsData &&
-                                <TipsByNeighborhoodChart data={plotlyTipNeighborhoodsData} />
-                            }
+                    <Col xs={12} sm={12} md={12} lg={10} style={{display: "flex", minWidth: 0}}>
+                        <div className="mb-5" style={{minWidth: 0, width: "100%"}}>
+                            <Card sx={{
+                                mb: 2,
+                                borderRadius: 3,
+                                position: "relative",
+                                transition: "0.3s",
+                                minHeight: 200,
+                                flex: 1,
+                                display: "flex",
+                                flexDirection: "column",
+                                minWidth: 0
+                            }}>
+                                <CardContent sx={{ p: 2, flex: 1 }}>
+                                    {plotlyTipNeighborhoodsData &&
+                                        <TipsByNeighborhoodChart data={plotlyTipNeighborhoodsData} />
+                                     }
+                                </CardContent>
+                            </Card>
                         </div>
                     </Col>
 
                     {/*Location Statistics*/}
-                    <Col sm={5}>
+                    <Col xs={12} sm={12} md={6} lg={5}>
                             <Card sx={{
                                 mb: 5,
                                 textAlign: "start",
@@ -256,7 +286,7 @@ export default function Statistics() {
                     </Col>
 
                     {/*App Statistics*/}
-                    <Col sm={5}>
+                    <Col xs={12} sm={12} md={6} lg={5}>
                         <Card sx={{
                                 mb: 3,
                                 textAlign: "start",
@@ -283,7 +313,7 @@ export default function Statistics() {
                     </Col>
 
                     {/*Expense Statistics*/}
-                    <Col sm={5}>
+                    <Col xs={12} sm={12} md={6} lg={5}>
                         <Card sx={{
                                 mb: 3,
                                 textAlign: "start",
@@ -311,7 +341,7 @@ export default function Statistics() {
                     </Col>
 
                     {/*Shift Statistics*/}
-                    <Col sm={5}>
+                    <Col xs={12} sm={12} md={6} lg={5}>
                         <Card sx={{
                                 mb: 3,
                                 textAlign: "start",

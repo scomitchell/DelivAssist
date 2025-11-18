@@ -30,8 +30,7 @@ export default function EarningsDonutChart({data}: EarningsDonutProps) {
     ];
 
     const layout = {
-        height: 215,
-        width: 450,
+        autosize: true,
         showlegend: false,
         margin: { t: 0, b: 0, l: 0, r: 0 },
         annotations: [
@@ -50,10 +49,20 @@ export default function EarningsDonutChart({data}: EarningsDonutProps) {
     };
 
     return (
-         <Plot
-            data={chartData}
-            layout={layout}
-            config={{ displayModeBar: false }}
-        />
+        <div style={{width: "100%",
+            height: "100%",
+            minHeight: 250,
+            display: "flex",
+            justifyContent: "center",
+            alignItems: "center"
+        }}>
+            <Plot
+                data={chartData}
+                layout={layout}
+                useResizeHandler={true}
+                config={{ displayModeBar: false }}
+                style={{ height: "100%", width: "100%" }}
+            />
+        </div>
     );
 }
