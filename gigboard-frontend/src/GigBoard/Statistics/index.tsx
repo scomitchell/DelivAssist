@@ -294,7 +294,7 @@ export default function Statistics() {
                                 borderRadius: 3,
                                 boxShadow: 3,
                                 position: "relative",
-                                minHeight: 200,
+                                minHeight: 655,
                                 display: "flex",
                                 flexDirection: "column",
                                 minWidth: 0
@@ -423,9 +423,9 @@ export default function Statistics() {
 
     return (
         <div id="da-statistics">
-            <h1 className="mb-3">Your Statistics</h1>
+            <h1 className="ms-2 mb-3">Your Statistics</h1>
             <Col sm={6}>
-                <select onChange={(e) => setPage(e.target.value)} className="form-control mb-4">
+                <select onChange={(e) => setPage(e.target.value)} className="form-control ms-2 mb-4">
                     <option value="stats">Overall Statistics</option>
                     <option value="predict-earnings">Predict Earnings</option>
                 </select>
