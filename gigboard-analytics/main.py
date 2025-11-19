@@ -32,6 +32,10 @@ class PredictionSample(BaseModel):
     app: str
     neighborhood: str
 
+@app.get("/")
+def root():
+    return {"status": "ok"}
+
 @app.post("/train/shift-model")
 def train_shift_model(data: TrainingData):
     df = pd.DataFrame([sample.dict() for sample in data.samples])
