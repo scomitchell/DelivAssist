@@ -658,5 +658,53 @@ namespace GigBoard.Tests.Controllers
             Assert.Equal(7.50, totalBasePay, 2);
             Assert.Equal(4.50, totalTipPay, 2);
         }
+
+        [Fact]
+        public async Task GetTipsByApp_ReturnsData()
+        {
+            // Add delivery
+            var delivery3 = new Delivery
+            {
+                Id = 3,
+                App = DeliveryApp.Doordash,
+                DeliveryTime = new DateTime(2025, 1, 1, 12, 0, 0),
+                BasePay = 3.50,
+                TipPay = 4.00,
+                TotalPay = 7.50,
+                Mileage = 1.5,
+                Restaurant = "Back Bay Social",
+                CustomerNeighborhood = "Roxbury",
+                Notes = "test 3"
+            };
+            _context.Deliveries.Add(delivery3);
+
+            var userDelivery3 = new UserDelivery
+            {
+                UserId = 1,
+                DeliveryId = 3
+            };
+            _context.UserDeliveries.Add(userDelivery3);
+            await _context.SaveChangesAsync();
+
+            var result = await _controller.GetTipsByAppData();
+
+            var okResult = Assert.IsAssignableFrom<OkObjectResult>(result);
+            var value = okResult.Value;
+            Assert.NotNull(value);
+
+            var dict = value.GetType().GetProperties().ToDictionary(p => p.Name, p => p.GetValue(value));
+            Assert.True(dict.ContainsKey("apps"));
+            Assert.True(dict.ContainsKey("tipPays"));
+
+            var apps = Assert.IsAssignableFrom<List<string>>(dict["apps"]);
+            var tipPays = Assert.IsAssignableFrom<List<double>>(dict["tipPays"]);
+            Assert.NotEmpty(apps);
+            Assert.NotEmpty(tipPays);
+
+            Assert.Contains("UberEats", apps);
+            Assert.Contains("Doordash", apps);
+            Assert.Contains(2.50, tipPays);
+            Assert.Contains(3.00, tipPays);
+        }
     }
 }
