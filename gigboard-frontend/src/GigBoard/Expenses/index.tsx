@@ -48,7 +48,7 @@ export default function Expenses() {
     return (
         <div id="da-expenses">
             <div id="da-expenses-header" className="d-flex align-items-center">
-                <h1 className="me-2">Track your expenses</h1>
+                <h1 className="me-2">Track Your Expenses</h1>
                 <Button onClick={() => setShowForm(true)} variant="contained" color="primary">
                     Add Expense
                 </Button>
