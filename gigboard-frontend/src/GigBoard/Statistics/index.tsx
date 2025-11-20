@@ -15,6 +15,7 @@ import type { TipNeighborhoodsProps } from "./TipsByNeighborhoodChart";
 import type { BaseByAppProps } from "./BaseByAppsChart";
 import type { EarningsDonutProps } from "./EarningsDonutChart";
 import type { TipsByAppProps } from "./TipsByAppChart";
+import { useSignalR } from "../SignalRContext";
 import "../../index.css";
 
 type MonthlySpendingType = {
@@ -57,38 +58,52 @@ export default function Statistics() {
     // Page Control
     const [page, setPage] = useState("stats");
 
+    // Remote server
+    const { stats } = useSignalR();
+
 
     const fetchStatistics = async () => {
         // Fetch statistics
-        try {
-            const avgPay = await client.findAvgDeliveryPay();
-            const avgBase = await client.findAvgBasePay();
-            const avgTip = await client.findAvgTipPay();
-            const dollarPerMile = await client.findDollarPerMile();
-            const tipPerMile = await client.findAverageTipPerMile();
+        if (!stats) {
+            try {
+                const avgPay = await client.findAvgDeliveryPay();
+                const avgBase = await client.findAvgBasePay();
+                const avgTip = await client.findAvgTipPay();
+                const dollarPerMile = await client.findDollarPerMile();
+                const bestRestaurant = await client.findHighestPayingRestaurant();
 
-            setAveragePay(avgPay ?? 0);
-            setAverageBase(avgBase ?? 0);
-            setAverageTip(avgTip ?? 0);
-            setAvgDollarPerMile(dollarPerMile ?? 0);
-            setAvgTipPerMile(tipPerMile ?? 0);
-        } catch {
-            setAveragePay(0)
-            setAverageBase(0)
-            setAverageTip(0);
-            setAvgDollarPerMile(0);
-            setAvgTipPerMile(0);
+                setAveragePay(avgPay ?? 0);
+                setAverageBase(avgBase ?? 0);
+                setAverageTip(avgTip ?? 0);
+                setAvgDollarPerMile(dollarPerMile ?? 0);
+                setRestaurant(bestRestaurant ?? { restaurant: "N/A", avgTotalPay: 0 });
+            } catch {
+                setAveragePay(0)
+                setAverageBase(0)
+                setAverageTip(0);
+                setAvgDollarPerMile(0);
+                setRestaurant({ restaurant: "N/A", avgTotalPay: 0 });
+            }
+        } else {
+            setAveragePay(stats.avgPay);
+            setAverageBase(stats.avgBase);
+            setAverageTip(stats.avgTip);
+            setAvgDollarPerMile(stats.dollarPerMile);
+            setRestaurant(stats.highestPayingRestaurant);
         }
 
         try {
-            const bestRestaurant = await client.findHighestPayingRestaurant();
             const restaurantWithMostOrders = await client.findRestaurantWithMostDeliveries();
-
-            setRestaurant(bestRestaurant ?? { restaurant: "N/A", avgTotalPay: 0 });
             setRestaurantWithMost(restaurantWithMostOrders ?? { restaurant: "N/A", orderCount: 0 });
         } catch {
-            setRestaurant({ restaurant: "N/A", avgTotalPay: 0 });
             setRestaurantWithMost({ restaurant: "N/A", orderCount: 0 });
+        }
+
+        try {
+            const tipPerMile = await client.findAverageTipPerMile();
+            setAvgTipPerMile(tipPerMile ?? 0);
+        } catch {
+            setAvgTipPerMile(0);
         }
 
         try {
@@ -232,8 +247,8 @@ export default function Statistics() {
                             </div>
                         </Col>
 
-                        <Col xs={12} lg={10} style={{display: "flex", minWidth: 0}}>
-                            <div style={{minWidth: 0, width: "100%"}}>
+                        <Col xs={12} lg={10} style={{ display: "flex", minWidth: 0 }}>
+                            <div style={{ minWidth: 0, width: "100%" }}>
                                 <Card sx={{
                                     mb: 3,
                                     borderRadius: 3,
@@ -245,7 +260,7 @@ export default function Statistics() {
                                     flexDirection: "column",
                                     minWidth: 0
                                 }}>
-                                    <CardContent sx={{p: 2, flex: 1}}>
+                                    <CardContent sx={{ p: 2, flex: 1 }}>
                                         {hourlyEarningsData &&
                                             <HourlyEarningsChart data={hourlyEarningsData} />
                                         }
@@ -420,7 +435,7 @@ export default function Statistics() {
     }
 
     useEffect(() => {
-        fetchStatistics();
+        fetchStatistics()
     }, [])
 
     return (

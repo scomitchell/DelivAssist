@@ -8,6 +8,7 @@ using Hangfire.Storage.SQLite;
 using GigBoardBackend.Data;
 using GigBoardBackend.Services;
 using System.Text.Json.Serialization;
+using GigBoard.Hubs;
 
 var builder = WebApplication.CreateBuilder(args);
 DotEnv.Load();
@@ -53,11 +54,28 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme).AddJw
         ValidateAudience = false,
         ValidateLifetime = true
     };
+
+    options.Events = new JwtBearerEvents
+    {
+        OnMessageReceived = context =>
+        {
+            var accessToken = context.Request.Query["access_token"];
+
+            var path = context.HttpContext.Request.Path;
+            if (!string.IsNullOrEmpty(accessToken) && path.StartsWithSegments("/hubs/statistics"))
+            {
+                context.Token = accessToken;
+            }
+
+            return Task.CompletedTask;
+        }
+    };
 });
 
 builder.Services.AddAuthorization();
 
 builder.Services.AddScoped<AuthService>();
+builder.Services.AddScoped<StatisticsService>();
 builder.Services.AddHttpClient();
 
 // Hangfire
@@ -76,6 +94,9 @@ builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+
+// SignalR
+builder.Services.AddSignalR();
 
 var app = builder.Build();
 
@@ -96,6 +117,9 @@ using (var scope = app.Services.CreateScope())
 app.UseAuthentication();
 app.UseAuthorization();
 app.UseHangfireDashboard("/hangfire");
+
+app.MapHub<StatisticsHub>("/hubs/statistics")
+    .RequireAuthorization();
 
 app.MapControllers();
 

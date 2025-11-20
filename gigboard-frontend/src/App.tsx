@@ -10,6 +10,7 @@ import store from "./GigBoard/store";
 import { Provider } from "react-redux";
 import { useEffect } from "react";
 import { HashRouter, Route, Routes, Navigate, useNavigate } from "react-router-dom";
+import { SignalRProvider } from "./GigBoard/SignalRContext";
 import './App.css'
 
 function AuthTokenListener() {
@@ -36,22 +37,24 @@ function AuthTokenListener() {
 export default function App() {
     return (
         <HashRouter>
-            <Provider store={store}>
-                <AuthTokenListener />
-                <div id="da-main-app">
-                    <Navigation />
-                    <Routes>
-                        <Route path="/" element={<Navigate to="GigBoard" />} />
-                        <Route path="/GigBoard/*" element={<GigBoard />} />
-                        <Route path="/GigBoard/MyDeliveries/*" element={<Deliveries />} />
-                        <Route path="/GigBoard/Shifts/*" element={<Shifts /> } />
-                        <Route path="/GigBoard/Shifts/:shiftId" element={<IndividualShift />} />
-                        <Route path="/GigBoard/Expenses/*" element={<Expenses /> } />
-                        <Route path="/GigBoard/Account/*" element={<Account />} />
-                        <Route path="/GigBoard/Statistics/*" element={<Statistics /> } />
-                    </Routes>
-                </div>
-            </Provider>
+            <SignalRProvider>
+                <Provider store={store}>
+                    <AuthTokenListener />
+                    <div id="da-main-app">
+                        <Navigation />
+                        <Routes>
+                            <Route path="/" element={<Navigate to="GigBoard" />} />
+                            <Route path="/GigBoard/*" element={<GigBoard />} />
+                            <Route path="/GigBoard/MyDeliveries/*" element={<Deliveries />} />
+                            <Route path="/GigBoard/Shifts/*" element={<Shifts />} />
+                            <Route path="/GigBoard/Shifts/:shiftId" element={<IndividualShift />} />
+                            <Route path="/GigBoard/Expenses/*" element={<Expenses />} />
+                            <Route path="/GigBoard/Account/*" element={<Account />} />
+                            <Route path="/GigBoard/Statistics/*" element={<Statistics />} />
+                        </Routes>
+                    </div>
+                </Provider>
+            </SignalRProvider>
         </HashRouter>
     );
 }

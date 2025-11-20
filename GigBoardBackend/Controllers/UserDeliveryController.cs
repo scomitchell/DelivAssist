@@ -4,6 +4,10 @@ using System.Security.Claims;
 using Microsoft.EntityFrameworkCore;
 using GigBoardBackend.Data;
 using GigBoardBackend.Models;
+using System.Runtime.CompilerServices;
+using Microsoft.AspNetCore.SignalR;
+using GigBoard.Hubs;
+using GigBoardBackend.Services;
 
 namespace GigBoardBackend.Controllers
 {
@@ -13,10 +17,15 @@ namespace GigBoardBackend.Controllers
     public class UserDeliveryController : ControllerBase
     {
         private readonly ApplicationDbContext _context;
+        private readonly IHubContext<StatisticsHub> _hub;
+        private readonly StatisticsService _statsService;
 
-        public UserDeliveryController(ApplicationDbContext context)
+        public UserDeliveryController(ApplicationDbContext context, 
+            IHubContext<StatisticsHub> hub, StatisticsService statsService)
         {
             _context = context;
+            _hub = hub;
+            _statsService = statsService;
         }
 
         [HttpPost]
@@ -67,6 +76,12 @@ namespace GigBoardBackend.Controllers
                 }
 
                 await _context.SaveChangesAsync();
+
+                // Recalculate statistics
+                var stats = await _statsService.CalculateStatistics(userId);
+
+                await _hub.Clients.User(userId.ToString())
+                    .SendAsync("StatisticsUpdated", stats);
 
                 return Ok(new DeliveryDto
                 {
