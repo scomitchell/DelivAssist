@@ -15,6 +15,8 @@ export default function Navigation() {
     const handleLogout = () => {
         clearStats();
         localStorage.removeItem("token");
+
+        window.dispatchEvent(new Event("logout"));
         dispatch(setCurrentUser(null));
         navigate("/");
     };

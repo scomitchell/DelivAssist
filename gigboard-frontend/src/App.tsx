@@ -8,7 +8,7 @@ import Statistics from "./GigBoard/Statistics";
 import IndividualShift from "./GigBoard/Shifts/IndividualShift";
 import store from "./GigBoard/store";
 import { Provider } from "react-redux";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { HashRouter, Route, Routes, Navigate, useNavigate } from "react-router-dom";
 import { SignalRProvider } from "./GigBoard/SignalRContext";
 import './App.css'
@@ -35,7 +35,31 @@ function AuthTokenListener() {
 }
 
 export default function App() {
-    const token = localStorage.getItem("token");
+    const [token, setToken] = useState(localStorage.getItem("token"));
+
+    useEffect(() => {
+        const handleLogout = () => {
+            setToken(null);
+        };
+
+        window.addEventListener("logout", handleLogout);
+
+        return () => {
+            window.removeEventListener("logout", handleLogout);
+        };
+    }, []);
+
+    useEffect(() => {
+        const handleLogin = () => {
+            setToken(localStorage.getItem("token"));
+        };
+
+        window.addEventListener("login", handleLogin);
+
+        return () => {
+            window.removeEventListener("login", handleLogin);
+        };
+    }, []);
     
     return (
         <HashRouter>

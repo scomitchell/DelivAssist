@@ -29,6 +29,7 @@ export default function Login() {
             scheduleAutoLogout();
 
             dispatch(setCurrentUser(response.user));
+            window.dispatchEvent(new Event("login"));
             console.log(response.user);
             navigate("/");
         } catch (err: any) {
