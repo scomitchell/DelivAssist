@@ -40,9 +40,17 @@ export default function Profile() {
     }
 
     return (
-        <div id="da-profile">
-            <h1>Your Profile</h1>
-            <div id="da-profile-details" className="col-sm-8 col-md-4">
+        <div style={{
+            display: "flex",
+            justifyContent: "center",
+            alignItems: "center",
+            height: "100vh",
+            paddingLeft: "100px",
+            boxSizing: "border-box",
+            backgroundColor: "white"
+        }}>
+            <div id="da-profile" style={{ width: "75%", height: "100%" }}>
+                <h1 style={{ textAlign: "center" }}>Your Profile</h1>
                 <FormGroup as={Row} className="mb-3 mt-4 align-items-center d-flex">
                     <FormLabel column sm={3} className="text-sm-end">First Name</FormLabel>
                     <Col sm={9}>
@@ -100,14 +108,20 @@ export default function Profile() {
                             id="da-password"
                             value=""
                             type="password"
+                            className="mb-3"
                             onChange={(e) => setPassword(e.target.value)}
                         />
                     </Col>
                 </FormGroup>
 
-                <Button onClick={updateProfile} id="da-update-profile-btn" className="btn btn-primary w-100">
-                    Update Profile
-                </Button>
+                <FormGroup as={Row} className="mb-3 d-flex" style={{alignItems: "end"}}>
+                    <Col sm={2} />
+                    <Col sm={10}>
+                        <Button onClick={updateProfile} id="da-update-profile-btn" className="btn btn-primary w-100">
+                            Update Profile
+                        </Button>
+                    </Col>
+                </FormGroup>
             </div>
         </div>
     );
