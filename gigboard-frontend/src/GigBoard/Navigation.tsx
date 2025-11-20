@@ -2,6 +2,7 @@ import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useSelector, useDispatch } from "react-redux";
 import { setCurrentUser } from "./Account/reducer"
 import { FaHome } from "react-icons/fa";
+import { useSignalR } from "./SignalRContext";
 import { BsBagFill, BsPersonFillGear, BsBarChartFill, BsCurrencyDollar, BsClockFill, BsArrowBarLeft, BsArrowBarUp } from "react-icons/bs";
 
 export default function Navigation() {
@@ -9,8 +10,10 @@ export default function Navigation() {
     const dispatch = useDispatch();
     const { pathname } = useLocation();
     const { currentUser } = useSelector((state: any) => state.accountReducer);
+    const { clearStats } = useSignalR();
 
     const handleLogout = () => {
+        clearStats();
         localStorage.removeItem("token");
         dispatch(setCurrentUser(null));
         navigate("/");

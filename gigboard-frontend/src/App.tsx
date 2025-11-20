@@ -35,9 +35,11 @@ function AuthTokenListener() {
 }
 
 export default function App() {
+    const token = localStorage.getItem("token");
+    
     return (
         <HashRouter>
-            <SignalRProvider>
+            <SignalRProvider token={token}>
                 <Provider store={store}>
                     <AuthTokenListener />
                     <div id="da-main-app">

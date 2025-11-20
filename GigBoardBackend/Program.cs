@@ -14,7 +14,6 @@ var builder = WebApplication.CreateBuilder(args);
 DotEnv.Load();
 
 // Add services to the container.
-
 builder.Services.AddControllers()
     .AddJsonOptions(options =>
     {
@@ -39,11 +38,13 @@ builder.Services.AddCors(options =>
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseSqlite(builder.Configuration.GetConnectionString("DefaultConnection")));
 
-// Add Authentication
+// Authentication
+// Get secrety key and encode
 var secretKey = Environment.GetEnvironmentVariable("JWT_SECRET_KEY")
     ?? throw new InvalidOperationException("JWT_SECRET_KEY environment variable is not set.");
 var key = Encoding.UTF8.GetBytes(secretKey);
 
+// Add Authentication to services
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme).AddJwtBearer(options =>
 {
     options.TokenValidationParameters = new TokenValidationParameters
@@ -74,12 +75,14 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme).AddJw
 
 builder.Services.AddAuthorization();
 
+// Add custom services
 builder.Services.AddScoped<AuthService>();
 builder.Services.AddScoped<StatisticsService>();
+
+// Add HTTP Client
 builder.Services.AddHttpClient();
 
 // Hangfire
-
 var hangfireConnection = builder.Configuration.GetConnectionString("DefaultConnection");
 
 builder.Services.AddHangfire(config =>
@@ -90,7 +93,9 @@ builder.Services.AddHangfire(config =>
 builder.Services.AddHangfireServer();
 builder.Services.AddTransient<ShiftTrainingJob>();
 
+// Add controllers
 builder.Services.AddControllers();
+
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
@@ -98,8 +103,10 @@ builder.Services.AddSwaggerGen();
 // SignalR
 builder.Services.AddSignalR();
 
+// Build App
 var app = builder.Build();
 
+// Use Cors policy
 app.UseCors("AllowFrontend");
 
 using (var scope = app.Services.CreateScope())
@@ -116,8 +123,12 @@ using (var scope = app.Services.CreateScope())
 
 app.UseAuthentication();
 app.UseAuthorization();
+
+// Enable Hangfire dashboard
 app.UseHangfireDashboard("/hangfire");
 
+
+// Set hub to /hub/statistics
 app.MapHub<StatisticsHub>("/hubs/statistics")
     .RequireAuthorization();
 

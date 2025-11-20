@@ -71,18 +71,35 @@ export default function Statistics() {
                 const avgTip = await client.findAvgTipPay();
                 const dollarPerMile = await client.findDollarPerMile();
                 const bestRestaurant = await client.findHighestPayingRestaurant();
+                const tipPerMile = await client.findAverageTipPerMile();
 
                 setAveragePay(avgPay ?? 0);
                 setAverageBase(avgBase ?? 0);
                 setAverageTip(avgTip ?? 0);
                 setAvgDollarPerMile(dollarPerMile ?? 0);
+                setAvgTipPerMile(tipPerMile ?? 0);
                 setRestaurant(bestRestaurant ?? { restaurant: "N/A", avgTotalPay: 0 });
             } catch {
                 setAveragePay(0)
                 setAverageBase(0)
                 setAverageTip(0);
                 setAvgDollarPerMile(0);
+                setAvgTipPerMile(0);
                 setRestaurant({ restaurant: "N/A", avgTotalPay: 0 });
+            }
+
+            try {
+                const restaurantWithMostOrders = await client.findRestaurantWithMostDeliveries();
+                setRestaurantWithMost(restaurantWithMostOrders ?? { restaurant: "N/A", orderCount: 0 });
+            } catch {
+                setRestaurantWithMost({ restaurant: "N/A", orderCount: 0 });
+            }
+
+            try {
+                const userPlotlyEarningsData = await client.findPlotlyEarningsData();
+                setPlotlyEarningsData(userPlotlyEarningsData);
+            } catch {
+                setPlotlyEarningsData(null);
             }
         } else {
             setAveragePay(stats.avgPay);
@@ -90,20 +107,8 @@ export default function Statistics() {
             setAverageTip(stats.avgTip);
             setAvgDollarPerMile(stats.dollarPerMile);
             setRestaurant(stats.highestPayingRestaurant);
-        }
-
-        try {
-            const restaurantWithMostOrders = await client.findRestaurantWithMostDeliveries();
-            setRestaurantWithMost(restaurantWithMostOrders ?? { restaurant: "N/A", orderCount: 0 });
-        } catch {
-            setRestaurantWithMost({ restaurant: "N/A", orderCount: 0 });
-        }
-
-        try {
-            const tipPerMile = await client.findAverageTipPerMile();
-            setAvgTipPerMile(tipPerMile ?? 0);
-        } catch {
-            setAvgTipPerMile(0);
+            setAvgTipPerMile(stats.tipPerMile);
+            setPlotlyEarningsData(stats.plotlyEarningsData);
         }
 
         try {
@@ -140,19 +145,16 @@ export default function Statistics() {
         }
 
         try {
-            const userPlotlyEarningsData = await client.findPlotlyEarningsData();
             const userTipNeighborhoodsData = await client.findPlotlyTipNeighborhoodData();
             const userBaseByAppData = await client.findPlotlyBaseByApp();
             const userEarningsDonutData = await client.findDonutChartData();
             const userTipsByAppData = await client.findTipsByAppData();
 
-            setPlotlyEarningsData(userPlotlyEarningsData);
             setPlotlyTipNeighborhoodsData(userTipNeighborhoodsData);
             setPlotlyBaseByAppData(userBaseByAppData);
             setDonutChartData(userEarningsDonutData);
             setTipsByAppData(userTipsByAppData);
         } catch {
-            setPlotlyEarningsData(null);
             setPlotlyTipNeighborhoodsData(null);
             setPlotlyBaseByAppData(null);
             setDonutChartData(null);
