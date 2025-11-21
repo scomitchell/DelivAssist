@@ -29,9 +29,42 @@ function AuthTokenListener() {
 
     useEffect(() => {
         const onStorageChange = (event: StorageEvent) => {
-            if (event.key === "token") {
-                window.location.reload();
+            if (event.key === "token" && event.newValue === null) {
+                dispatch(setCurrentUser(null));
+                clearStats();
                 navigate("/");
+            }
+
+            if (event.key === "token" && event.newValue) {
+                const token: any = localStorage.getItem("token");
+                try {
+                    const decodedUser = jwtDecode<GigBoardJwt>(token);
+                    const user = {
+                        id: decodedUser["http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier"],
+                        username: decodedUser["http://schemas.xmlsoap.org/ws/2005/05/identity/claims/name"]
+                    };
+
+                    const exp = decodedUser.exp;
+
+                    if (!exp) {
+                        console.log("Token has no expiration");
+                    } else {
+                        const now = Math.floor(Date.now() / 1000);
+
+                        if (exp < now) {
+                            clearStats();
+                            localStorage.removeItem("token");
+
+                            window.dispatchEvent(new Event("logout"));
+                            dispatch(setCurrentUser(null));
+                            navigate("/");
+                        } else {
+                            dispatch(setCurrentUser(user));
+                        }
+                    }
+                } catch (e) {
+                    localStorage.removeItem("token");
+                }
             }
         };
 
@@ -40,7 +73,7 @@ function AuthTokenListener() {
         return () => {
             window.removeEventListener("storage", onStorageChange);
         };
-    }, [navigate]);
+    }, [dispatch, navigate, clearStats]);
 
     useEffect(() => {
         const token: any = localStorage.getItem("token");
