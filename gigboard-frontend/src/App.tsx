@@ -7,14 +7,23 @@ import Account from "./GigBoard/Account";
 import Statistics from "./GigBoard/Statistics";
 import IndividualShift from "./GigBoard/Shifts/IndividualShift";
 import store from "./GigBoard/store";
-import { Provider } from "react-redux";
+import { Provider, useDispatch } from "react-redux";
 import { useEffect, useState } from "react";
 import { HashRouter, Route, Routes, Navigate, useNavigate } from "react-router-dom";
+import { setCurrentUser } from "./GigBoard/Account/reducer";
 import { SignalRProvider } from "./GigBoard/SignalRContext";
+import {jwtDecode } from "jwt-decode";
+import type { JwtPayload } from "jwt-decode";
 import './App.css'
+
+type GigBoardJwt = {
+    "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier": string;
+    "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/name": string;
+} & JwtPayload;
 
 function AuthTokenListener() {
     const navigate = useNavigate();
+    const dispatch = useDispatch();
 
     useEffect(() => {
         const onStorageChange = (event: StorageEvent) => {
@@ -30,6 +39,23 @@ function AuthTokenListener() {
             window.removeEventListener("storage", onStorageChange);
         };
     }, [navigate]);
+
+    useEffect(() => {
+        const token: any = localStorage.getItem("token");
+        if (token) {
+            try {
+                const decodedUser = jwtDecode<GigBoardJwt>(token);
+                const user = {
+                    id: decodedUser["http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier"],
+                    username: decodedUser["http://schemas.xmlsoap.org/ws/2005/05/identity/claims/name"]
+                };
+
+                dispatch(setCurrentUser(user));
+            } catch (e) {
+                localStorage.removeItem("token");
+            }
+        }
+    }, [dispatch])
 
     return null;
 }

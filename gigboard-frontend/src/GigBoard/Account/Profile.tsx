@@ -106,7 +106,7 @@ export default function Profile() {
                         <FormControl
                             placeholder="Password"
                             id="da-password"
-                            value=""
+                            defaultValue=""
                             type="password"
                             className="mb-3"
                             onChange={(e) => setPassword(e.target.value)}
