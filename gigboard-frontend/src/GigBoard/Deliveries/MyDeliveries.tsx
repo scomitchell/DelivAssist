@@ -237,7 +237,7 @@ export default function MyDeliveries({ myDeliveries, setMyDeliveries }: {
             {/*Render individual delivery details on cards*/}
             <Row>
                 {myDeliveries.map((delivery: any) => 
-                    <Col sm={6}>
+                    <Col sm={6} key={delivery.id}>
                         <Card sx={{
                                 mb: 3,
                                 textAlign: "start",

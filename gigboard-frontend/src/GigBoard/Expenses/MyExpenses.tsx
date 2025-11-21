@@ -177,7 +177,7 @@ export default function MyExpenses({myExpenses, setMyExpenses} : {
             {/*Render individual delivery details on cards*/}
             <Row>
                 {myExpenses.map((expense: any) => 
-                    <Col sm={6}>
+                    <Col sm={6} key={expense.id}>
                         <Card sx={{
                             mb: 3,
                             textAlign: "start",
