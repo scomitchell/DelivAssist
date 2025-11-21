@@ -63,6 +63,7 @@ function AuthTokenListener() {
         const onStorageChange = (event: StorageEvent) => {
             if (event.key === "token") {
                 processToken(event.newValue);
+                navigate("/")
             }
         };
 
