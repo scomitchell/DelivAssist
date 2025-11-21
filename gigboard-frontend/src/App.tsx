@@ -8,7 +8,7 @@ import Statistics from "./GigBoard/Statistics";
 import IndividualShift from "./GigBoard/Shifts/IndividualShift";
 import store from "./GigBoard/store";
 import { Provider, useDispatch } from "react-redux";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { HashRouter, Route, Routes, Navigate, useNavigate } from "react-router-dom";
 import { setCurrentUser } from "./GigBoard/Account/reducer";
 import { SignalRProvider } from "./GigBoard/SignalRContext";
@@ -27,87 +27,54 @@ function AuthTokenListener() {
     const dispatch = useDispatch();
     const { clearStats } = useSignalR();
 
-    useEffect(() => {
-        const onStorageChange = (event: StorageEvent) => {
-            if (event.key === "token" && event.newValue === null) {
-                dispatch(setCurrentUser(null));
+    const processToken = useCallback((rawToken: string | null) => {
+        if (!rawToken) {
+            dispatch(setCurrentUser(null));
+            clearStats();
+            return;
+        }
+
+        try {
+            const decoded = jwtDecode<GigBoardJwt>(rawToken);
+            const user = {
+                id: decoded["http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier"],
+                username: decoded["http://schemas.xmlsoap.org/ws/2005/05/identity/claims/name"]
+            };
+
+            const exp = decoded.exp;
+            const now = Math.floor(Date.now() / 1000);
+
+            if (!exp || exp < now) {
+                localStorage.removeItem("token");
                 clearStats();
+                dispatch(setCurrentUser(null));
                 navigate("/");
+                return;
             }
 
-            if (event.key === "token" && event.newValue) {
-                const token: any = localStorage.getItem("token");
-                try {
-                    const decodedUser = jwtDecode<GigBoardJwt>(token);
-                    const user = {
-                        id: decodedUser["http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier"],
-                        username: decodedUser["http://schemas.xmlsoap.org/ws/2005/05/identity/claims/name"]
-                    };
+            dispatch(setCurrentUser(user));
+        } catch {
+            localStorage.removeItem("token");
+            dispatch(setCurrentUser(null));
+        }
+    }, [dispatch, navigate, clearStats]);
 
-                    const exp = decodedUser.exp;
-
-                    if (!exp) {
-                        console.log("Token has no expiration");
-                    } else {
-                        const now = Math.floor(Date.now() / 1000);
-
-                        if (exp < now) {
-                            clearStats();
-                            localStorage.removeItem("token");
-
-                            window.dispatchEvent(new Event("logout"));
-                            dispatch(setCurrentUser(null));
-                            navigate("/");
-                        } else {
-                            dispatch(setCurrentUser(user));
-                        }
-                    }
-                } catch (e) {
-                    localStorage.removeItem("token");
-                }
+    useEffect(() => {
+        const onStorageChange = (event: StorageEvent) => {
+            if (event.key === "token") {
+                processToken(event.newValue);
             }
         };
 
         window.addEventListener("storage", onStorageChange);
-
         return () => {
             window.removeEventListener("storage", onStorageChange);
-        };
-    }, [dispatch, navigate, clearStats]);
+        }
+    }, [processToken]);
 
     useEffect(() => {
-        const token: any = localStorage.getItem("token");
-        if (token) {
-            try {
-                const decodedUser = jwtDecode<GigBoardJwt>(token);
-                const user = {
-                    id: decodedUser["http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier"],
-                    username: decodedUser["http://schemas.xmlsoap.org/ws/2005/05/identity/claims/name"]
-                };
-
-                const exp = decodedUser.exp;
-
-                if (!exp) {
-                    console.log("Token has no expiration");
-                } else {
-                    const now = Math.floor(Date.now() / 1000);
-
-                    if (exp < now) {
-                        clearStats();
-                        localStorage.removeItem("token");
-
-                        window.dispatchEvent(new Event("logout"));
-                        dispatch(setCurrentUser(null));
-                        navigate("/");
-                    } else {
-                        dispatch(setCurrentUser(user));
-                    }
-                }
-            } catch (e) {
-                localStorage.removeItem("token");
-            }
-        }
-    }, [dispatch])
+        processToken(localStorage.getItem("token"));
+    }, [processToken]);
 
     return null;
 }
