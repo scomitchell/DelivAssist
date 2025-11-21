@@ -13,6 +13,7 @@ import { HashRouter, Route, Routes, Navigate, useNavigate } from "react-router-d
 import { setCurrentUser } from "./GigBoard/Account/reducer";
 import { SignalRProvider } from "./GigBoard/SignalRContext";
 import {jwtDecode } from "jwt-decode";
+import { useSignalR } from "./GigBoard/SignalRContext";
 import type { JwtPayload } from "jwt-decode";
 import './App.css'
 
@@ -24,6 +25,7 @@ type GigBoardJwt = {
 function AuthTokenListener() {
     const navigate = useNavigate();
     const dispatch = useDispatch();
+    const { clearStats } = useSignalR();
 
     useEffect(() => {
         const onStorageChange = (event: StorageEvent) => {
@@ -50,7 +52,24 @@ function AuthTokenListener() {
                     username: decodedUser["http://schemas.xmlsoap.org/ws/2005/05/identity/claims/name"]
                 };
 
-                dispatch(setCurrentUser(user));
+                const exp = decodedUser.exp;
+
+                if (!exp) {
+                    console.log("Token has no expiration");
+                } else {
+                    const now = Math.floor(Date.now() / 1000);
+
+                    if (exp < now) {
+                        clearStats();
+                        localStorage.removeItem("token");
+
+                        window.dispatchEvent(new Event("logout"));
+                        dispatch(setCurrentUser(null));
+                        navigate("/");
+                    } else {
+                        dispatch(setCurrentUser(user));
+                    }
+                }
             } catch (e) {
                 localStorage.removeItem("token");
             }
